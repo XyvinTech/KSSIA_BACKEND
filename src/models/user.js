@@ -1,5 +1,10 @@
 const mongoose = require('mongoose');
 
+const Subschema = new mongoose.Schema({
+    name: { type: String },
+    url: { type: String }
+},{ _id: false });
+
 const userSchema = new mongoose.Schema(
     {   name: {
             first_name: { type: String, required: true },
@@ -17,11 +22,13 @@ const userSchema = new mongoose.Schema(
             whatsapp_number: { type: Number },
             whatsapp_business_number: { type: Number },
         },
-        password: { type: String, required: true },
+        // password: { type: String, required: true },
         otp: { type: Number },
         designation: { type: String },
         company_name: { type: String },
         company_email: { type: String },
+        business_category: { type: String },
+        sub_category: { type: String },
         bio: { type: String },
         address: {
             street: String,
@@ -35,36 +42,11 @@ const userSchema = new mongoose.Schema(
                 url: { type: String }
             }
         ],
-        websites: [
-            {
-                name: { type: String },
-                url: { type: String }
-            }
-        ],
-        video: [
-            {
-                name: { type: String },
-                url: { type: String }
-            }
-        ],
-        awards: [
-            {
-                name: { type: String },
-                url: { type: String }
-            }
-        ],
-        certificates: [
-            {
-                name: { type: String },
-                url: { type: String }
-            }
-        ],
-        brochure: [
-            {
-                name: { type: String },
-                url: { type: String }
-            }
-        ],
+        websites: [Subschema],
+        video: [Subschema],
+        awards: [Subschema],
+        certificates: [Subschema],
+        brochure: [Subschema],
         is_active: { type: Boolean, default: true },
         is_deleted: { type: Boolean, default: false },
     },

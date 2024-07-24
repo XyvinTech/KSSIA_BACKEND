@@ -4,16 +4,17 @@ const productSchema = mongoose.Schema(
     {
         seller_id: { 
             type: mongoose.Schema.Types.ObjectId,
-            ref: "User" 
+            ref: "User",
+            required: true
         },
-        name: { type: String },
+        name: { type: String, required:true },
         image: { type: String },
-        price: { type: Number },
-        offer_price: { type: Number },
+        price: { type: Number, min: 0, required:true },
+        offer_price: { type: Number, min: 0 },
         description: { type: String },
-        date : { type: Date },
-        units: { type: Number },
-        status: { type: Boolean },
+        moq: { type: Number, min: 0 },
+        units: { type: Number, min: 0 },
+        status: { type: Boolean , default:true },
         tags: [{ type: String }],
     },
     {
