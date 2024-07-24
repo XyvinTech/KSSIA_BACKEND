@@ -1,23 +1,48 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const usersRouter = require('./routes/users');
-const rolesRouter = require('./routes/roles');
-const productsRouter = required('./routes/products')
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const volleyball = require("volleyball");
+const clc = require("cli-color");
+const responseHandler = require("./src/helpers/responseHandler");
+const userRoute = require("./src/routes/user");
 
 const app = express();
+app.use(volleyball);
+//* Define the PORT, NODE_ENV & API version based on environment variable
+const { PORT, API_VERSION, NODE_ENV } = process.env;
 
-// Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/KSSIA', { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log('Connected to MongoDB'))
-    .catch(err => console.error('Error connecting to MongoDB', err));
+//* Enable Cross-Origin Resource Sharing (CORS) middleware
+app.use(cors());
 
-    app.use(bodyParser.json());
-    app.use('/users', usersRouter);
-    app.use('/roles', rolesRouter);
-    app.use('/products', productsRouter);
+//* Parse JSON request bodies
+app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
+//* Set the base path for API routes
+const BASE_PATH = `/api/${API_VERSION}`;
+
+//* Import database connection module
+require("./src/helpers/connection");
+
+//* Configure routes for user API
+app.use(`${BASE_PATH}/user`, userRoute);
+// app.use(`${BASE_PATH}/role`, rolesRouter);
+// app.use(`${BASE_PATH}/product`, productsRouter);
+
+//? Define a route for the API root
+app.get(BASE_PATH, (req, res) => {
+  return responseHandler(
+    res,
+    200,
+    "🛡️ Welcome! All endpoints are fortified. Do you possess the master 🗝️?",
+    null
+  );
+});
+
+//! Start the server and listen on the specified port from environment variable
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  const portMessage = clc.redBright(`✓ App is running on port: ${PORT}`);
+  const envMessage = clc.yellowBright(
+    `✓ Environment: ${NODE_ENV || "development"}`
+  );
+  console.log(`${portMessage}\n${envMessage}`);
 });
