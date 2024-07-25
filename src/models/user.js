@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema(
             middle_name: { type: String, required: false },
             last_name: { type: String, required: true }, 
         },
-        membership_id: { type: String, required: true },
+        membership_id: { type: String, required: true, unique: true },
         blood_group: { type: String },
         email: { type: String, unique: true },
         profile_picture: { type: String },
