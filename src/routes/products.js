@@ -12,11 +12,9 @@ productRoute
   .get(productController.getAllProducts)
 
 // Edit an existing product
-productRoute.put('/products/:productId', async (req, res) => {
-    const productId = req.params.productId;
-    const data = req.body;
-    await productController.editProduct(res, productId, data);
-});
+productRoute
+.route('/products/:productId')
+.put(productController.editProduct)
 
 
 module.exports = productRoute;
