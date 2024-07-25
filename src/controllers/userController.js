@@ -5,6 +5,19 @@ const {
     EditUserSchema,
 } = require("../validations");
 
+// Function to generate a 6-digit OTP
+const generateOTP = (length = 6) => {
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    return otp.toString().substring(0, length);
+};
+  
+// Mock function to send OTP (replace with actual implementation)
+const sendOtp = async (mobile, otp) => {
+    console.log(`Sending OTP ${otp} to mobile number ${mobile}`);
+    // Simulate sending OTP
+    return { status: "success" }; // Replace with actual status from your SMS service
+};
+
 // Function to sent OTP for login
 exports.sendOtp = async (req, res) => {
     try {
