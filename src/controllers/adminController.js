@@ -77,3 +77,31 @@ exports.getAllUsers = async (req, res) => {
         return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
     }
 };
+
+
+// Delete an user 
+exports.deleteUser = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { membership_id } = req.params;
+        if(userId){
+            const user = await User.findByIdAndDelete(userId);
+            if (!user) {
+                return responseHandler(res, 404, "User not found");
+            }
+        }
+        else if(membership_id){
+            const user = await User.findOneAndDelete(membership_id);
+            if (!user) {
+                return responseHandler(res, 404, "User not found");
+            }
+        }
+        else{
+            return responseHandler(res, 400, `Invalid input: ${error.message}`);
+        }
+        return responseHandler(res, 200, "User deleted successfully");
+    } catch (error) {
+        console.error(error);
+        return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
+    }
+};
