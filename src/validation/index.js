@@ -15,6 +15,11 @@ const schemaUrl = Joi.object({
     url: Joi.string().uri()
 });
 
+const otherSchema = Joi.object({
+    name: Joi.string(),
+    url: Joi.string().uri()
+});
+
 const productsSchema = Joi.object({
     seller_id: Joi.string().required(),
     name: Joi.string().required(),
@@ -52,7 +57,7 @@ exports.CreateUserSchema = Joi.object({
         state: Joi.string(),
         zip: Joi.string()
     }),
-    websites: Joi.array().items(websiteSchema),
+    websites: Joi.array().items(otherSchema),
     is_active: Joi.boolean().default(true),
     is_deleted: Joi.boolean().default(false)
 });
@@ -81,11 +86,11 @@ exports.EditUserSchema = Joi.object({
         state: Joi.string(),
         zip: Joi.string()
     }),
-    social_media: Joi.array().items(socialMediaSchema),
-    websites: Joi.array().items(websiteSchema),
-    video: Joi.array().items(videoSchema),
-    awards: Joi.array().items(awardSchema),
-    certificates: Joi.array().items(certificateSchema),
-    brochure: Joi.array().items(brochureSchema),
+    social_media: Joi.array().items(schemaUrl),
+    websites: Joi.array().items(otherSchema),
+    video: Joi.array().items(otherSchema),
+    awards: Joi.array().items(otherSchema),
+    certificates: Joi.array().items(otherSchema),
+    brochure: Joi.array().items(otherSchema),
     products: Joi.array().items(productsSchema)
 });

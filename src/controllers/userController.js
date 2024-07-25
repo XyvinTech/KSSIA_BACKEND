@@ -3,7 +3,7 @@ const User = require("../models/user");
 const {
     CreateUserSchema,
     EditUserSchema,
-} = require("../validations");
+} = require("../validation");
 
 // Function to generate a 6-digit OTP
 const generateOTP = (length = 6) => {
@@ -21,7 +21,7 @@ const sendOtp = async (mobile, otp) => {
 // Function to sent OTP for login
 exports.sendOtp = async (req, res) => {
     try {
-        const { mobile } = req.body;
+        const { mobile } = req.params;
 
         // Validate the presence of the mobile field in the request body
         if (!mobile) {

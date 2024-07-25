@@ -5,6 +5,7 @@ const volleyball = require("volleyball");
 const clc = require("cli-color");
 const responseHandler = require("./src/helpers/responseHandler");
 const userRoute = require("./src/routes/user");
+const adminRoute = require("./src/routes/admin");
 
 const app = express();
 app.use(volleyball);
@@ -25,6 +26,7 @@ require("./src/helpers/connection");
 
 //* Configure routes for user API
 app.use(`${BASE_PATH}/user`, userRoute);
+app.use(`${BASE_PATH}/admin`, adminRoute);
 // app.use(`${BASE_PATH}/role`, rolesRouter);
 // app.use(`${BASE_PATH}/product`, productsRouter);
 
