@@ -12,11 +12,9 @@ adminRoute
   .get(adminController.getAllUsers)
 
 // Edit an existing user
-adminRoute.put('/users/:userId', async (req, res) => {
-    const userId = req.params.userId;
-    const data = req.body;
-    await adminController.editUser(res, userId, data);
-});
+adminRoute
+.route('/users/:userId')
+.put(adminController.editUser)
 
 
 module.exports = adminRoute;
