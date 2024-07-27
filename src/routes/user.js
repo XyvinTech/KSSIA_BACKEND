@@ -1,29 +1,30 @@
 const express = require("express");
 const userController = require("../controllers/userController");
 const authVerify = require("../middlewares/authVerify");
+const asyncHandler = require("../utils/asyncHandler");
 const userRoute = express.Router();
 
 userRoute
     .route("/login")
-    .post(userController.verifyOtp)
+    .post(asyncHandler(userController.verifyOtp))
 
 userRoute  
     .route("/login/:mobile")
-    .get(userController.sendOtp)
+    .get(asyncHandler(userController.sendOtp))
 
 
 // Edit an existing user
 userRoute
     .route('/edit/:userId')
-    .put(userController.editProfile)
+    .put(asyncHandler(userController.editProfile))
 
 userRoute  
     .route("/search/:name")
-    .get(userController.findUserByName)
+    .get(asyncHandler(userController.findUserByName))
 
 userRoute 
     .route("/find/:membershipId")
-    .get(userController.findUserByMembershipId)
+    .get(asyncHandler(userController.findUserByMembershipId))
 
 // userRoute.use(authVerify);
 

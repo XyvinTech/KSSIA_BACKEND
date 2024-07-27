@@ -1,6 +1,7 @@
 const express = require("express");
 const productController = require("../controllers/productController");
 const authVerify = require("../middlewares/authVerify");
+const asyncHandler = require("../utils/asyncHandler");
 const productRoute = express.Router();
 
 productRoute.use(authVerify);
@@ -8,17 +9,17 @@ productRoute.use(authVerify);
 // get all products and add products
 productRoute
   .route("/products")
-  .post(productController.addProduct)
-  .get(productController.getAllProducts)
+  .post(asyncHandler(productController.addProduct))
+  .get(asyncHandler(productController.getAllProducts))
 
 // Edit an existing product
 productRoute
   .route('/products/:productId')
-  .get(productController.getProductsById)
-  .put(productController.editProduct)
+  .get(asyncHandler(productController.getProductsById))
+  .put(asyncHandler(productController.editProduct))
 
 productRoute
   .route('products/seller/:sellerId')
-  .get(productController.getProductsBySeller)
+  .get(asyncHandler(productController.getProductsBySeller))
 
 module.exports = productRoute;

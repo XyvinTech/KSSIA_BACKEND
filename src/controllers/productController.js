@@ -1,98 +1,146 @@
 const responseHandler = require("../helpers/responseHandler");
 const Product = require("../models/products");
+const { productsSchemaval } = require("../validation");
 
-// Add Product
+/****************************************************************************************************/
+/*                                    Function to add product                                       */
+/****************************************************************************************************/
+
 exports.addProduct = async (req, res) => {
-    try {
 
-        const data = req.body;
+    const data = req.body;
+    // console.log(`Received data parameter: ${data}`);                                 // Debug line
 
-        // Create a new product
-        const newProduct = new Product(data);
-        await newProduct.save();
+    // Validate the input data
+    const { error } = productsSchemaval.validate(data, {
+        abortEarly: true
+    });
 
-        return responseHandler( res, 201, `Product added successfully!`, newProduct );
-
-    } catch (error) {
-        console.error(error);
-        return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
+    // Check if an error exists in the validation
+    if (error) {
+        // If an error exists, return a 400 status code with the error message
+        // console.log('Invalid input: ${error.message}');                              // Debug line
+        return responseHandler(res, 400, `Invalid input: ${error.message}`);
     }
+
+    // Check if the product exist in the database
+    const productExist = await Product.findOne({ name: data.name , seller_id: data.seller_id});
+    if (productExist) {
+        // console.log(`Product already exist`);                                        // Debug line
+        return responseHandler(res, 400, "Product already exist");
+    }
+
+    // Create a new product
+    const newProduct = new Product(data);
+    await newProduct.save();
+
+    // console.log(`Product added successfully!`);                                      // Debug line
+    return responseHandler( res, 201, `Product added successfully!`, newProduct );
+
 };
 
-// Edit Product
+/****************************************************************************************************/
+/*                                    Function to edit product                                      */
+/****************************************************************************************************/
+
 exports.editProduct = async (req, res) => {
-    try {
-        const { productId } = req.params;
-        const data = req.body;
 
-        // Find and update the product
-        const updatedProduct = await Product.findByIdAndUpdate(productId, data, { new: true, runValidators: true });
+    const { productId } = req.params;
+    const data = req.body;
 
-        if (!updatedProduct) {
-            return responseHandler(res, 404, "Product not found");
-        }
-
-        return responseHandler(res, 200, "Product updated successfully!", updatedProduct);
-        
-    } catch (error) {
-        console.error(error);
-        return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
+    // Validate the presence of the productId in the request
+    if (!productId) {
+        // console.log(`productId is required`);                                        // Debug line
+        return responseHandler(res, 400, "Invalid request");
     }
-};
 
-// Get All Products
-exports.getAllProducts = async (req, res) => {
-    try {
-        const products = await Product.find().populate({ path: 'seller_id', select: 'name membership_id' }).exec();
-        return responseHandler(res, 200, "Products retrieved successfully", products);
-    } catch (error) {
-        console.error(error);
-        return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
-    }
-};
-
-// Get product by id
-exports.getProductsById = async (req, res) => {
-    try {
-        const { productId } = req.params;
-
-        // Check if the productId is present in the request
-        if (!productId) {
-            return responseHandler(res, 400, "Product ID is required");
-        }
-
-        // Check if the product exist in the database
-        const product = await Product.findById(productId).populate({ path: 'seller_id', select: 'name membership_id' }).exec();
-        if (!product) {
-            return responseHandler(res, 404, "Product not found");
-        }
-        return responseHandler(res, 200, "Product retrieved successfully", product);
+    // Validate the input data
+    const { error } = productsSchemaval.validate(data, {
+        abortEarly: true
+    });
     
-    } catch (error) {
-        console.error(error);
-        return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
+    // Check if an error exists in the validation
+    if (error) {
+        // If an error exists, return a 400 status code with the error message
+        // console.log('Invalid input: ${error.message}');                              // Debug line
+        return responseHandler(res, 400, `Invalid input: ${error.message}`);
     }
+
+    // Find and update the product
+    const updatedProduct = await Product.findByIdAndUpdate(productId, data, { new: true, runValidators: true });
+
+    if (!updatedProduct) {
+        // console.log(`Product not found`);                                            // Debug line
+        return responseHandler(res, 404, "Product not found");
+    }
+
+    // console.log(`Product updated successfully! ${updatedProduct}`);                  // Debug line
+    return responseHandler(res, 200, "Product updated successfully!", updatedProduct);
+        
+};
+
+/****************************************************************************************************/
+/*                                  Function to get ll Products                                     */
+/****************************************************************************************************/
+
+exports.getAllProducts = async (req, res) => {
+
+    const products = await Product.find().populate({ path: 'seller_id', select: 'name membership_id' }).exec();
+    // console.log(Products retrieved successfully! ${products});                       // Debug line
+    return responseHandler(res, 200, "Products retrieved successfully!", products);
+
+};
+
+/****************************************************************************************************/
+/*                                 Function to get product by id                                    */
+/****************************************************************************************************/
+
+exports.getProductsById = async (req, res) => {
+
+    const { productId } = req.params;
+    // console.log(productId);                                                          // Debug line
+
+    // Check if the productId is present in the request
+    if (!productId) {
+        // console.log(`productId is required`);                                        // Debug line
+        return responseHandler(res, 400, "Invalid request");
+    }
+
+    // Check if the product exist in the database
+    const product = await Product.findById(productId).populate({ path: 'seller_id', select: 'name membership_id' }).exec();
+    if (!product) {
+        // console.log(`Product not found`);                                            // Debug line
+        return responseHandler(res, 404, "Product not found");
+    }
+
+    // console.log(`Product retrieved successfully!  ${product}`);                      // Debug line
+    return responseHandler(res, 200, "Product retrieved successfully!", product);
+    
 }
 
-// Get products by a single seller
+/****************************************************************************************************/
+/*                          Function to get products by a single seller                             */
+/****************************************************************************************************/
+
 exports.getProductsBySeller = async (req, res) => {
-    try {
-        const { sellerId } = req.params;
 
-        // Check if sellerId exist in the parameter
-        if (!sellerId) {
-            return responseHandler(res, 400, "Seller ID is required");
-        }
+    const { sellerId } = req.params;
+    // console.log(sellerId);                                                           // Debug line
 
-        // Check if the products by the seller exist in the database
-        const products = await Product.find({ seller_id: sellerId }).populate({ path: 'seller_id', select: 'name membership_id' }).exec();
-        if(!products){
-            return responseHandler(res, 404, "Seller has no products");
-        }
-        return responseHandler(res, 200, "Products retrieved successfully", products);
-    
-    } catch (error) {
-        console.error(error);
-        return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
+    // Check if sellerId exist in the parameter
+    if (!sellerId) {
+        // console.log(`sellerId is required`);                                         // Debug line
+        return responseHandler(res, 400, "Invalid request");
     }
+
+    // Check if the products by the seller exist in the database
+    const products = await Product.find({ seller_id: sellerId }).populate({ path: 'seller_id', select: 'name membership_id' }).exec();
+    if(!products){
+        // console.log(`No products found for the seller`);                             // Debug line
+        return responseHandler(res, 404, "Seller has no products");
+    }
+
+    // console.log(`Products retrieved successfully!  ${products}`);                    // Debug line
+    return responseHandler(res, 200, "Products retrieved successfully!", products);
+
 }

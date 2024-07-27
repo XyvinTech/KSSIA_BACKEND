@@ -94,3 +94,5 @@ exports.EditUserSchema = Joi.object({
     brochure: Joi.array().items(otherSchema),
     products: Joi.array().items(productsSchema)
 });
+
+exports.productsSchemaval = productsSchema;
