@@ -17,6 +17,14 @@ userRoute
     .route('/edit/:userId')
     .put(userController.editProfile)
 
+userRoute  
+    .route("/search/:name")
+    .get(userController.findUserByName)
+
+userRoute 
+    .route("/find/:membershipId")
+    .get(userController.findUserByMembershipId)
+
 // userRoute.use(authVerify);
 
 module.exports = userRoute;

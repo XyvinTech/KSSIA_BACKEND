@@ -13,8 +13,12 @@ productRoute
 
 // Edit an existing product
 productRoute
-.route('/products/:productId')
-.put(productController.editProduct)
+  .route('/products/:productId')
+  .get(productController.getProductsById)
+  .put(productController.editProduct)
 
+productRoute
+  .route('products/seller/:sellerId')
+  .get(productController.getProductsBySeller)
 
 module.exports = productRoute;

@@ -50,3 +50,49 @@ exports.getAllProducts = async (req, res) => {
         return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
     }
 };
+
+// Get product by id
+exports.getProductsById = async (req, res) => {
+    try {
+        const { productId } = req.params;
+
+        // Check if the productId is present in the request
+        if (!productId) {
+            return responseHandler(res, 400, "Product ID is required");
+        }
+
+        // Check if the product exist in the database
+        const product = await Product.findById(productId).populate({ path: 'seller_id', select: 'name membership_id' }).exec();
+        if (!product) {
+            return responseHandler(res, 404, "Product not found");
+        }
+        return responseHandler(res, 200, "Product retrieved successfully", product);
+    
+    } catch (error) {
+        console.error(error);
+        return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
+    }
+}
+
+// Get products by a single seller
+exports.getProductsBySeller = async (req, res) => {
+    try {
+        const { sellerId } = req.params;
+
+        // Check if sellerId exist in the parameter
+        if (!sellerId) {
+            return responseHandler(res, 400, "Seller ID is required");
+        }
+
+        // Check if the products by the seller exist in the database
+        const products = await Product.find({ seller_id: sellerId }).populate({ path: 'seller_id', select: 'name membership_id' }).exec();
+        if(!products){
+            return responseHandler(res, 404, "Seller has no products");
+        }
+        return responseHandler(res, 200, "Products retrieved successfully", products);
+    
+    } catch (error) {
+        console.error(error);
+        return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
+    }
+}

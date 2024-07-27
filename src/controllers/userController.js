@@ -1,3 +1,4 @@
+const Fuse = require('fuse.js');
 const responseHandler = require("../helpers/responseHandler");
 const User = require("../models/user");
 const {
@@ -145,6 +146,100 @@ exports.editProfile = async (req, res) => {
     }
 };
 
+// Function to search users using name aggregation and fuse.js
+exports.findUserByName = async (req, res) => {
+    try {
+        const { name } = req.params;
+        // console.log(`Received name parameter: ${name}`);                                 // Debug line
+
+        // Validate the presence of the name in the request parameter
+        if (!name) {
+            return responseHandler(res, 400, "Requires name to find the user");
+        }
+
+        // Decode URL encoded spaces
+        const decodedName = decodeURIComponent(name);
+        // console.log(`Decoded Name: ${decodedName}`);                                     // Debug line
+
+        // Split the name into parts
+        const nameParts = decodedName.split(' ').filter(Boolean);
+        // console.log(`Name Parts: ${nameParts}`);                                         // Debug line
+
+        // Prepare the match query
+        let matchQuery = {};
+        if (nameParts.length > 0) {
+            matchQuery = {
+                $or: [
+                    { 'name.first_name': { $regex: nameParts[0], $options: 'i' } },
+                    { 'name.middle_name': { $regex: nameParts.slice(1, -1).join(' '), $options: 'i' } },
+                    { 'name.last_name': { $regex: nameParts[nameParts.length - 1], $options: 'i' } }
+                ]
+            };
+        }
+        // console.log(`Match Query: ${JSON.stringify(matchQuery)}`);                       // Debug line
+
+        // Find users using aggregation
+        const initialResults = await User.aggregate([
+            { $match: matchQuery }
+        ]);
+        // console.log(`Initial Results: ${JSON.stringify(initialResults)}`);               // Debug line
+
+        // Check if initial results are empty
+        if (!initialResults || initialResults.length === 0) {
+            // console.log('No users found in aggregation stage');                          // Debug line
+            return responseHandler(res, 404, "User not found");
+        }
+
+        // Set up Fuse.js options
+        const fuseOptions = {
+            keys: ['name.first_name', 'name.middle_name', 'name.last_name'],
+            threshold: 0.7  // Adjust as needed
+        };
+        // console.log(`Fuse.js Options: ${JSON.stringify(fuseOptions)}`);                  // Debug line
+        // Create Fuse instance
+        const fuse = new Fuse(initialResults, fuseOptions);
+
+        // Search for users
+        const fuseResults = fuse.search(decodedName);
+        // console.log(`Fuse.js Results: ${JSON.stringify(fuseResults)}`);                  // Debug line
+        const matchedUsers = fuseResults.map(result => result.item);
+        // console.log(`Matched Users: ${JSON.stringify(matchedUsers)}`);                   // Debug line
+
+        if (!matchedUsers || matchedUsers.length === 0) {
+            // console.log('No users found in Fuse.js stage');                              // Debug line
+            return responseHandler(res, 404, "User not found");
+        }
+
+        // console.log('Users successfully found and returned');                            // Debug line
+        return responseHandler(res, 200, "User found", matchedUsers);
+
+    } catch (error) {
+        // console.error(`Internal Server Error: ${error.message}`);                        // Debug line
+        return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
+    }
+};
+
+// Function to get user using membership ID
+exports.findUserByMembershipId = async (req,res) => {
+    try {
+        const { membershipId } = req.params;
+
+        // Check if the membership id is present in the request
+        if (!membershipId) {
+            return responseHandler(res, 400, "Membership ID is required");
+        }
+
+        // Check if the membership id exist in the database
+        const user = await User.findOne({ membershipId });
+        if (!user) {
+            return responseHandler(res, 404, "User not found");
+        }
+        return responseHandler(res, 200, "User found", user);
+
+    } catch (error) {
+        return responseHandler(res, 500, `Internal Server Error ${error.message}`);
+    }
+}
 
 exports.register = (req, res) => {
     res.send("register");

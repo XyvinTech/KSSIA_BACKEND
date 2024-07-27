@@ -1,6 +1,6 @@
-const { Mongoose } = require("mongoose");
+const mongoose = require('mongoose');
 
-const productSchema = mongoose.Schema(
+const productSchema = new mongoose.Schema(
     {
         seller_id: { 
             type: mongoose.Schema.Types.ObjectId,
