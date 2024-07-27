@@ -1,37 +1,33 @@
 const mongoose = require('mongoose');
-const User = require('./src/models/user'); // Adjust the path to where your User model is located
+const User = require('./models/user'); // Adjust the path to where your User model is located
 
 // Connect to MongoDB
-mongoose.connect('mongodb+srv://user:pass@falcon.vgl0ddx.mongodb.net/?retryWrites=true&w=majority&appName=Falcon')
+mongoose.connect('mongodb://localhost:27017/KSSIA', { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('Error connecting to MongoDB', err));
 
 const createTestData = async () => {
   try {
+    // const roleId = new mongoose.Types.ObjectId('64c1a3c88d93e04b240b8f2e'); // Replace with actual Role ObjectId
+    // const productId = new mongoose.Types.ObjectId('64c1a3c88d93e04b240b8f2f'); // Replace with actual Products ObjectId
+
     const newUser = new User({
-      name: {
-        first_name: 'John',
-        middle_name: 'A.',
-        last_name: 'Doe',
-      },
+      first_name: 'John',
+      middle_name: 'D.',
+      last_name: 'Doe',
       membership_id: 'MEM123456',
       blood_group: 'O+',
       email: 'john.doe@example.com',
       profile_picture: 'https://example.com/profile.jpg',
       phone_numbers: {
         personal: 9876543210,
-        landline: 1234567890,
-        company_phone_number: 1122334455,
-        whatsapp_number: 2233445566,
-        whatsapp_business_number: 3344556677
+        landline: 1234567890
       },
-      otp: 123456,
+      password: 'securepassword123',
       designation: 'Software Engineer',
       company_name: 'Tech Solutions Inc.',
-      company_email: 'contact@techsolutions.com',
-      business_category: 'IT',
-      sub_category: 'Software Development',
       bio: 'Experienced software engineer specializing in web applications.',
+    //   role: roleId,
       address: {
         street: '123 Elm Street',
         city: 'Springfield',
@@ -51,6 +47,7 @@ const createTestData = async () => {
       awards: [
         { name: 'Best Developer', url: 'https://example.com/award' }
       ],
+    //   products: productId,
       certificates: [
         { name: 'Certified Web Developer', url: 'https://example.com/certificate' }
       ],
