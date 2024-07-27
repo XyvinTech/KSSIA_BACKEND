@@ -4,7 +4,7 @@ const { CreateUserSchema, EditUserSchema } = require("../validation");
 
 // Create a new user
 exports.createUser = async (req, res) => {
-    try {
+  
         const data = req.body;
 
         // Validate the input data
@@ -30,15 +30,12 @@ exports.createUser = async (req, res) => {
         await newUser.save();
 
         return responseHandler(res, 201, `New user created successfully!`, newUser);
-    } catch (error) {
-        console.error(error);
-        return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
-    }
+   
 };
 
 // Edit User
 exports.editUser = async (req, res) => {
-    try {
+    
         const { userId } = req.params;
         const { membership_id } = req.params;
         const data = req.body;
@@ -72,15 +69,12 @@ exports.editUser = async (req, res) => {
 
         return responseHandler(res, 200, "User updated successfully!", updatedUser);
 
-    } catch (error) {
-        console.error(error);
-        return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
-    }
+   
 };
 
 // Delete an user 
 exports.deleteUser = async (req, res) => {
-    try {
+   
         const { userId } = req.params;
         const { membership_id } = req.params;
 
@@ -102,26 +96,20 @@ exports.deleteUser = async (req, res) => {
         }
         
         return responseHandler(res, 200, "User deleted successfully");
-    } catch (error) {
-        console.error(error);
-        return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
-    }
+    
 };
 
 // Get All Users
 exports.getAllUsers = async (req, res) => {
-    try {
+  
         const users = await User.find();
         return responseHandler(res, 200, "Users retrieved successfully", users);
-    } catch (error) {
-        console.error(error);
-        return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
-    }
+   
 };
 
 // Get user by id 
 exports.getUserById = async (req, res) => {
-    try {
+    
         const { userId } = req.params;
         
         // Check if a user with this id exists
@@ -130,8 +118,5 @@ exports.getUserById = async (req, res) => {
             return responseHandler(res, 404, "User not found");
         }
         return responseHandler(res, 200, "User retrieved successfully", user);
-    } catch (error) {
-        console.error(error);
-        return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
-    }
+   
 };

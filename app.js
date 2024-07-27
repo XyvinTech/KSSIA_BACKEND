@@ -41,6 +41,15 @@ app.get(BASE_PATH, (req, res) => {
   );
 });
 
+
+app.all('*', (req, res, next) => {
+  return responseHandler(
+    res,
+    404,
+    "🛡️ No API Found",
+    null
+  );
+})
 //! Start the server and listen on the specified port from environment variable
 app.listen(PORT, () => {
   const portMessage = clc.redBright(`✓ App is running on port: ${PORT}`);
