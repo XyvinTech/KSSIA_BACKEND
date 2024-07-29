@@ -7,6 +7,8 @@ const responseHandler = require("./src/helpers/responseHandler");
 const userRoute = require("./src/routes/user");
 const adminRoute = require("./src/routes/admin");
 const productRoute = require("./src/routes/products");
+const eventRoute = require("./src/routes/events");
+
 
 const app = express();
 app.use(volleyball);
@@ -29,7 +31,7 @@ require("./src/helpers/connection");
 app.use(`${BASE_PATH}/user`, userRoute);
 app.use(`${BASE_PATH}/admin`, adminRoute);
 app.use(`${BASE_PATH}/product`, productRoute);
-
+app.use(`${BASE_PATH}/events`, eventRoute);
 
 //? Define a route for the API root
 app.get(BASE_PATH, (req, res) => {
