@@ -11,5 +11,5 @@ function createCommentHeader(title) {
 // Example usage
 console.log(createCommentHeader
     (
-        "Function to get user by ID"
+        "Function to delete product"
     ));

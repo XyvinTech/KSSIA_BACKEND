@@ -144,3 +144,30 @@ exports.getProductsBySeller = async (req, res) => {
     return responseHandler(res, 200, "Products retrieved successfully!", products);
 
 }
+
+/****************************************************************************************************/
+/*                                   Function to delete product                                     */
+/****************************************************************************************************/
+
+exports.deleteProduct = async (req, res) => {
+
+    const { productId } = req.params;
+    // console.log(productId);                                                          // Debug line
+
+    // Check if productId exist in the parameter
+    if (!productId) {
+        // console.log(`productId is required`);                                        // Debug line
+        return responseHandler(res, 400, "Invalid request");
+    }
+
+    // Check if the products by the productId exist in the database
+    const product = await Product.findOneAndDelete({ _id: productId });
+    if(!product){
+        // console.log(`No product found for the productId provided`);                  // Debug line
+        return responseHandler(res, 404, "Product with the given ID do not exist in the database");
+    }
+
+    // console.log(`Product deleted successfully!`);                                    // Debug line
+    return responseHandler(res, 200, "Products Deleted successfully!");
+
+}

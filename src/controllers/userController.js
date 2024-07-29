@@ -156,11 +156,55 @@ exports.editProfile = async (req, res) => {
         return responseHandler(res, 400, `Invalid input: ${error.message}`);
     }
 
+    // Fetch current user data
+    const currentUser = await User.findById(userId);
+    if (!currentUser) {
+        return responseHandler(res, 404, "User not found");
+    }
+    
     // Update the user's profile with the validated data
     const updatedUser = await User.findByIdAndUpdate(userId, data, { new: true, runValidators: true });
     if (!updatedUser) {
         // console.log(`User not found`);                                               // Debug line
         return responseHandler(res, 404, "User not found");
+    }
+
+    // Update products if any changes exist in the data
+    // Check for product changes
+    if (data.products) {
+        // Fetch current products for the user
+        const currentProducts = await Product.find({ seller_id: userId });
+        // console.log(`Current products: ${currentProducts}`);                         // Debug line
+        // console.log(`Data products: ${data.products}`);                              // Debug line
+    
+        // Convert current products to a map for easier comparison
+        const currentProductsMap = new Map(currentProducts.map(product => [product._id.toString(), product]));
+        // console.log(`Current products map: ${currentProductsMap}`);                  // Debug line
+
+        for (let productData of data.products) {
+            // If the product contains an ID update the product in the database else add the  
+            if (productData._id) {
+                // Update existing products
+                const existingProduct = currentProductsMap.get(productData._id);
+                if (existingProduct) {
+                    await Product.findByIdAndUpdate(productData._id, productData, { new: true, runValidators: true });
+                    currentProductsMap.delete(productData._id);
+                } else {
+                    // console.log(`Product not found with the Id provided`);           // Debug line
+                    return responseHandler(res, 404, "Invalid request");
+                }
+            } else {
+                // Add new products
+                const newProduct = new Product({ ...productData, seller_id: userId });
+                await newProduct.save();
+                // console.console.log(`Product added successfully! ${newProduct}`);                   // Debug line
+            }
+        }
+    
+        // Remove products that were not in the update request
+        for (let remainingProduct of currentProductsMap.values()) {
+            await Product.findByIdAndDelete(remainingProduct._id);
+        }
     }
 
     // console.log(`User profile updated successfully`);                                // Debug line
