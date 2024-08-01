@@ -123,6 +123,13 @@ exports.sendEmail = async (req, res) => {
 
 };
 
+exports.getUnsentEmails = async (req, res) => {
+
+    const unsent_email = await find({sent_status: false, type: false});
+    return responseHandler(res, 200, unsent_email);
+    
+};
+
 exports.getUnreadNotifications = async (req, res) => {
     const user_id = req.user_id;
 
