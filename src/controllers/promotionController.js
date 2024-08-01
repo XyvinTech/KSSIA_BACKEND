@@ -1,5 +1,5 @@
 const responseHandler = require("../helpers/responseHandler");
-const Promotion = require("../models/promotion");
+const Promotion = require("../models/promotions");
 const { EditPromotionSchema } = require("../validation");
 const fs = require('fs');
 const path = require('path');
