@@ -49,6 +49,7 @@ const userSchema = new mongoose.Schema(
         brochure: [Subschema],
         is_active: { type: Boolean, default: true },
         is_deleted: { type: Boolean, default: false },
+        selectedTheme: { type: String, default:'white'}
     },
     {
         timestamps: true,
