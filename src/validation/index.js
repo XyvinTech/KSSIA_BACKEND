@@ -121,4 +121,45 @@ exports.EditEventsSchema = Joi.object({
     activate: Joi.boolean()
 });
 
+// notificationSchema validation
 
+exports.emailNotificationSchema = Joi.object({
+    to: Joi.string().required(),
+    subject: Joi.string().required(),
+    content: Joi.string().required(),
+    upload_url: Joi.string(),
+    upload_file_url: Joi.string(),
+    url: Joi.string().uri(),
+    type: Joi.boolean()
+});
+
+exports.inAppNotificationSchema = Joi.object({
+    to: Joi.string().required(),
+    subject: Joi.string().required(),
+    content: Joi.string().required(),
+    upload_url: Joi.string(),
+    url: Joi.string().uri(),
+    type: Joi.boolean(),
+    read_status: Joi.boolean()
+});
+
+exports.NewsSchema = Joi.object({
+    category: Joi.string().required(),
+    title: Joi.string().required(),
+    content: Joi.string().optional(),
+});
+
+exports.EditPromotionSchema = Joi.object({
+    type: Joi.string().valid('banner', 'video', 'poster', 'notice').required(),
+    banner_image_url: Joi.string().when('type', { is: 'banner', then: Joi.required() }),
+    upload_video: Joi.string().when('type', { is: 'video', then: Joi.required() }),
+    yt_link: Joi.string().when('type', { is: 'video', then: Joi.required() }),
+    video_title: Joi.string().when('type', { is: 'video', then: Joi.required() }),
+    poster_image_url: Joi.string().when('type', { is: 'poster', then: Joi.required() }),
+    notice_title: Joi.string().when('type', { is: 'notice', then: Joi.required() }),
+    notice_description: Joi.string().when('type', { is: 'notice', then: Joi.required() }),
+    notice_link: Joi.string().when('type', { is: 'notice', then: Joi.required() }),
+    status: Joi.boolean().default(false),
+    startDate: Joi.date(),
+    endDate: Joi.date()
+});
