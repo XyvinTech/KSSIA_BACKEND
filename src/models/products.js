@@ -16,7 +16,6 @@ const productSchema = new mongoose.Schema(
         units: { type: Number, min: 0 },
         status: { type: Boolean , default:true },
         tags: [{ type: String }],
-        isApproval: { type: Boolean, default:false },
     },
     {
         timestamps: true,
