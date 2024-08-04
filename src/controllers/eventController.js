@@ -78,7 +78,7 @@ exports.editEvent = async (req, res) => {
 
 // Get all events
 exports.getAllEvents = async (req, res) => {
-        const events = await Event.find().populate({ path: 'type', select: 'name' }).exec();
+        const events = await Event.find();
         return responseHandler(res, 200, "Events retrieved successfully", events);
 };
 /****************************************************************************************************/
@@ -93,7 +93,7 @@ exports.getEventById = async (req, res) => {
         // console.log(`productId is required`);                                        // Debug line
         return responseHandler(res, 400, "Invalid request");
     }
-    const event = await Event.findById(eventId).populate({ path: 'type', select: 'name' }).exec();
+    const event = await Event.findById(eventId);
 
     if (!event) {
         return responseHandler(res, 404, "Event not found");
