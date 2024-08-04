@@ -2,21 +2,21 @@ const mongoose = require('mongoose');
 
 const notificationSchema = new mongoose.Schema(
     {
-        to: { 
+        to: [{ 
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true 
-        },
+        }],
         subject: { type: String, required: true },
         content: { type: String, required: true },
-        upload_url: { type: String },
-        upload_file_url: { type: String },
-        url: { type: String },
-        type: { type: Boolean },
+        media_url: { type: String },
+        file_url: { type: String },
+        link_url: { type: String },
+        type: { type: String},
         sent_status: { type: Boolean, default: false },
         sent_at: { type: Date },
-        recived_status: { type: Boolean, default: false },
-        read_status: { type: Boolean, default: false }
+       
+      
     },
     {
         timestamps: true
