@@ -1,7 +1,17 @@
 const responseHandler = require("../helpers/responseHandler");
 const Product = require("../models/products");
 const { productsSchemaval } = require("../validation");
+const fs = require('fs');
+const path = require('path');
 
+// Helper function to handle file deletion
+const deleteFile = (filePath) => {
+    fs.unlink(filePath, (err) => {
+        if (err) {
+            console.error('Error deleting file:', err);
+        }
+    });
+};
 /****************************************************************************************************/
 /*                                    Function to add product                                       */
 /****************************************************************************************************/
@@ -29,9 +39,32 @@ exports.addProduct = async (req, res) => {
         // console.log(`Product already exist`);                                        // Debug line
         return responseHandler(res, 400, "Product already exist");
     }
+    // Handle file upload if present
+    let image = '';
+    if (req.file) {
+        // Get current date in YYYYMMDD format
+        const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
 
+        // Extract original file name and extension
+        const originalName = req.file.originalname;
+        const fileExtension = path.extname(originalName);
+        const baseName = path.basename(originalName, fileExtension);
+        
+        // Generate new file name with date included
+        const newFileName = `${baseName}_${date}${fileExtension}`;
+        
+        // Construct file path
+        const filePath = path.join(__dirname, '../uploads/products', newFileName);
+        
+        // Write file to the path
+        fs.writeFileSync(filePath, req.file.buffer);
+        
+        // Generate URL of the image
+        // Adjust the URL path based on your server configuration
+        image = `/uploads/products/${newFileName}`;
+    }
     // Create a new product
-    const newProduct = new Product(data);
+    const newProduct = new Product({ ...data, image });
     await newProduct.save();
 
     // console.log(`Product added successfully!`);                                      // Debug line
@@ -66,16 +99,50 @@ exports.editProduct = async (req, res) => {
         return responseHandler(res, 400, `Invalid input: ${error.message}`);
     }
 
-    // Find and update the product
-    const updatedProduct = await Product.findByIdAndUpdate(productId, data, { new: true, runValidators: true });
+    const product =  await Product.findById(productId);
 
-    if (!updatedProduct) {
+    if (!product) {
         // console.log(`Product not found`);                                            // Debug line
         return responseHandler(res, 404, "Product not found");
     }
 
-    // console.log(`Product updated successfully! ${updatedProduct}`);                  // Debug line
-    return responseHandler(res, 200, "Product updated successfully!", updatedProduct);
+    // Handle file upload if present
+    let image = product.image;
+    
+    if (req.file) {
+        // Delete old image
+        if (product.image) {
+            deleteFile(path.join(__dirname, '../uploads/products', product.image));
+        }
+
+        // Get current date in YYYYMMDD format
+        const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
+
+        // Extract original file name and extension
+        const originalName = req.file.originalname;
+        const fileExtension = path.extname(originalName);
+        const baseName = path.basename(originalName, fileExtension);
+        
+        // Generate new file name with date included
+        const newFileName = `${baseName}_${date}${fileExtension}`;
+        
+        // Construct file path
+        const filePath = path.join(__dirname, '../uploads/products', newFileName);
+        
+        // Write file to the path
+        fs.writeFileSync(filePath, req.file.buffer);
+        
+        // Generate URL of the image
+        // Adjust the URL path based on your server configuration
+        image = `/uploads/products/${newFileName}`;
+    }
+
+    // Update the news article
+    Object.assign(product, data, { image });
+    await product.save();
+
+    // console.log(`Product updated successfully! ${product}`);                         // Debug line
+    return responseHandler(res, 200, "Product updated successfully!", product);
         
 };
 

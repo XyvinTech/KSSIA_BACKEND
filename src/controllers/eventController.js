@@ -1,6 +1,17 @@
 const responseHandler = require("../helpers/responseHandler");
 const Event = require("../models/events");
 const { EditEventsSchema } = require("../validation");
+const fs = require('fs');
+const path = require('path');
+
+// Helper function to handle file deletion
+const deleteFile = (filePath) => {
+    fs.unlink(filePath, (err) => {
+        if (err) {
+            console.error('Error deleting file:', err);
+        }
+    });
+};
 
 /****************************************************************************************************/
 /*                                    Function to add event                                       */
