@@ -1,5 +1,9 @@
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const {
+  PORT,
+  API_VERSION
+} = process.env;
 
 const options = {
   definition: {
@@ -36,6 +40,14 @@ const options = {
       {
         name: 'Notifications',
         description: 'Notification related operations'
+      },
+    ],
+    servers: [
+      // {
+      //   url: `https://example.com/api/v1`,
+      // },
+      {
+        url: `http://localhost:${PORT}/api/${API_VERSION}`,
       },
     ],
     components: {
@@ -817,7 +829,7 @@ const options = {
       },
     },
   },
-  apis: ['./src/routes/*.js'], // Path to your API routes
+  apis: ['./src/middlewares/swagger/paths/*.js'], // Path to your API routes
 };
 
 const specs = swaggerJsdoc(options);
