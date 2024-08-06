@@ -52,15 +52,32 @@ exports.createPromotion = async (req, res) => {
     let poster_image_url = '';
 
     if (req.file) {
-        const filePath = path.join(__dirname, '../uploads/promotion', req.file.originalname);
+        // Get current date in YYYYMMDD format
+        const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
+
+        // Extract original file name and extension
+        const originalName = req.file.originalname;
+        const fileExtension = path.extname(originalName);
+        const baseName = path.basename(originalName, fileExtension);
+        
+        // Generate new file name with date included
+        const newFileName = `${baseName}_${date}${fileExtension}`;
+        
+        // Construct file path
+        const filePath = path.join(__dirname, '../uploads/promotions', newFileName);
+        
+        // Write file to the path
         fs.writeFileSync(filePath, req.file.buffer);
+        
+        // Generate URL of the image
+        // Adjust the URL path based on your server configuration
 
         if (data.type === 'banner') {
-            banner_image_url = req.file.originalname;
+            banner_image_url = `/uploads/promotions/${newFileName}`;
         } else if (data.type === 'video') {
-            upload_video = req.file.originalname;
+            upload_video = `/uploads/promotions/${newFileName}`;
         } else if (data.type === 'poster') {
-            poster_image_url = req.file.originalname;
+            poster_image_url = `/uploads/promotions/${newFileName}`;
         }
     }
 
@@ -120,15 +137,32 @@ exports.editPromotion = async (req, res) => {
             deleteFile(path.join(__dirname, '../uploads/promotion', promotion.poster_image_url));
         }
 
-        const filePath = path.join(__dirname, '../uploads/promotion', req.file.originalname);
+        // Get current date in YYYYMMDD format
+        const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
+
+        // Extract original file name and extension
+        const originalName = req.file.originalname;
+        const fileExtension = path.extname(originalName);
+        const baseName = path.basename(originalName, fileExtension);
+        
+        // Generate new file name with date included
+        const newFileName = `${baseName}_${date}${fileExtension}`;
+        
+        // Construct file path
+        const filePath = path.join(__dirname, '../uploads/promotions', newFileName);
+        
+        // Write file to the path
         fs.writeFileSync(filePath, req.file.buffer);
+        
+        // Generate URL of the image
+        // Adjust the URL path based on your server configuration
 
         if (data.type === 'banner') {
-            banner_image_url = req.file.originalname;
+            banner_image_url = `/uploads/promotions/${newFileName}`;
         } else if (data.type === 'video') {
-            upload_video = req.file.originalname;
+            upload_video = `/uploads/promotions/${newFileName}`;
         } else if (data.type === 'poster') {
-            poster_image_url = req.file.originalname;
+            poster_image_url = `/uploads/promotions/${newFileName}`;
         }
     }
 

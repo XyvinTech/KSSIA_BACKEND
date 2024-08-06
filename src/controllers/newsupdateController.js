@@ -39,9 +39,26 @@ exports.createNews = async (req, res) => {
     // Handle file upload if present
     let image = '';
     if (req.file) {
-        const filePath = path.join(__dirname, '../uploads/news', req.file.originalname);
+        // Get current date in YYYYMMDD format
+        const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
+
+        // Extract original file name and extension
+        const originalName = req.file.originalname;
+        const fileExtension = path.extname(originalName);
+        const baseName = path.basename(originalName, fileExtension);
+        
+        // Generate new file name with date included
+        const newFileName = `${baseName}_${date}${fileExtension}`;
+        
+        // Construct file path
+        const filePath = path.join(__dirname, '../uploads/news', newFileName);
+        
+        // Write file to the path
         fs.writeFileSync(filePath, req.file.buffer);
-        image = req.file.originalname;
+        
+        // Generate URL of the image
+        // Adjust the URL path based on your server configuration
+        image = `/uploads/news/${newFileName}`;
     }
 
     // Create a new news article
@@ -87,9 +104,26 @@ exports.editNews = async (req, res) => {
             deleteFile(path.join(__dirname, '../uploads/news', news.image));
         }
 
-        const filePath = path.join(__dirname, '../uploads/news', req.file.originalname);
+        // Get current date in YYYYMMDD format
+        const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
+
+        // Extract original file name and extension
+        const originalName = req.file.originalname;
+        const fileExtension = path.extname(originalName);
+        const baseName = path.basename(originalName, fileExtension);
+        
+        // Generate new file name with date included
+        const newFileName = `${baseName}_${date}${fileExtension}`;
+        
+        // Construct file path
+        const filePath = path.join(__dirname, '../uploads/news', newFileName);
+        
+        // Write file to the path
         fs.writeFileSync(filePath, req.file.buffer);
-        image = req.file.originalname;
+        
+        // Generate URL of the image
+        // Adjust the URL path based on your server configuration
+        image = `/uploads/news/${newFileName}`;
     }
 
     // Update the news article

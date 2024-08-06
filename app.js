@@ -11,10 +11,11 @@ const eventRoute = require("./src/routes/events");
 const newsRoute = require("./src/routes/news");
 const promotionRoute = require("./src/routes/promotion");
 const notificationRoute = require("./src/routes/notification");
-const { specs, swaggerUi } = require('./src/middlewares/swagger');
+const { specs, swaggerUi } = require('./src/middlewares/swagger/swagger');
 
 const app = express();
 app.use(volleyball);
+
 //* Define the PORT, NODE_ENV & API version based on environment variable
 const { PORT, API_VERSION, NODE_ENV } = process.env;
 
