@@ -7,11 +7,30 @@ const eventRoute = express.Router();
 eventRoute.use(authVerify);
 
 
-eventRoute.post('/', asyncHandler(eventController.createEvent));
-eventRoute.get('/', asyncHandler(eventController.getAllEvents));
+// Get all events and add a new event
+eventRoute
+  .route("/events")
+  .post(upload.fields([
+    { name: 'image', maxCount: 1 },
+    { name: 'guest_image', maxCount: 1 },
+    ...Array.from({ length: 10 }, (_, index) => ({ name: `speaker_image_${index}`, maxCount: 1 }))
+  ]), asyncHandler(eventController.createEvent))
+  .get(asyncHandler(eventController.getAllEvents));
 
-eventRoute.get('/:eventId', asyncHandler(eventController.getEventById));
-eventRoute.put('/:eventId', asyncHandler(eventController.editEvent));
-eventRoute.delete('/:eventId', asyncHandler(eventController.deleteEvent));
+// Edit an existing event by ID
+eventRoute
+  .route("/events/:eventId")
+  .get(asyncHandler(eventController.getEventById))
+  .put(upload.fields([
+    { name: 'image', maxCount: 1 },
+    { name: 'guest_image', maxCount: 1 },
+    ...Array.from({ length: 10 }, (_, index) => ({ name: `speaker_image_${index}`, maxCount: 1 }))
+  ]), asyncHandler(eventController.editEvent));
+
+// Delete an event by ID
+eventRoute
+  .route("/events/:eventId")
+  .delete(asyncHandler(eventController.deleteEvent));
+
 
 module.exports = eventRoute;

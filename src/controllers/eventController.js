@@ -13,6 +13,14 @@ const deleteFile = (filePath) => {
     });
 };
 
+// Helper function to generate a new file name with date included
+const generateFileName = (originalName) => {
+    const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
+    const fileExtension = path.extname(originalName);
+    const baseName = path.basename(originalName, fileExtension);
+    return `${baseName}_${date}${fileExtension}`;
+};
+
 /****************************************************************************************************/
 /*                                    Function to add event                                       */
 /****************************************************************************************************/
@@ -37,6 +45,32 @@ exports.createEvent = async (req, res) => {
     if (eventExist) {
         // console.log(`Product already exist`);                                        // Debug line
         return responseHandler(res, 400, "Event already exist");
+    }
+    // Handle file uploads if present
+    if (req.files) {
+        if (req.files.image) {
+            const newFileName = generateFileName(req.files.image[0].originalname);
+            const imagePath = path.join(__dirname, '../uploads/events', newFileName);
+            fs.writeFileSync(imagePath, req.files.image[0].buffer);
+            data.image = `/uploads/events/${newFileName}`;
+        }
+        if (req.files.guest_image) {
+            const newFileName = generateFileName(req.files.guest_image[0].originalname);
+            const guestImagePath = path.join(__dirname, '../uploads/events', newFileName);
+            fs.writeFileSync(guestImagePath, req.files.guest_image[0].buffer);
+            data.guest_image = `/uploads/events/${newFileName}`;
+        }
+        if (data.speakers && Array.isArray(data.speakers)) {
+            data.speakers = data.speakers.map((speaker, index) => {
+                if (req.files[`speaker_image_${index}`]) {
+                    const newFileName = generateFileName(req.files[`speaker_image_${index}`][0].originalname);
+                    const speakerImagePath = path.join(__dirname, '../uploads/events', newFileName);
+                    fs.writeFileSync(speakerImagePath, req.files[`speaker_image_${index}`][0].buffer);
+                    speaker.speaker_image = `/uploads/events/${newFileName}`;
+                }
+                return speaker;
+            });
+        }
     }
 
     // Create a new event
@@ -74,11 +108,50 @@ exports.editEvent = async (req, res) => {
         return responseHandler(res, 400, `Invalid input: ${error.message}`);
     }
     // Find and update the event
-    const updatedEvent = await Event.findByIdAndUpdate(eventId, data, { new: true, runValidators: true });
+    const event = await Event.findById(eventId);
 
-    if (!updatedEvent) {
+    if (!event) {
         return responseHandler(res, 404, "Event not found");
     }
+
+    // Handle file uploads if present
+    if (req.files) {
+        if (req.files.image) {
+            if (event.image) {
+                deleteFile(path.join(__dirname, '../uploads/events', event.image));
+            }
+            const newFileName = generateFileName(req.files.image[0].originalname);
+            const imagePath = path.join(__dirname, '../uploads/events', newFileName);
+            fs.writeFileSync(imagePath, req.files.image[0].buffer);
+            data.image = `/uploads/events/${newFileName}`;
+        }
+        if (req.files.guest_image) {
+            if (event.guest_image) {
+                deleteFile(path.join(__dirname, '../uploads/events', event.guest_image));
+            }
+            const newFileName = generateFileName(req.files.guest_image[0].originalname);
+            const guestImagePath = path.join(__dirname, '../uploads/events', newFileName);
+            fs.writeFileSync(guestImagePath, req.files.guest_image[0].buffer);
+            data.guest_image = `/uploads/events/${newFileName}`;
+        }
+        if (data.speakers && Array.isArray(data.speakers)) {
+            data.speakers = data.speakers.map((speaker, index) => {
+                if (req.files[`speaker_image_${index}`]) {
+                    if (event.speakers[index] && event.speakers[index].speaker_image) {
+                        deleteFile(path.join(__dirname, '../uploads/events', event.speakers[index].speaker_image));
+                    }
+                    const newFileName = generateFileName(req.files[`speaker_image_${index}`][0].originalname);
+                    const speakerImagePath = path.join(__dirname, '../uploads/events', newFileName);
+                    fs.writeFileSync(speakerImagePath, req.files[`speaker_image_${index}`][0].buffer);
+                    speaker.speaker_image = `/uploads/events/${newFileName}`;
+                }
+                return speaker;
+            });
+        }
+    }
+
+    Object.assign(event, data);
+    await event.save();
 
     return responseHandler(res, 200, "Event updated successfully!", updatedEvent);
 
@@ -119,15 +192,28 @@ exports.getEventById = async (req, res) => {
 
 // Delete an event
 exports.deleteEvent = async (req, res) => {
-        const { eventId } = req.params;
-        if (!eventId) {
-            return responseHandler(res, 400, "Invalid request");
-        }
-        // Find and delete the event
-        const event = await Event.findByIdAndDelete(eventId);
-        if (!event) {
-            return responseHandler(res, 404, "Event not found");
-        }
-
-        return responseHandler(res, 200, "Event deleted successfully");
+    const { eventId } = req.params;
+    if (!eventId) {
+        return responseHandler(res, 400, "Invalid request");
+    }
+    // Find and delete the event
+    const event = await Event.findByIdAndDelete(eventId);
+    if (!event) {
+        return responseHandler(res, 404, "Event not found");
+    }
+    // Delete associated files if they exist
+    if (event.image) {
+        deleteFile(path.join(__dirname, '../uploads/events', event.image));
+    }
+    if (event.guest_image) {
+        deleteFile(path.join(__dirname, '../uploads/events', event.guest_image));
+    }
+    if (event.speakers && Array.isArray(event.speakers)) {
+        event.speakers.forEach(speaker => {
+            if (speaker.speaker_image) {
+                deleteFile(path.join(__dirname, '../uploads/events', speaker.speaker_image));
+            }
+        });
+    }
+    return responseHandler(res, 200, "Event deleted successfully");
 };
