@@ -1,12 +1,19 @@
 /**
  * @swagger
+ * tags:
+ *   name: News
+ *   description: API endpoints for managing news articles
+ */
+
+/**
+ * @swagger
  * /news:
  *   post:
  *     summary: Create a new news article
- *     tags:
+ *     tags: 
  *       - News
  *     requestBody:
- *       description: News article object that needs to be created
+ *       description: News article object that needs to be added to the system. Includes file uploads for images.
  *       required: true
  *       content:
  *         multipart/form-data:
@@ -15,16 +22,13 @@
  *             properties:
  *               category:
  *                 type: string
- *                 example: "Technology"
  *               title:
  *                 type: string
- *                 example: "New Tech Innovations"
  *               image:
  *                 type: string
  *                 format: binary
  *               content:
  *                 type: string
- *                 example: "Detailed content about the news article."
  *     responses:
  *       201:
  *         description: News article created successfully
@@ -33,7 +37,7 @@
  *             schema:
  *               $ref: '#/components/schemas/News'
  *       400:
- *         description: Invalid input or news article already exists
+ *         description: Invalid input
  *       500:
  *         description: Internal server error
  */
@@ -43,7 +47,7 @@
  * /news:
  *   get:
  *     summary: Retrieve all news articles
- *     tags:
+ *     tags: 
  *       - News
  *     responses:
  *       200:
@@ -62,8 +66,8 @@
  * @swagger
  * /news/{newsId}:
  *   get:
- *     summary: Retrieve a news article by ID
- *     tags:
+ *     summary: Retrieve a single news article by ID
+ *     tags: 
  *       - News
  *     parameters:
  *       - in: path
@@ -79,8 +83,6 @@
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/News'
- *       400:
- *         description: Invalid request
  *       404:
  *         description: News article not found
  *       500:
@@ -91,8 +93,8 @@
  * @swagger
  * /news/{newsId}:
  *   put:
- *     summary: Update a news article by ID
- *     tags:
+ *     summary: Update an existing news article by ID
+ *     tags: 
  *       - News
  *     parameters:
  *       - in: path
@@ -102,7 +104,7 @@
  *         required: true
  *         description: The ID of the news article to update
  *     requestBody:
- *       description: News article object that needs to be updated
+ *       description: News article object that needs to be updated. Includes file uploads for images.
  *       required: true
  *       content:
  *         multipart/form-data:
@@ -111,16 +113,13 @@
  *             properties:
  *               category:
  *                 type: string
- *                 example: "Technology"
  *               title:
  *                 type: string
- *                 example: "Updated Tech Innovations"
  *               image:
  *                 type: string
  *                 format: binary
  *               content:
  *                 type: string
- *                 example: "Updated detailed content about the news article."
  *     responses:
  *       200:
  *         description: News article updated successfully
@@ -129,7 +128,7 @@
  *             schema:
  *               $ref: '#/components/schemas/News'
  *       400:
- *         description: Invalid input or news article not found
+ *         description: Invalid input
  *       404:
  *         description: News article not found
  *       500:
@@ -141,7 +140,7 @@
  * /news/{newsId}:
  *   delete:
  *     summary: Delete a news article by ID
- *     tags:
+ *     tags: 
  *       - News
  *     parameters:
  *       - in: path
@@ -153,10 +152,37 @@
  *     responses:
  *       200:
  *         description: News article deleted successfully
- *       400:
- *         description: Invalid request
  *       404:
  *         description: News article not found
  *       500:
  *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     News:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: The unique identifier for the news article
+ *         category:
+ *           type: string
+ *         title:
+ *           type: string
+ *         image:
+ *           type: string
+ *           description: URL of the news image
+ *         content:
+ *           type: string
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: The date and time when the news article was created
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: The date and time when the news article was last updated
  */

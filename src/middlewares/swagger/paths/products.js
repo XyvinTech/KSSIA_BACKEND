@@ -1,17 +1,42 @@
 /**
  * @swagger
+ * tags:
+ *   name: Products
+ *   description: API endpoints for managing products
+ */
+
+/**
+ * @swagger
  * /products:
  *   post:
  *     summary: Add a new product
- *     tags:
+ *     tags: 
  *       - Products
  *     requestBody:
  *       description: Product object that needs to be added to the system
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/Product'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Product Name"
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *               price:
+ *                 type: number
+ *                 format: float
+ *               description:
+ *                 type: string
+ *               seller_id:
+ *                 type: string
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
  *     responses:
  *       201:
  *         description: Product added successfully
@@ -20,7 +45,7 @@
  *             schema:
  *               $ref: '#/components/schemas/Product'
  *       400:
- *         description: Invalid input or product already exists
+ *         description: Invalid input
  *       500:
  *         description: Internal server error
  */
@@ -30,7 +55,7 @@
  * /products:
  *   get:
  *     summary: Retrieve all products
- *     tags:
+ *     tags: 
  *       - Products
  *     responses:
  *       200:
@@ -49,8 +74,8 @@
  * @swagger
  * /products/{productId}:
  *   get:
- *     summary: Retrieve a product by ID
- *     tags:
+ *     summary: Retrieve a single product by ID
+ *     tags: 
  *       - Products
  *     parameters:
  *       - in: path
@@ -66,8 +91,6 @@
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Product'
- *       400:
- *         description: Invalid request
  *       404:
  *         description: Product not found
  *       500:
@@ -79,7 +102,7 @@
  * /products/{productId}:
  *   put:
  *     summary: Update a product by ID
- *     tags:
+ *     tags: 
  *       - Products
  *     parameters:
  *       - in: path
@@ -92,9 +115,25 @@
  *       description: Product object that needs to be updated
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
- *             $ref: '#/components/schemas/Product'
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Updated Product Name"
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *               price:
+ *                 type: number
+ *                 format: float
+ *               description:
+ *                 type: string
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
  *     responses:
  *       200:
  *         description: Product updated successfully
@@ -103,7 +142,7 @@
  *             schema:
  *               $ref: '#/components/schemas/Product'
  *       400:
- *         description: Invalid input or product not found
+ *         description: Invalid input
  *       404:
  *         description: Product not found
  *       500:
@@ -115,7 +154,7 @@
  * /products/{productId}:
  *   delete:
  *     summary: Delete a product by ID
- *     tags:
+ *     tags: 
  *       - Products
  *     parameters:
  *       - in: path
@@ -127,8 +166,6 @@
  *     responses:
  *       200:
  *         description: Product deleted successfully
- *       400:
- *         description: Invalid request
  *       404:
  *         description: Product not found
  *       500:
@@ -139,8 +176,8 @@
  * @swagger
  * /products/seller/{sellerId}:
  *   get:
- *     summary: Retrieve all products for a specific seller
- *     tags:
+ *     summary: Retrieve products by seller ID
+ *     tags: 
  *       - Products
  *     parameters:
  *       - in: path
@@ -158,8 +195,6 @@
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Product'
- *       400:
- *         description: Invalid request
  *       404:
  *         description: Seller has no products
  *       500:

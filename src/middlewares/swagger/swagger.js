@@ -41,6 +41,10 @@ const options = {
         name: 'Notifications',
         description: 'Notification related operations'
       },
+      {
+        name: 'Payments',
+        description: 'Operations related to payments'
+      },
     ],
     servers: [
       // {

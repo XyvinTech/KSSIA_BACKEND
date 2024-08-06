@@ -11,6 +11,7 @@ const eventRoute = require("./src/routes/events");
 const newsRoute = require("./src/routes/news");
 const promotionRoute = require("./src/routes/promotion");
 const notificationRoute = require("./src/routes/notification");
+const paymentRoute = require("./src/routes/payments");
 const { specs, swaggerUi } = require('./src/middlewares/swagger/swagger');
 
 const app = express();
@@ -40,6 +41,7 @@ app.use(`${BASE_PATH}/events`, eventRoute);
 app.use(`${BASE_PATH}/news`, newsRoute);
 app.use(`${BASE_PATH}/promotions`, promotionRoute);
 app.use(`${BASE_PATH}/notification`, notificationRoute);
+app.use(`${BASE_PATH}/payments`, paymentRoute);
 app.use(`${BASE_PATH}/api-docs`, swaggerUi.serve, swaggerUi.setup(specs));
 
 
