@@ -1,4 +1,7 @@
 const Fuse = require('fuse.js');
+const path = require('path');
+const handleFileUpload = require("../utils/fileHandler");
+const deleteFile = require("../helpers/deleteFiles");
 const responseHandler = require("../helpers/responseHandler");
 const User = require("../models/user");
 const {
@@ -135,20 +138,20 @@ exports.verifyOtp = async (req, res) => {
 /****************************************************************************************************/
 
 exports.editProfile = async (req, res) => {
-    
+
     const { userId } = req.params;
     const data = req.body;
     // console.log(`Received userId parameter: ${userId}`);                             // Debug line
     // console.log(`Received body parameter: ${data}`);                                 // Debug line
 
     // Validate the presence of the userId in the request body
-    if(!userId){
+    if (!userId) {
         // console.log(`Requires user id to update the data`);                          // Debug line
         return responseHandler(res, 400, "Invalid request");
     }
 
     // Validate the input data
-    const {error} = EditUserSchema.validate(data, {abortEarly: true});
+    const { error } = EditUserSchema.validate(data, { abortEarly: true });
 
     // Check if an error exist in the validation
     if (error) {
@@ -161,7 +164,83 @@ exports.editProfile = async (req, res) => {
     if (!currentUser) {
         return responseHandler(res, 404, "User not found");
     }
-    
+
+    // Handle file uploads if present
+    const uploadDir = path.join(__dirname, '../uploads/users');
+
+    if (req.files) {
+        // Handle profile picture
+        if (req.files.profile_picture) {
+            if (currentUser.profile_picture) {
+                await deleteFile(path.join(uploadDir, path.basename(currentUser.profile_picture)));
+            }
+            data.profile_picture = await handleFileUpload(req.files.profile_picture[0], uploadDir);
+        }
+
+        // Handle certificates
+        if (req.files.certificates) {
+            if (currentUser.certificates) {
+                // Delete old certificates not included in the new upload
+                const oldCertificates = new Set(currentUser.certificates);
+                const newCertificates = new Set();
+                for (const file of req.files.certificates) {
+                    const filePath = await handleFileUpload(file, uploadDir);
+                    newCertificates.add(filePath);
+                }
+                for (const oldCert of oldCertificates) {
+                    if (!newCertificates.has(oldCert)) {
+                        await deleteFile(path.join(uploadDir, path.basename(oldCert)));
+                    }
+                }
+                data.certificates = Array.from(newCertificates);
+            } else {
+                data.certificates = await Promise.all(req.files.certificates.map(file => handleFileUpload(file, uploadDir)));
+            }
+        }
+
+        // Handle brochures
+        if (req.files.brochures) {
+            if (currentUser.brochure) {
+                // Delete old brochures not included in the new upload
+                const oldBrochures = new Set(currentUser.brochure);
+                const newBrochures = new Set();
+                for (const file of req.files.brochures) {
+                    const filePath = await handleFileUpload(file, uploadDir);
+                    newBrochures.add(filePath);
+                }
+                for (const oldBrochure of oldBrochures) {
+                    if (!newBrochures.has(oldBrochure)) {
+                        await deleteFile(path.join(uploadDir, path.basename(oldBrochure)));
+                    }
+                }
+                data.brochures = Array.from(newBrochures);
+            } else {
+                data.brochures = await Promise.all(req.files.brochures.map(file => handleFileUpload(file, uploadDir)));
+            }
+        }
+
+        // Handle awards
+        if (req.files.awards) {
+            if (currentUser.awards) {
+                // Delete old awards not included in the new upload
+                const oldAwards = new Set(currentUser.awards);
+                const newAwards = new Set();
+                for (const file of req.files.awards) {
+                    const filePath = await handleFileUpload(file, uploadDir);
+                    newAwards.add(filePath);
+                }
+                for (const oldAward of oldAwards) {
+                    if (!newAwards.has(oldAward)) {
+                        await deleteFile(path.join(uploadDir, path.basename(oldAward)));
+                    }
+                }
+                data.awards = Array.from(newAwards);
+            } else {
+                data.awards = await Promise.all(req.files.awards.map(file => handleFileUpload(file, uploadDir)));
+            }
+        }
+
+    }
     // Update the user's profile with the validated data
     const updatedUser = await User.findByIdAndUpdate(userId, data, { new: true, runValidators: true });
     if (!updatedUser) {
@@ -176,7 +255,7 @@ exports.editProfile = async (req, res) => {
         const currentProducts = await Product.find({ seller_id: userId });
         // console.log(`Current products: ${currentProducts}`);                         // Debug line
         // console.log(`Data products: ${data.products}`);                              // Debug line
-    
+
         // Convert current products to a map for easier comparison
         const currentProductsMap = new Map(currentProducts.map(product => [product._id.toString(), product]));
         // console.log(`Current products map: ${currentProductsMap}`);                  // Debug line
@@ -200,7 +279,7 @@ exports.editProfile = async (req, res) => {
                 // console.console.log(`Product added successfully! ${newProduct}`);                   // Debug line
             }
         }
-    
+
         // Remove products that were not in the update request
         for (let remainingProduct of currentProductsMap.values()) {
             await Product.findByIdAndDelete(remainingProduct._id);

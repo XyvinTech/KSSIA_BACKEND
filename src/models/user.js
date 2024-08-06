@@ -44,7 +44,13 @@ const userSchema = new mongoose.Schema(
         ],
         websites: [Subschema],
         video: [Subschema],
-        awards: [Subschema],
+        awards: [
+            {
+                url: {type:String},
+                name: { type: String },
+                authority_name: { type: String }
+            }
+        ],
         certificates: [Subschema],
         brochure: [Subschema],
         is_active: { type: Boolean, default: true },
