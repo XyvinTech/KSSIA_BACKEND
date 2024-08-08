@@ -14,8 +14,14 @@ userRoute
 
 userRoute
   .route('/edit/:userId')
-  .put(asyncHandler(userController.editProfile));
-
+  .put(upload.fields([
+    { name: 'profile_picture', maxCount: 1 },
+    { name: 'certificates', maxCount: 5 },
+    { name: 'brochures', maxCount: 5 },
+    { name: 'awards', maxCount: 5 },
+    { name: 'product_images', maxCount: 10 }
+  ]), asyncHandler(userController.editProfile));
+  
 userRoute  
   .route("/search/:name")
   .get(asyncHandler(userController.findUserByName));

@@ -124,7 +124,7 @@ exports.EditEventsSchema = Joi.object({
 // notificationSchema validation
 
 exports.emailNotificationSchema = Joi.object({
-    to: Joi.string().required(),
+    to: Joi.string().hex().length(24).required(), // ObjectId in MongoDB is a 24-character hex string,
     subject: Joi.string().required(),
     content: Joi.string().required(),
     upload_url: Joi.string(),
@@ -134,7 +134,7 @@ exports.emailNotificationSchema = Joi.object({
 });
 
 exports.inAppNotificationSchema = Joi.object({
-    to: Joi.string().required(),
+    to: Joi.string().hex().length(24).required(), // ObjectId in MongoDB is a 24-character hex string,
     subject: Joi.string().required(),
     content: Joi.string().required(),
     upload_url: Joi.string(),
@@ -162,4 +162,16 @@ exports.EditPromotionSchema = Joi.object({
     status: Joi.boolean().default(false),
     startDate: Joi.date(),
     endDate: Joi.date()
+});
+
+exports.PaymentSchema = Joi.object({
+    member: Joi.string().hex().length(24).required(),
+    date: Joi.date().required(),
+    time: Joi.date().required(),
+    amount: Joi.number().positive().required(),
+    mode_of_payment: Joi.string().required(),
+    category: Joi.string().required(),
+    status: Joi.string().valid('pending', 'accepted', 'resubmit', 'rejected').default('pending'),
+    invoice_url: Joi.string().uri().allow(''),
+    remarks: Joi.string().allow(''),
 });

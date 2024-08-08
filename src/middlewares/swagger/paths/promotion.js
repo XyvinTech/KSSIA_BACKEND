@@ -1,12 +1,19 @@
 /**
  * @swagger
- * /promotion:
+ * tags:
+ *   name: Promotions
+ *   description: API endpoints for managing promotions
+ */
+
+/**
+ * @swagger
+ * /promotions:
  *   post:
  *     summary: Create a new promotion
- *     tags:
+ *     tags: 
  *       - Promotions
  *     requestBody:
- *       description: Promotion object that needs to be created
+ *       description: Promotion object that needs to be added to the system. Includes file uploads for images and videos.
  *       required: true
  *       content:
  *         multipart/form-data:
@@ -16,42 +23,33 @@
  *               type:
  *                 type: string
  *                 enum: ['banner', 'video', 'poster', 'notice']
- *                 description: Type of the promotion
  *               banner_image_url:
  *                 type: string
  *                 format: binary
- *                 description: Banner image URL (required if type is 'banner')
  *               upload_video:
  *                 type: string
  *                 format: binary
- *                 description: Video file (required if type is 'video')
  *               yt_link:
  *                 type: string
- *                 description: YouTube link (required if type is 'video')
  *               video_title:
  *                 type: string
- *                 description: Title of the video (required if type is 'video')
  *               poster_image_url:
  *                 type: string
  *                 format: binary
- *                 description: Poster image URL (required if type is 'poster')
  *               notice_title:
  *                 type: string
- *                 description: Title of the notice (required if type is 'notice')
  *               notice_description:
  *                 type: string
- *                 description: Description of the notice (required if type is 'notice')
  *               notice_link:
  *                 type: string
- *                 description: Link associated with the notice (required if type is 'notice')
+ *               status:
+ *                 type: boolean
  *               startDate:
  *                 type: string
  *                 format: date
- *                 description: Start date of the promotion
  *               endDate:
  *                 type: string
  *                 format: date
- *                 description: End date of the promotion
  *     responses:
  *       201:
  *         description: Promotion created successfully
@@ -60,17 +58,17 @@
  *             schema:
  *               $ref: '#/components/schemas/Promotion'
  *       400:
- *         description: Invalid input or promotion already exists
+ *         description: Invalid input
  *       500:
  *         description: Internal server error
  */
 
 /**
  * @swagger
- * /promotion/promotions:
+ * /promotions:
  *   get:
  *     summary: Retrieve all promotions
- *     tags:
+ *     tags: 
  *       - Promotions
  *     responses:
  *       200:
@@ -87,10 +85,10 @@
 
 /**
  * @swagger
- * /promotion/{promotionId}:
+ * /promotions/{promotionId}:
  *   get:
- *     summary: Retrieve a promotion by ID
- *     tags:
+ *     summary: Retrieve a single promotion by ID
+ *     tags: 
  *       - Promotions
  *     parameters:
  *       - in: path
@@ -106,8 +104,6 @@
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Promotion'
- *       400:
- *         description: Invalid request
  *       404:
  *         description: Promotion not found
  *       500:
@@ -116,10 +112,10 @@
 
 /**
  * @swagger
- * /promotion/{promotionId}:
+ * /promotions/{promotionId}:
  *   put:
- *     summary: Update a promotion by ID
- *     tags:
+ *     summary: Update an existing promotion by ID
+ *     tags: 
  *       - Promotions
  *     parameters:
  *       - in: path
@@ -129,7 +125,7 @@
  *         required: true
  *         description: The ID of the promotion to update
  *     requestBody:
- *       description: Promotion object that needs to be updated
+ *       description: Promotion object that needs to be updated. Includes file uploads for images and videos.
  *       required: true
  *       content:
  *         multipart/form-data:
@@ -139,42 +135,33 @@
  *               type:
  *                 type: string
  *                 enum: ['banner', 'video', 'poster', 'notice']
- *                 description: Type of the promotion
  *               banner_image_url:
  *                 type: string
  *                 format: binary
- *                 description: Banner image URL (required if type is 'banner')
  *               upload_video:
  *                 type: string
  *                 format: binary
- *                 description: Video file (required if type is 'video')
  *               yt_link:
  *                 type: string
- *                 description: YouTube link (required if type is 'video')
  *               video_title:
  *                 type: string
- *                 description: Title of the video (required if type is 'video')
  *               poster_image_url:
  *                 type: string
  *                 format: binary
- *                 description: Poster image URL (required if type is 'poster')
  *               notice_title:
  *                 type: string
- *                 description: Title of the notice (required if type is 'notice')
  *               notice_description:
  *                 type: string
- *                 description: Description of the notice (required if type is 'notice')
  *               notice_link:
  *                 type: string
- *                 description: Link associated with the notice (required if type is 'notice')
+ *               status:
+ *                 type: boolean
  *               startDate:
  *                 type: string
  *                 format: date
- *                 description: Start date of the promotion
  *               endDate:
  *                 type: string
  *                 format: date
- *                 description: End date of the promotion
  *     responses:
  *       200:
  *         description: Promotion updated successfully
@@ -183,7 +170,7 @@
  *             schema:
  *               $ref: '#/components/schemas/Promotion'
  *       400:
- *         description: Invalid input or promotion not found
+ *         description: Invalid input
  *       404:
  *         description: Promotion not found
  *       500:
@@ -192,10 +179,10 @@
 
 /**
  * @swagger
- * /promotion/{promotionId}:
+ * /promotions/{promotionId}:
  *   delete:
  *     summary: Delete a promotion by ID
- *     tags:
+ *     tags: 
  *       - Promotions
  *     parameters:
  *       - in: path
@@ -207,10 +194,59 @@
  *     responses:
  *       200:
  *         description: Promotion deleted successfully
- *       400:
- *         description: Invalid request
  *       404:
  *         description: Promotion not found
  *       500:
  *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Promotion:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: The unique identifier for the promotion
+ *         type:
+ *           type: string
+ *           enum: ['banner', 'video', 'poster', 'notice']
+ *         banner_image_url:
+ *           type: string
+ *           description: URL of the banner image
+ *         upload_video:
+ *           type: string
+ *           description: URL of the uploaded video
+ *         yt_link:
+ *           type: string
+ *           description: YouTube link for the video
+ *         video_title:
+ *           type: string
+ *         poster_image_url:
+ *           type: string
+ *           description: URL of the poster image
+ *         notice_title:
+ *           type: string
+ *         notice_description:
+ *           type: string
+ *         notice_link:
+ *           type: string
+ *         status:
+ *           type: boolean
+ *         startDate:
+ *           type: string
+ *           format: date
+ *         endDate:
+ *           type: string
+ *           format: date
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: The date and time when the promotion was created
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: The date and time when the promotion was last updated
  */

@@ -99,11 +99,12 @@ exports.editUser = async (req, res) => {
 /****************************************************************************************************/
 
 exports.deleteUser = async (req, res) => {
-   
+
     const { userId } = req.params;
     const { membership_id } = req.params;
     // console.log(`Received userId: ${userId}`);                                       // Debug line
     // console.log(`Received membership_id: ${membership_id}`);                         // Debug line
+    let user;
 
     if (userId) {
         // Find and delete the user using userId
@@ -126,10 +127,44 @@ exports.deleteUser = async (req, res) => {
         // console.log('Invalid request');                                              // Debug line
         return responseHandler(res, 400, `Invalid request`);
     }
-    
+    // Delete user's files
+    const uploadDir = path.join(__dirname, '../uploads/users');
+    if (user.profile_picture) {
+        await deleteFile(path.join(uploadDir, path.basename(user.profile_picture)));
+    }
+
+    if (user.certificates) {
+        for (const cert of user.certificates) {
+            await deleteFile(path.join(uploadDir, path.basename(cert)));
+        }
+    }
+
+    if (user.brochures) {
+        for (const brochure of user.brochures) {
+            await deleteFile(path.join(uploadDir, path.basename(brochure)));
+        }
+    }
+
+    if (user.awards) {
+        for (const award of user.awards) {
+            await deleteFile(path.join(uploadDir, path.basename(award)));
+        }
+    }
+
+    // Delete product images
+    const products = await Product.find({ seller_id: userId });
+    for (const product of products) {
+        if (product.image_url) {
+            await deleteFile(path.join(uploadDir, path.basename(product.image_url)));
+        }
+    }
+
+    // Delete products
+    await Product.deleteMany({ seller_id: userId });
+
     // console.log(`User deleted successfully`);                                        // Debug line
     return responseHandler(res, 200, "User deleted successfully");
-    
+
 };
 
 /****************************************************************************************************/
