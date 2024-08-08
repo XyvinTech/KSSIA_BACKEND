@@ -164,3 +164,30 @@ exports.updateReadStatus = async (req, res) => {
         }
     });
 };
+
+// Function to count unread notifications for a user
+async function getUnreadNotificationCount(userId) {
+    try {
+      const count = await Notification.countUnread(userId);
+      return count;
+    } catch (error) {
+      console.error('Error counting unread notifications:', error);
+      return 0;
+    }
+  }
+
+  // Function to mark a notification as read by a user
+async function markNotificationAsRead(notificationId, userId) {
+    try {
+      const notification = await Notification.findById(notificationId);
+      if (notification) {
+        await notification.markAsRead(userId);
+        console.log('Notification marked as read');
+      } else {
+        console.log('Notification not found');
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  }
+  
