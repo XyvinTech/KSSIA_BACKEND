@@ -13,31 +13,30 @@ const notificationSchema = new mongoose.Schema(
         file_url: { type: String },
         link_url: { type: String },
         type: { type: String, enum: ['email', 'in-app'], required: true },
-        sent_status: { type: Boolean, default: false },
         readBy: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: "User"
-
         }]
-
-
     },
     {
         timestamps: true
     }
 );
 
+notificationSchema.index({ to: 1, readBy: 1 });
+
 notificationSchema.statics.countUnread = function (userId) {
-    return this.countDocuments({ to: userId, readBy: { $ne: userId } });
+    return this.countDocuments({ to: userId, readBy: { $ne: userId }, type: 'in-app' });
 };
 
 notificationSchema.methods.markAsRead = function (userId) {
     if (!this.readBy.includes(userId)) {
         this.readBy.push(userId);
+        return this.save();
     }
-    return this.save();
+    return Promise.resolve(this); // Return the existing document if no change was made.
 };
 
-const notification = mongoose.model("Notification", notificationSchema);
+const Notification = mongoose.model("Notification", notificationSchema);
 
-module.exports = notification;
+module.exports = Notification;

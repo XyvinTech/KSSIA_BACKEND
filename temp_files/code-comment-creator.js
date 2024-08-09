@@ -11,5 +11,5 @@ function createCommentHeader(title) {
 // Example usage
 console.log(createCommentHeader
     (
-        "Function to update status of payments"
+        "Function to create email notification"
     ));
