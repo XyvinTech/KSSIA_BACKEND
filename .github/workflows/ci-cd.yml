@@ -80,7 +80,7 @@ jobs:
             sudo docker rm ${{ env.CONTAINER_NAME }} || true
 
             sudo docker run -d \
-              -p ${{ env.PORT }}:${{ env.PORT }}\
+              -p 80:${{ env.PORT }}\
               --name ${{ env.CONTAINER_NAME }} \
               --env-file ${{ env.ENV_FILE_PATH }} \
               -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \

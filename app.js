@@ -26,7 +26,7 @@ app.use(cors());
 //* Parse JSON request bodies
 app.use(express.json());
 
-//* Set the base path for API routes
+//* Set the base path for API routess
 const BASE_PATH = `/api/${API_VERSION}`;
 
 //* Import database connection module
