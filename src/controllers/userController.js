@@ -49,7 +49,7 @@ exports.sendOtp = async (req, res) => {
 
     // Generate a 6-digit OTP
     const otp = generateOTP(6);
-
+ 
     // Send the OTP to the user's mobile number
     const sendOtpFn = await sendOtp(mobile, otp);
 

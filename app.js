@@ -11,6 +11,7 @@ const eventRoute = require("./src/routes/events");
 const newsRoute = require("./src/routes/news");
 const promotionRoute = require("./src/routes/promotion");
 const notificationRoute = require("./src/routes/notification");
+const rolesRoute = require("./src/routes/roles");
 
 const app = express();
 app.use(volleyball);
@@ -37,6 +38,7 @@ app.use(`${BASE_PATH}/events`, eventRoute);
 app.use(`${BASE_PATH}/news`, newsRoute);
 app.use(`${BASE_PATH}/promotions`, promotionRoute);
 app.use(`${BASE_PATH}/notification`, notificationRoute);
+app.use(`${BASE_PATH}/roles`, rolesRoute);
 
 //? Define a route for the API root
 app.get(BASE_PATH, (req, res) => {
@@ -65,3 +67,4 @@ app.listen(PORT, () => {
   );
   console.log(`${portMessage}\n${envMessage}`);
 });
+  
