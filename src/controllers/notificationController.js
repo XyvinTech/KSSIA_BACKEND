@@ -1,193 +1,383 @@
 const responseHandler = require("../helpers/responseHandler");
 const Notification = require("../models/notifications");
-const { emailNotificationSchema,inAppNotificationSchema } = require("../validation");
-// const { sendEmail } = require("../helpers/email");
-// const { sendInAppNotification } = require("../helpers/inAppNotification");
-// const { sendEmail, sendInAppNotification } = require("../helpers/notification");
+const User = require("../models/user");
+const {
+    emailNotificationSchema,
+    inAppNotificationSchema
+} = require("../validation");
+const handleFileUpload = require("../utils/fileHandler");
+const deleteFile = require("../helpers/deleteFiles");
 
-exports.saveEmail = async (req, res) => {
+/****************************************************************************************************/
+/*                             Function to create in app notification                             */
+/****************************************************************************************************/
+
+exports.createInAppNotification = async (req, res) => {
 
     const data = req.body;
-    // console.log(`Received data parameter: ${data}`);                                 // Debug line
+
+    // Handle file uploads if present
+    const uploadDir = path.join(__dirname, '../uploads/notification');
+
+    if (req.files) {
+        if (req.files.media) {
+            data.media_url = await handleFileUpload(req.files.media[0], uploadDir);
+        }
+    }
 
     // Validate the input data
-    const { error } = emailNotificationSchema.validate(data, {
+    const {
+        error
+    } = inAppNotificationSchema.validate(data, {
         abortEarly: true
     });
 
     // Check if an error exists in the validation
     if (error) {
-        // If an error exists, return a 400 status code with the error message
-        // console.log('Invalid input: ${error.message}');                              // Debug line
         return responseHandler(res, 400, `Invalid input: ${error.message}`);
     }
 
-    // Create a new product
-    const newNotification = new Notification(data);
-    await newNotification.save();
-
-    // console.log(`Product added successfully!`);                                      // Debug line
-    return responseHandler( res, 201, `Notification saved successfully!`, newNotification );
-
-};
-
-exports.saveInApp = async (req, res) => {
-
-    const data = req.body;
-    // console.log(`Received data parameter: ${data}`);                                 // Debug line
-
-    // Validate the input data
-    const { error } = inAppNotificationSchema.validate(data, {
-        abortEarly: true
-    });
-
-    // Check if an error exists in the validation
-    if (error) {
-        // If an error exists, return a 400 status code with the error message
-        // console.log('Invalid input: ${error.message}');                              // Debug line
-        return responseHandler(res, 400, `Invalid input: ${error.message}`);
-    }
-
-    // Create a new product
-    const newNotification = new Notification(data);
-    await newNotification.save();
-
-    // console.log(`Product added successfully!`);                                      // Debug line
-    return responseHandler( res, 201, `Notification saved successfully!`, newNotification );
-
-};
-
-exports.sendEmail = async (req, res) => {
-
-    const { _id } = req.id;
-
-    const email_body = await Notification.findOne(_id).populate({path: 'to', select: 'email'});
-    
-    if(!email_body){
-        return responseHandler(res, 404, "Notification not found");
-    }
-    if(email_body.sent_status){
-        return responseHandler(res, 400, "Notification already sent");
-    }
-
-    const to = email_body.to.email;
-    const subject = email_body.subject;
-    const body = email_body.content;
-    const attachment = email_body.upload_url;
-    const attachment2 = email_body.upload_file_url;
-    const url = email_body.url;
-        
-    const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false, // or 'STARTTLS'
-        auth: {
-            user: 'your-email@gmail.com',
-            pass: 'your-password'
-        }
-    });
-
-    const mailOptions = {
-        from: 'your-email@gmail.com',
-        to: to,
-        subject: subject,
-        text: body + url,
-        attachments: [
-            {
-                filename: path.basename(attachment), // Extract the file name from the file path
-                path: attachment // Full file path
-            },
-            {
-                filename: path.basename(attachment2), // Extract the file name from the file path
-                path: attachment2 // Full file path
-            }
-        ]
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            return responseHandler(res, 500, 'Error sending email');
-        }
-        
-        email_body.sent_status = true;
-        email_body.sent_at = new Date();
-        email_body.save((err) => {
-            if (err) {
-                return responseHandler(res, 500, 'Error updating email sent status');
-            }
+    try {
+        // Create a new in-app notification
+        const newNotification = new Notification({
+            ...data,
+            type: 'in-app'
         });
-        
-        return responseHandler(res, 200, 'Email sent successfully');
+        await newNotification.save();
+        return responseHandler(res, 201, 'Notification saved successfully!', newNotification);
+    } catch (err) {
+        return responseHandler(res, 500, `Server error: ${err.message}`);
+    }
+};
 
+/****************************************************************************************************/
+/*                           Function to get all in app notification                                */
+/****************************************************************************************************/
+
+exports.getallInAppNotifications = async (req, res) => {
+
+    const notifications = await Notification.find({type: 'in-app'});
+    if (!notifications){
+        return responseHandler(res, 404, 'No notifications found');
+    }
+    return responseHandler(res, 200, 'Notifications retrieved successfully!', notifications);
+};
+
+/****************************************************************************************************/
+/*                           Function to get unread in app notification                             */
+/****************************************************************************************************/
+
+exports.getUnreadInAppNotifications = async (req, res) => {
+
+    const {
+        userId
+    } = req.params;
+
+    if (!userId) {
+        // If userId is not provided, return a 400 status code with the error message
+        // console.log('Invalid request');                                              // Debug line
+        return responseHandler(res, 400, `Invalid request`);
+    }
+
+    try {
+        const notifications = await Notification.find({
+            to: userId,
+            readBy: {
+                $ne: userId
+            },
+            type: 'in-app'
+        });
+        return responseHandler(res, 200, 'Unread notifications retrieved successfully!', notifications);
+    } catch (err) {
+        return responseHandler(res, 500, `Server error: ${err.message}`);
+    }
+};
+
+/****************************************************************************************************/
+/*                          Function to get all read in app notification                          */
+/****************************************************************************************************/
+
+exports.getReadInAppNotifications = async (req, res) => {
+
+    const {
+        userId
+    } = req.params;
+
+    if (!userId) {
+        // If userId is not provided, return a 400 status code with the error message
+        // console.log('Invalid request');                                              // Debug line
+        return responseHandler(res, 400, `Invalid request`);
+    }
+
+    try {
+        const notifications = await Notification.find({
+            to: userId,
+            readBy: userId,
+            type: 'in-app'
+        });
+        return responseHandler(res, 200, 'Read notifications retrieved successfully!', notifications);
+    } catch (err) {
+        return responseHandler(res, 500, `Server error: ${err.message}`);
+    }
+};
+
+/****************************************************************************************************/
+/*                             Function to update in app notification                             */
+/****************************************************************************************************/
+
+exports.updateInAppNotification = async (req, res) => {
+
+    const {
+        notificationId
+    } = req.params;
+    const data = req.body;
+
+    if (!notificationId) {
+        // If notificationId is not provided, return a 400 status code with the error message
+        // console.log('Invalid request');                                              // Debug line
+        return responseHandler(res, 400, `Invalid request`);
+    }
+
+    // Validate the input data
+    const {
+        error
+    } = inAppNotificationSchema.validate(data, {
+        abortEarly: true
     });
 
-};
-
-exports.getUnsentEmails = async (req, res) => {
-
-    const unsent_email = await find({sent_status: false, type: false});
-    return responseHandler(res, 200, unsent_email);
-    
-};
-
-exports.getUnreadNotifications = async (req, res) => {
-    const user_id = req.user_id;
-
-    if(!user_id){
-        return responseHandler(res, 401, 'Invalid request!');
+    // Check if an error exists in the validation
+    if (error) {
+        return responseHandler(res, 400, `Invalid input: ${error.message}`);
     }
 
-    const unreadNotifications = await Notification.find({ to: user_id,  type: true, read_status: false });
-    if(!unreadNotifications){
-        return responseHandler(res, 200, 'No unread notifications');
+    const notification = await Notification.findOne(notificationId);
+
+    if (!notification) {
+        return responseHandler(res, 404, 'Notification not found.');
     }
 
-    return responseHandler(res, 200, 'Notifications retrieved successfully', unreadNotifications);
+    // Handle file uploads if present
+    const uploadDir = path.join(__dirname, '../uploads/notification');
+
+    let media_url = notification.media_url;
+    if (req.file) {
+        try {
+            if (notification.media_url) {
+                await deleteFile(path.join(__dirname, uploadDir, path.basename(notification.media_url)));
+            }
+            media_url = await handleFileUpload(req.file, path.join(__dirname, uploadDir));
+        } catch (err) {
+            return responseHandler(res, 500, err.message);
+        }
+    }
+
+    Object.assign(notification, data, {
+        media_url
+    });
+
+    try {
+        await notification.save();
+        return responseHandler(res, 200, "News article updated successfully!", notification);
+    } catch (err) {
+        return responseHandler(res, 500, `Error saving news: ${err.message}`);
+    }
+
 };
+
+/****************************************************************************************************/
+/*                          Function to mark as read in app notifications                          */
+/****************************************************************************************************/
 
 exports.updateReadStatus = async (req, res) => {
-    const id = req.id;
 
-    if(!id){
-        return responseHandler(res, 401, 'Invalid request!');
+    const {
+        notificationId
+    } = req.params;
+    const {
+        userId
+    } = req.params;
+
+    if (!notificationId) {
+        // If notificationId is not provided, return a 400 status code with the error message
+        // console.log('Invalid request');                                              // Debug line
+        return responseHandler(res, 400, `Invalid request`);
+    }
+    if (!userId) {
+        // If userId is not provided, return a 400 status code with the error message
+        // console.log('Invalid request');                                              // Debug line
+        return responseHandler(res, 400, `Invalid request`);
     }
 
-    const noti = await Notification.findOne(id);
-    if(!noti){
-        return responseHandler(res, 404, 'Notification not found');
-    }
-
-    noti.read_status = true;
-    noti.save((err) => {
-        if (err) {
-            return responseHandler(res, 500, 'Error updating notification read status');
+    try {
+        const notification = await Notification.findById(notificationId);
+        if (!notification) {
+            return responseHandler(res, 404, 'Notification not found.');
         }
-    });
+
+        await notification.markAsRead(userId);
+        return responseHandler(res, 200, 'Notification read status updated successfully!', notification);
+    } catch (err) {
+        return responseHandler(res, 500, `Server error: ${err.message}`);
+    }
 };
 
-// Function to count unread notifications for a user
-async function getUnreadNotificationCount(userId) {
-    try {
-      const count = await Notification.countUnread(userId);
-      return count;
-    } catch (error) {
-      console.error('Error counting unread notifications:', error);
-      return 0;
-    }
-  }
+/****************************************************************************************************/
+/*                          Function to count unread in app notification                          */
+/****************************************************************************************************/
 
-  // Function to mark a notification as read by a user
-async function markNotificationAsRead(notificationId, userId) {
-    try {
-      const notification = await Notification.findById(notificationId);
-      if (notification) {
-        await notification.markAsRead(userId);
-        console.log('Notification marked as read');
-      } else {
-        console.log('Notification not found');
-      }
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
+exports.getUnreadNotificationCount = async (req, res) => {
+
+    const {
+        userId
+    } = req.params;
+
+    if (!userId) {
+        // If userId is not provided, return a 400 status code with the error message
+        // console.log('Invalid request');                                              // Debug line
+        return responseHandler(res, 400, `Invalid request`);
     }
-  }
-  
+
+    try {
+        // Use the static method defined in the Notification model
+        const count = await Notification.countUnread(userId);
+
+        if (count === null || count === undefined) {
+            return responseHandler(res, 404, 'User not found or no unread notifications.');
+        }
+
+        return responseHandler(res, 200, 'Unread notifications count retrieved successfully!', {
+            count
+        });
+    } catch (err) {
+        return responseHandler(res, 500, `Server error: ${err.message}`);
+    }
+};
+
+/****************************************************************************************************/
+/*                             Function to delete in app notification                             */
+/****************************************************************************************************/
+
+exports.deleteInAppNotification = async (req, res) => {
+
+    const {
+        notificationId
+    } = req.params;
+
+    if (!notificationId) {
+        // If notificationId is not provided, return a 400 status code with the error message
+        // console.log('Invalid request');                                              // Debug line
+        return responseHandler(res, 400, `Invalid request`);
+    }
+
+    try {
+        const result = await Notification.findByIdAndDelete(notificationId);
+        if (!result) {
+            return responseHandler(res, 404, 'Notification not found.');
+        }
+        if (result.media_url) {
+            try {
+                await deleteFile(path.join(__dirname, '../uploads/notification', path.basename(result.media_url)));
+            } catch (err) {
+                return responseHandler(res, 500, `Error deleting file: ${err.message}`);
+            }
+        }
+        return responseHandler(res, 200, 'Notification deleted successfully.');
+    } catch (err) {
+        return responseHandler(res, 500, `Server error: ${err.message}`);
+    }
+};
+
+/*************************************************************************************k***************/
+/*                             Function to create email notification                              */
+/****************************************************************************************************/
+
+exports.formatNotificationEmails = async (notification) => {
+    try {
+        // Populate the `to` field with user data
+        const users = await User.find({
+            '_id': {
+                $in: notification.to
+            }
+        }).select('email');
+
+        // Extract emails from the user documents
+        const emailAddresses = users.map(user => user.email).filter(email => email);
+
+        // Join the emails into a single string separated by commas
+        return emailAddresses.join(', ');
+    } catch (err) {
+        throw new Error(`Error formatting email recipients: ${err.message}`);
+    }
+};
+
+exports.createAndSendEmailNotification = async (req, res) => {
+    const data = req.body;
+
+    // Validate the input data
+    const {
+        error
+    } = emailNotificationSchema.validate(data, {
+        abortEarly: true
+    });
+
+    // Check if an error exists in the validation
+    if (error) {
+        return responseHandler(res, 400, `Invalid input: ${error.message}`);
+    }
+
+    const {
+        to,
+        subject,
+        content,
+        media_url,
+        file_url,
+        link_url
+    } = data;
+
+    try {
+        // Create email notification
+        const newNotification = new Notification({
+            to,
+            subject,
+            content,
+            media_url,
+            file_url,
+            link_url,
+            type: 'email'
+        });
+        await newNotification.save();
+
+        // Format the email addresses
+        const formattedEmails = await formatNotificationEmails(newNotification);
+
+        // Send email
+        const transporter = nodemailer.createTransport({
+            service: 'Gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: formattedEmails,
+            subject,
+            text: content,
+            attachments: [
+                media_url ? {
+                    path: media_url
+                } : null,
+                file_url ? {
+                    path: file_url
+                } : null
+            ].filter(Boolean) // Filter out null values
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        return responseHandler(res, 201, 'Email notification created and sent successfully!');
+    } catch (err) {
+        return responseHandler(res, 500, `Server error: ${err.message}`);
+    }
+};

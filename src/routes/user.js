@@ -1,6 +1,7 @@
 const express = require("express");
 const userController = require("../controllers/userController");
 const asyncHandler = require("../utils/asyncHandler");
+const upload = require("../middlewares/uploads");
 const userRoute = express.Router();
 
 

@@ -11,8 +11,11 @@ const handleFileUpload = async (file, directory) => {
         const fileExtension = path.extname(originalName);
         const baseName = path.basename(originalName, fileExtension);
 
-        // Generate new file name with date included
-        const newFileName = `${baseName}_${date}${fileExtension}`;
+        // Generate a unique identifier (e.g., timestamp) to avoid collisions
+        const uniqueId = Date.now();
+
+        // Generate new file name with date and unique ID included
+        const newFileName = `${baseName}_${date}_${uniqueId}${fileExtension}`;
 
         // Construct file path
         const filePath = path.join(directory, newFileName);
