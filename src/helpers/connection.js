@@ -1,8 +1,9 @@
+require("dotenv").config();
 const mongoose = require("mongoose");
 const clc = require("cli-color");
 
 const { MONGO_URL } = process.env;
-
+console.log(process.env.MONGO_URL)
 mongoose
   .connect(MONGO_URL)
   .then(() => {
