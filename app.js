@@ -17,7 +17,7 @@ const { specs, swaggerUi } = require('./src/middlewares/swagger/swagger');
 const app = express();
 app.use(volleyball);
 
-//* Define the PORT, NODE_ENV & API version based on environment variable
+//* Define the PORT, NODE_ENV & API version based on environment variables
 const { PORT, API_VERSION, NODE_ENV } = process.env;
 
 //* Enable Cross-Origin Resource Sharing (CORS) middleware
