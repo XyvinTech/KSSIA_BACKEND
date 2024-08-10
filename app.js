@@ -64,7 +64,7 @@ app.all('*', (req, res, next) => {
   );
 });
 
-//! Start the server and listen on the specified port from environment variable
+//! Start the server and listen on the specified port from environment variables
 app.listen(PORT, () => {
   const portMessage = clc.redBright(`✓ App is running on port: ${PORT}`);
   const envMessage = clc.yellowBright(
