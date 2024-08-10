@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Role = require('./roles');
 
 const Subschema = new mongoose.Schema({
     name: { type: String },
@@ -23,7 +24,8 @@ const userSchema = new mongoose.Schema(
             whatsapp_business_number: { type: Number },
         },
         // password: { type: String, required: true },
-        otp: { type: Number },
+        otp: { type: String },
+        otpExpiration: { type: Date },
         designation: { type: String },
         company_name: { type: String },
         company_email: { type: String },
@@ -46,6 +48,10 @@ const userSchema = new mongoose.Schema(
         video: [Subschema],
         awards: [Subschema],
         certificates: [Subschema],
+        role: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: Role
+          },
         brochure: [Subschema],
         is_active: { type: Boolean, default: true },
         is_deleted: { type: Boolean, default: false },

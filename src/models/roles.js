@@ -1,13 +1,9 @@
 const mongoose = require('mongoose');
+
 const roleSchema = mongoose.Schema(
     {
-        role_name: { type: String, required: true },
-        permissions: [
-            { 
-                name: { type: String, required: true  },
-                value: { type: Boolean, required: true  }
-            }
-        ],
+        role_name: { type: String },
+        permissions:  { type: Map},
         description: { type: String },
     },
     { timestamps: true }
