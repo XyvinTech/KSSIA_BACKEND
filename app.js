@@ -30,7 +30,7 @@ app.use(express.json());
 //* Set the base path for API routes
 const BASE_PATH = `/api/${API_VERSION}`;
 
-//* Import database connection modules
+//* Import database connection moduless
 require("./src/helpers/connection");
 
 //* Configure routes for user API
