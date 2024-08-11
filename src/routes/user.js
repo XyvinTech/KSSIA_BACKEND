@@ -4,13 +4,13 @@ const authVerify = require("../middlewares/authVerify");
 const asyncHandler = require("../utils/asyncHandler");
 const userRoute = express.Router();
 
-userRoute
-    .route("/login")
-    .post(asyncHandler(userController.verifyOtp))
+// userRoute
+//     .route("/login")
+//     .post(asyncHandler(userController.loginWithOTP))
 
-userRoute  
-    .route("/login/:mobile")
-    .get(asyncHandler(userController.sendOtp))
+// userRoute  
+//     .route("/login/:mobile")
+//     .get(asyncHandler(userController.sendOTPForLogin))
 
 
 // Edit an existing user

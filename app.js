@@ -12,12 +12,13 @@ const newsRoute = require("./src/routes/news");
 const promotionRoute = require("./src/routes/promotion");
 const notificationRoute = require("./src/routes/notification");
 const rolesRoute = require("./src/routes/roles");
+const authRoutes = require('./src/routes/auth');
 
+const CONSTANTS = require('./constants');
 const app = express();
 app.use(volleyball);
 //* Define the PORT, NODE_ENV & API version based on environment variable
-const { PORT, API_VERSION, NODE_ENV } = process.env;
-
+const { PORT, NODE_ENV } = process.env;
 //* Enable Cross-Origin Resource Sharing (CORS) middleware
 app.use(cors());
 
@@ -25,12 +26,13 @@ app.use(cors());
 app.use(express.json());
 
 //* Set the base path for API routes
-const BASE_PATH = `/api/${API_VERSION}`;
+const BASE_PATH = CONSTANTS.BASE_PATH;
 
 //* Import database connection module
 require("./src/helpers/connection");
 
 //* Configure routes for user API
+app.use(`${BASE_PATH}/${CONSTANTS.AUTH_ROUTE}`,authRoutes)
 app.use(`${BASE_PATH}/user`, userRoute);
 app.use(`${BASE_PATH}/admin`, adminRoute);
 app.use(`${BASE_PATH}/product`, productRoute);

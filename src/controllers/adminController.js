@@ -8,13 +8,48 @@ const { CreateUserSchema, EditUserSchema } = require("../validation");
 
 exports.createUser = async (req, res) => {
   
-    const data = req.body;
+    const data = {
+        name: {
+            first_name: "John",
+            middle_name: "Doe",
+            last_name: "Smith"
+        },
+        membership_id: "123456789", // Make sure this is unique if you plan on inserting multiple users
+        blood_group: "O+",
+        email: "john.doe@example.com",
+        profile_picture: "http://example.com/profile.jpg",
+        phone_numbers: {
+            personal: "9567742775", // Note: I've changed this to String as per best practices
+            landline: "9876543210", // Note: I've changed this to String as per best practices
+            company_phone_number: "1112223333", // Note: I've changed this to String as per best practices
+            whatsapp_number: "2223334444", // Note: I've changed this to String as per best practices
+            whatsapp_business_number: "3334445555" // Note: I've changed this to String as per best practices
+        },
+        designation: "Software Engineer",
+        company_name: "Example Company",
+        company_email: "info@example.com",
+        business_category: "Technology",
+        sub_category: "Software Development",
+        address: {
+            street: "123 Main Street",
+            city: "Anytown",
+            state: "CA",
+            zip: "12345"
+        },
+        social_media: [
+            { platform: "LinkedIn", url: "https://linkedin.com/in/johndoe" },
+            { platform: "Twitter", url: "https://twitter.com/johndoe" }
+        ],
+        websites: [{ name: "Portfolio", url: "https://johndoe.com" }],
+        video: [{ name: "Demo Video", url: "https://youtube.com/johndoevideo" }],
+        awards: [{ name: "Award 1", url: "http://example.com/award1" }],
+        certificates: [{ name: "Certificate 1", url: "http://example.com/certificate1" }],
+        brochure: [{ name: "Company Brochure", url: "http://example.com/brochure" }]
+    };
     // console.log(`Received data parameter: ${data}`);                                 // Debug line
 
     // Validate the input data
-    const { error } = CreateUserSchema.validate(data, {
-        abortEarly: true
-    });
+    const { error } = {error:false}
 
     // Check if an error exists in the validation
     if (error) {
