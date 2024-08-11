@@ -1,3 +1,4 @@
+require("dotenv").config();
 const path = require('path');
 const responseHandler = require("../helpers/responseHandler");
 const News = require("../models/news");
@@ -11,30 +12,40 @@ const deleteFile = require("../helpers/deleteFiles");
 exports.createNews = async (req, res) => {
     const data = req.body;
 
+    // Validate the input data
     const { error } = NewsSchema.validate(data, { abortEarly: true });
     if (error) {
         return responseHandler(res, 400, `Invalid input: ${error.message}`);
     }
 
-    const newsExist = await News.findOne({ category: data.category, title: data.title, content: data.content });
+    // Check if the news article already exists
+    const newsExist = await News.findOne({
+        category: data.category,
+        title: data.title,
+        content: data.content,
+    });
     if (newsExist) {
-        return responseHandler(res, 400, "News article already exists");
+        return responseHandler(res, 400, 'News article already exists');
     }
 
+    // Handle file upload if present
     let image = '';
+    const bucketName = process.env.AWS_S3_BUCKET;
+    
     if (req.file) {
         try {
-            image = await handleFileUpload(req.file, path.join(__dirname, '../uploads/news'));
+            image = await handleFileUpload(req.file, bucketName);
         } catch (err) {
-            return responseHandler(res, 500, err.message);
+            return responseHandler(res, 500, `Error uploading file: ${err.message}`);
         }
     }
 
+    // Create the news article
     const newNews = new News({ ...data, image });
 
     try {
         await newNews.save();
-        return responseHandler(res, 201, "New news article created successfully!", newNews);
+        return responseHandler(res, 201, 'New news article created successfully!', newNews);
     } catch (err) {
         return responseHandler(res, 500, `Error saving news: ${err.message}`);
     }
@@ -48,36 +59,46 @@ exports.editNews = async (req, res) => {
     const data = req.body;
 
     if (!newsId) {
-        return responseHandler(res, 400, "Invalid request");
+        return responseHandler(res, 400, 'Invalid request: News ID is required.');
     }
 
+    // Validate the input data
     const { error } = NewsSchema.validate(data, { abortEarly: true });
     if (error) {
         return responseHandler(res, 400, `Invalid input: ${error.message}`);
     }
 
+    // Find the existing news article
     const news = await News.findById(newsId);
     if (!news) {
-        return responseHandler(res, 404, "News article not found");
+        return responseHandler(res, 404, 'News article not found.');
     }
 
+    // Handle file upload if present
     let image = news.image;
+    const bucketName = process.env.AWS_S3_BUCKET;
+    
     if (req.file) {
         try {
+            // Delete the old image from S3 if it exists
             if (news.image) {
-                await deleteFile(path.join(__dirname, '../uploads/news', path.basename(news.image)));
+                const oldImageKey = path.basename(news.image);
+                await deleteFile(bucketName, oldImageKey);
             }
-            image = await handleFileUpload(req.file, path.join(__dirname, '../uploads/news'));
+
+            // Upload the new image to S3
+            image = await handleFileUpload(req.file, bucketName);
         } catch (err) {
-            return responseHandler(res, 500, err.message);
+            return responseHandler(res, 500, `Error processing file: ${err.message}`);
         }
     }
 
+    // Update the news article with new data and image
     Object.assign(news, data, { image });
 
     try {
         await news.save();
-        return responseHandler(res, 200, "News article updated successfully!", news);
+        return responseHandler(res, 200, 'News article updated successfully!', news);
     } catch (err) {
         return responseHandler(res, 500, `Error saving news: ${err.message}`);
     }
@@ -116,21 +137,25 @@ exports.deleteNews = async (req, res) => {
     const { newsId } = req.params;
 
     if (!newsId) {
-        return responseHandler(res, 400, "Invalid request");
+        return responseHandler(res, 400, "Invalid request: News ID is required.");
     }
 
-    const news = await News.findByIdAndDelete(newsId);
-    if (!news) {
-        return responseHandler(res, 404, "News article not found");
-    }
-
-    if (news.image) {
-        try {
-            await deleteFile(path.join(__dirname, '../uploads/news', path.basename(news.image)));
-        } catch (err) {
-            return responseHandler(res, 500, `Error deleting file: ${err.message}`);
+    try {
+        // Find and delete the news article
+        const news = await News.findByIdAndDelete(newsId);
+        if (!news) {
+            return responseHandler(res, 404, "News article not found.");
         }
-    }
 
-    return responseHandler(res, 200, "News article deleted successfully");
+        // Delete the image from S3 if it exists
+        if (news.image) {
+            const bucketName = process.env.AWS_S3_BUCKET;
+            const imageKey = path.basename(news.image);
+            await deleteFile(bucketName, imageKey);
+        }
+
+        return responseHandler(res, 200, "News article deleted successfully.");
+    } catch (err) {
+        return responseHandler(res, 500, `Error deleting news article: ${err.message}`);
+    }
 };

@@ -26,6 +26,7 @@ eventRoute
       maxCount: 1
     }))
   ]), asyncHandler(eventController.createEvent))
+
   .get(asyncHandler(eventController.getAllEvents));
 
 // Edit an existing event by ID

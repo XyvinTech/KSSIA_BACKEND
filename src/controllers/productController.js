@@ -1,3 +1,4 @@
+require("dotenv").config();
 const path = require('path');
 const responseHandler = require("../helpers/responseHandler");
 const Product = require("../models/products");
@@ -28,9 +29,10 @@ exports.addProduct = async (req, res) => {
 
     // Handle file upload if present
     let image = '';
+    const bucketName = process.env.AWS_S3_BUCKET;
     if (req.file) {
         try {
-            image = await handleFileUpload(req.file, path.join(__dirname, '../uploads/products'));
+            image = await handleFileUpload(req.file, bucketName);
         } catch (err) {
             return responseHandler(res, 500, err.message);
         }
@@ -70,13 +72,15 @@ exports.editProduct = async (req, res) => {
     }
 
     // Handle file upload if present
+    const bucketName = process.env.AWS_S3_BUCKET;
     let image = product.image;
     if (req.file) {
         if (product.image) {
-            await deleteFile(path.join(__dirname, '../uploads/products', path.basename(product.image)));
+            let oldImageKey = path.basename(product.image);
+            await deleteFile(bucketName, oldImageKey);
         }
         try {
-            image = await handleFileUpload(req.file, path.join(__dirname, '../uploads/products'));
+            image = await handleFileUpload(req.file, bucketName);
         } catch (err) {
             return responseHandler(res, 500, err.message);
         }
@@ -149,8 +153,10 @@ exports.deleteProduct = async (req, res) => {
     }
 
     if (product.image) {
+        const bucketName = process.env.AWS_S3_BUCKET;
         try {
-            await deleteFile(path.join(__dirname, '../uploads/products', path.basename(product.image)));
+            let oldImageKey = path.basename(product.image);
+            await deleteFile(bucketName, oldImageKey);
         } catch (err) {
             return responseHandler(res, 500, `Error deleting file: ${err.message}`);
         }

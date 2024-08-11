@@ -1,3 +1,4 @@
+require("dotenv").config();
 const responseHandler = require("../helpers/responseHandler");
 const Notification = require("../models/notifications");
 const User = require("../models/user");
@@ -17,11 +18,12 @@ exports.createInAppNotification = async (req, res) => {
     const data = req.body;
 
     // Handle file uploads if present
-    const uploadDir = path.join(__dirname, '../uploads/notification');
-
-    if (req.files) {
-        if (req.files.media) {
-            data.media_url = await handleFileUpload(req.files.media[0], uploadDir);
+    if (req.file) {
+        try {
+            const bucketName = process.env.AWS_S3_BUCKET;
+            data.media_url = await handleFileUpload(req.file, bucketName);
+        } catch (err) {
+            return responseHandler(res, 500, `Error uploading file: ${err.message}`);
         }
     }
 
@@ -156,18 +158,22 @@ exports.updateInAppNotification = async (req, res) => {
         return responseHandler(res, 404, 'Notification not found.');
     }
 
-    // Handle file uploads if present
-    const uploadDir = path.join(__dirname, '../uploads/notification');
-
+    // Handle file upload if present
     let media_url = notification.media_url;
+    const bucketName = process.env.AWS_S3_BUCKET;
+
     if (req.file) {
         try {
+            // Delete the existing file from S3 if it exists
             if (notification.media_url) {
-                await deleteFile(path.join(__dirname, uploadDir, path.basename(notification.media_url)));
+                const fileKey = path.basename(notification.media_url);
+                await deleteFile(bucketName, fileKey);
             }
-            media_url = await handleFileUpload(req.file, path.join(__dirname, uploadDir));
+
+            // Upload the new file to S3
+            media_url = await handleFileUpload(req.file, bucketName);
         } catch (err) {
-            return responseHandler(res, 500, err.message);
+            return responseHandler(res, 500, `Error handling file: ${err.message}`);
         }
     }
 
@@ -274,13 +280,17 @@ exports.deleteInAppNotification = async (req, res) => {
         if (!result) {
             return responseHandler(res, 404, 'Notification not found.');
         }
-        if (result.media_url) {
+        
+        if (notification.media_url) {
             try {
-                await deleteFile(path.join(__dirname, '../uploads/notification', path.basename(result.media_url)));
+                const bucketName = process.env.AWS_S3_BUCKET;
+                const fileKey = path.basename(notification.media_url);
+                await deleteFile(bucketName, fileKey);
             } catch (err) {
                 return responseHandler(res, 500, `Error deleting file: ${err.message}`);
             }
         }
+
         return responseHandler(res, 200, 'Notification deleted successfully.');
     } catch (err) {
         return responseHandler(res, 500, `Server error: ${err.message}`);

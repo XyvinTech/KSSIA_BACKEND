@@ -1,3 +1,4 @@
+require("dotenv").config();
 const path = require('path');
 const responseHandler = require("../helpers/responseHandler");
 const deleteFile = require("../helpers/deleteFiles");
@@ -22,9 +23,10 @@ exports.createPayment = async (req, res) => {
     }
 
     let invoice_url = '';
+    const bucketName = process.env.AWS_S3_BUCKET;
     if (req.file) {
         try {
-            invoice_url = await handleFileUpload(req.file, path.join(__dirname, '../uploads/payment'));
+            invoice_url = await handleFileUpload(req.file, bucketName);
         } catch (err) {
             return responseHandler(res, 500, err.message);
         }
@@ -64,12 +66,15 @@ exports.updatePayment = async (req, res) => {
     }
 
     let invoice_url = payment.invoice_url;
+    const bucketName = process.env.AWS_S3_BUCKET;
+
     if (req.file) {
         try {
             if (payment.invoice_url) {
-                await deleteFile(path.join(__dirname, '../uploads/payment', path.basename(payment.invoice_url)));
+                const oldImageKey = path.basename(payment.invoice_url);
+                await deleteFile(bucketName, oldImageKey);
             }
-            invoice_url = await handleFileUpload(req.file, path.join(__dirname, '../uploads/payment'));
+            invoice_url = await handleFileUpload(req.file, bucketName);
         } catch (err) {
             return responseHandler(res, 500, err.message);
         }
@@ -97,9 +102,9 @@ exports.deletePayment = async (req, res) => {
     }
 
     if (payment.invoice_url) {
-        const filePath = path.join(__dirname, '../uploads/payment', path.basename(payment.invoice_url));
         try {
-            await deleteFile(filePath);
+            const oldImageKey = path.basename(payment.invoice_url);
+            await deleteFile(bucketName, oldImageKey);
         } catch (err) {
             return responseHandler(res, 500, `Error deleting file: ${err.message}`);
         }

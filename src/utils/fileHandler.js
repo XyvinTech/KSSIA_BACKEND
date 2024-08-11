@@ -1,7 +1,12 @@
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const path = require('path');
-const fs = require('fs').promises;
+const crypto = require('crypto');
+require("dotenv").config();
 
-const handleFileUpload = async (file, directory) => {
+// Initialize S3 client
+const s3 = new S3Client({ region: process.env.AWS_REGION });
+
+const handleFileUpload = async (file, bucketName) => {
     try {
         // Get current date in YYYYMMDD format
         const date = new Date().toISOString().split('T')[0].replace(/-/g, '');
@@ -11,23 +16,28 @@ const handleFileUpload = async (file, directory) => {
         const fileExtension = path.extname(originalName);
         const baseName = path.basename(originalName, fileExtension);
 
-        // Generate a unique identifier (e.g., timestamp) to avoid collisions
-        const uniqueId = Date.now();
+        // Generate a unique identifier to avoid collisions
+        const uniqueId = crypto.randomBytes(16).toString('hex');
 
         // Generate new file name with date and unique ID included
         const newFileName = `${baseName}_${date}_${uniqueId}${fileExtension}`;
 
-        // Construct file path
-        const filePath = path.join(directory, newFileName);
+        // Define S3 upload parameters
+        const params = {
+            Bucket: bucketName,
+            Key: newFileName,
+            Body: file.buffer,
+            ContentType: file.mimetype,
+            ACL: 'public-read', // Set file permission
+        };
 
-        // Ensure the directory exists
-        await fs.mkdir(path.dirname(filePath), { recursive: true });
-
-        // Write file to the path
-        await fs.writeFile(filePath, file.buffer);
+        // Upload file to S3
+        await s3.send(new PutObjectCommand(params));
 
         // Generate URL of the file
-        return `/uploads${filePath.split('uploads')[1]}`;
+        const fileUrl = `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${newFileName}`;
+
+        return fileUrl;
     } catch (err) {
         throw new Error(`Error handling file upload: ${err.message}`);
     }

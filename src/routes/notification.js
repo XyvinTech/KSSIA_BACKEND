@@ -16,8 +16,8 @@ notificationRoute.get(
 
 // Route to create in-app notifications with an optional image upload
 notificationRoute.post(
-    '/notifications/in-app', 
-    upload.single('image'), 
+    '/notifications/in-app',
+    upload.single('media'),
     asyncHandler(notificationController.createInAppNotification)
 );
 
@@ -36,7 +36,7 @@ notificationRoute.get(
 // Route to update an in-app notification (e.g., adding a new media URL)
 notificationRoute.put(
     '/notifications/in-app/:notificationId', 
-    upload.single('image'), 
+    upload.single('media'),
     asyncHandler(notificationController.updateInAppNotification)
 );
 
