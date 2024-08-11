@@ -19,6 +19,7 @@ app.use(volleyball);
 
 //* Define the PORT, NODE_ENV & API version based on environment variable
 const { PORT, API_VERSION, NODE_ENV } = process.env;
+console.log(PORT, API_VERSION, NODE_ENV)
 
 //* Enable Cross-Origin Resource Sharing (CORS) middleware
 app.use(cors());
