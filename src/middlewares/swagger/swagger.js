@@ -51,7 +51,7 @@ const options = {
       //   url: `https://example.com/api/v1`,
       // },
       {
-        url: `http://43.205.89.79:${PORT}/api/${API_VERSION}`,
+        url: `http://43.205.89.79/api/${API_VERSION}`,
       },
       {
         url: `http://localhost:${PORT}/api/${API_VERSION}`,
