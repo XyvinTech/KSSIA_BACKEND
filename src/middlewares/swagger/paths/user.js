@@ -161,8 +161,8 @@
  * @swagger
  * /upload:
  *   put:
- *     summary: Uploads a file to S3 bucket
- *     description: Handles file upload to AWS S3 bucket and returns the URL of the uploaded file.
+ *     summary: Upload a file to S3 bucket
+ *     description: Handles file upload to an AWS S3 bucket and returns the URL of the uploaded file.
  *     tags:
  *       - User
  *     requestBody:
@@ -186,10 +186,10 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: File uploaded successfully
+ *                   example: "File uploaded successfully"
  *                 fileUrl:
  *                   type: string
- *                   example: https://your-bucket-name.s3.your-region.amazonaws.com/your-file-name
+ *                   example: "https://your-bucket-name.s3.your-region.amazonaws.com/your-file-name"
  *       500:
  *         description: Internal server error
  *         content:
@@ -199,5 +199,5 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Error handling file upload: <error message>
+ *                   example: "Error handling file upload: an error occurred"
  */
