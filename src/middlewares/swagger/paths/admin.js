@@ -132,3 +132,26 @@
  *       500:
  *         description: Internal server error
  */
+
+/**
+ * @swagger
+ * /admin/users/{membership_id}:
+ *   delete:
+ *     summary: Delete a user by membership ID
+ *     tags: 
+ *       - Admin
+ *     parameters:
+ *       - in: path
+ *         name: membership_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the user to delete
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */

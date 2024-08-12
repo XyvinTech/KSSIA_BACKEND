@@ -1,5 +1,8 @@
+require("dotenv").config();
 const responseHandler = require("../helpers/responseHandler");
 const User = require("../models/user");
+const handleFileUpload = require("../utils/fileHandler");
+const deleteFile = require("../helpers/deleteFiles");
 const { CreateUserSchema, EditUserSchema } = require("../validation");
 
 /****************************************************************************************************/
@@ -128,26 +131,29 @@ exports.deleteUser = async (req, res) => {
         return responseHandler(res, 400, `Invalid request`);
     }
     // Delete user's files
-    const uploadDir = path.join(__dirname, '../uploads/users');
     if (user.profile_picture) {
-        await deleteFile(path.join(uploadDir, path.basename(user.profile_picture)));
+        let oldFileKey = path.basename(user.profile_picture);
+        await deleteFile(bucketName, oldFileKey);
     }
 
     if (user.certificates) {
         for (const cert of user.certificates) {
-            await deleteFile(path.join(uploadDir, path.basename(cert)));
+            let oldFileKey = path.basename(cert.url);
+            await deleteFile(bucketName, oldFileKey);
         }
     }
 
-    if (user.brochures) {
-        for (const brochure of user.brochures) {
-            await deleteFile(path.join(uploadDir, path.basename(brochure)));
+    if (user.brochure) {
+        for (const brochure of user.brochure) {
+            let oldFileKey = path.basename(brochure.url);
+            await deleteFile(bucketName, oldFileKey);
         }
     }
 
     if (user.awards) {
         for (const award of user.awards) {
-            await deleteFile(path.join(uploadDir, path.basename(award)));
+            let oldFileKey = path.basename(award.url);
+            await deleteFile(bucketName, oldFileKey);
         }
     }
 
@@ -155,7 +161,8 @@ exports.deleteUser = async (req, res) => {
     const products = await Product.find({ seller_id: userId });
     for (const product of products) {
         if (product.image_url) {
-            await deleteFile(path.join(uploadDir, path.basename(product.image_url)));
+            let oldFileKey = path.basename(product.image_url);
+            await deleteFile(bucketName, oldFileKey);
         }
     }
 

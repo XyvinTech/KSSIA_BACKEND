@@ -13,15 +13,17 @@ userRoute
   .route("/login/:mobile")
   .get(asyncHandler(userController.sendOtp));
 
+userRoute  
+  .route("/:userId")
+  .get(asyncHandler(userController.getUserById));
+
+userRoute
+  .route("/upload")
+  .put(upload.single('file'),asyncHandler(userController.uploadImages));
+
 userRoute
   .route('/edit/:userId')
-  .put(upload.fields([
-    { name: 'profile_picture', maxCount: 1 },
-    { name: 'certificates', maxCount: 5 },
-    { name: 'brochures', maxCount: 5 },
-    { name: 'awards', maxCount: 5 },
-    { name: 'product_images', maxCount: 10 }
-  ]), asyncHandler(userController.editProfile));
+  .put(asyncHandler(userController.editProfile));
   
 userRoute  
   .route("/search/:name")

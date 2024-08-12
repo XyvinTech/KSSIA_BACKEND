@@ -129,3 +129,75 @@
  *       404:
  *         description: User not found
  */
+
+/**
+ * @swagger
+ * /user/{userId}:
+ *   get:
+ *     summary: Retrieve a single user by ID
+ *     tags: 
+ *       - User
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the user to retrieve
+ *     responses:
+ *       200:
+ *         description: User retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /upload:
+ *   put:
+ *     summary: Uploads a file to S3 bucket
+ *     description: Handles file upload to AWS S3 bucket and returns the URL of the uploaded file.
+ *     tags:
+ *       - File Upload
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: The file to be uploaded.
+ *     responses:
+ *       200:
+ *         description: File uploaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: File uploaded successfully
+ *                 fileUrl:
+ *                   type: string
+ *                   example: https://your-bucket-name.s3.your-region.amazonaws.com/your-file-name
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Error handling file upload: <error message>
+ */
