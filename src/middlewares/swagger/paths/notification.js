@@ -7,7 +7,7 @@
 
 /**
  * @swagger
- * /notification/notifications/in-app:
+ * /notification/in-app:
  *   get:
  *     summary: Retrieve all in-app notifications
  *     tags:
@@ -30,7 +30,7 @@
 
 /**
  * @swagger
- * /notification/notifications/in-app:
+ * /notification/in-app:
  *   post:
  *     summary: Create a new in-app notification
  *     tags:
@@ -74,7 +74,7 @@
 
 /**
  * @swagger
- * /notification/notifications/in-app/unread/{userId}:
+ * /notification/in-app/unread/{userId}:
  *   get:
  *     summary: Retrieve unread in-app notifications for a user
  *     tags:
@@ -104,7 +104,7 @@
 
 /**
  * @swagger
- * /notification/notifications/in-app/read/{userId}:
+ * /notification/in-app/read/{userId}:
  *   get:
  *     summary: Retrieve read in-app notifications for a user
  *     tags:
@@ -134,7 +134,7 @@
 
 /**
  * @swagger
- * /notification/notifications/in-app/{notificationId}:
+ * /notification/in-app/{notificationId}:
  *   put:
  *     summary: Update an existing in-app notification
  *     tags:
@@ -183,7 +183,7 @@
 
 /**
  * @swagger
- * /notification/notifications/in-app/{notificationId}/read/{userId}:
+ * /notification/in-app/{notificationId}/read/{userId}:
  *   put:
  *     summary: Mark an in-app notification as read
  *     tags:
@@ -220,7 +220,7 @@
 
 /**
  * @swagger
- * /notification/notifications/in-app/unread-count/{userId}:
+ * /notification/in-app/unread-count/{userId}:
  *   get:
  *     summary: Count unread in-app notifications for a user
  *     tags:
@@ -253,7 +253,7 @@
 
 /**
  * @swagger
- * /notification/notifications/in-app/{notificationId}:
+ * /notification/in-app/{notificationId}:
  *   delete:
  *     summary: Delete an in-app notification
  *     tags:
@@ -277,7 +277,7 @@
 
 /**
  * @swagger
- * /notification/notifications/email:
+ * /notification/email:
  *   post:
  *     summary: Create and send an email notification
  *     tags:

@@ -10,57 +10,57 @@ notificationRoute.use(authVerify);
 
 // Route to retrive all in-app notifications
 notificationRoute.get(
-    '/notifications/in-app',  
+    '/in-app',  
     asyncHandler(notificationController.getallInAppNotifications)
 );
 
 // Route to create in-app notifications with an optional image upload
 notificationRoute.post(
-    '/notifications/in-app',
+    '/in-app',
     upload.single('media'),
     asyncHandler(notificationController.createInAppNotification)
 );
 
 // Route to get unread in-app notifications for a user
 notificationRoute.get(
-    '/notifications/in-app/unread/:userId', 
+    '/in-app/unread/:userId', 
     asyncHandler(notificationController.getUnreadInAppNotifications)
 );
 
 // Route to get read in-app notifications for a user
 notificationRoute.get(
-    '/notifications/in-app/read/:userId', 
+    '/in-app/read/:userId', 
     asyncHandler(notificationController.getReadInAppNotifications)
 );
 
 // Route to update an in-app notification (e.g., adding a new media URL)
 notificationRoute.put(
-    '/notifications/in-app/:notificationId', 
+    '/in-app/:notificationId', 
     upload.single('media'),
     asyncHandler(notificationController.updateInAppNotification)
 );
 
 // Route to mark a notification as read
 notificationRoute.put(
-    '/notifications/in-app/:notificationId/read/:userId', 
+    '/in-app/:notificationId/read/:userId', 
     asyncHandler(notificationController.updateReadStatus)
 );
 
 // Route to count unread in-app notifications for a user
 notificationRoute.get(
-    '/notifications/in-app/unread-count/:userId', 
+    '/in-app/unread-count/:userId', 
     asyncHandler(notificationController.getUnreadNotificationCount)
 );
 
 // Route to delete an in-app notification
 notificationRoute.delete(
-    '/notifications/in-app/:notificationId', 
+    '/in-app/:notificationId', 
     asyncHandler(notificationController.deleteInAppNotification)
 );
 
 // Route to create and send email notifications
 notificationRoute.post(
-    '/notifications/email', 
+    '/email', 
     asyncHandler(notificationController.createAndSendEmailNotification)
 );
 
