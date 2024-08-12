@@ -159,7 +159,7 @@
 
 /**
  * @swagger
- * /upload:
+ * /user/upload:
  *   put:
  *     summary: Upload a file to S3 bucket
  *     description: Handles file upload to an AWS S3 bucket and returns the URL of the uploaded file.
