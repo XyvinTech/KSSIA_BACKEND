@@ -1,4 +1,8 @@
+require("dotenv").config();
 const Fuse = require('fuse.js');
+const path = require('path');
+const handleFileUpload = require("../utils/fileHandler");
+const deleteFile = require("../helpers/deleteFiles");
 const responseHandler = require("../helpers/responseHandler");
 const User = require("../models/user");
 const {
@@ -101,58 +105,69 @@ exports.verifyOtp = async (req, res) => {
 };
 
 /****************************************************************************************************/
-/*                               Function to edit the user profile                                  */
+/*                                   Function to upload files                                       */
 /****************************************************************************************************/
 
-// exports.editProfile = async (req, res) => {
+exports.uploadImages = async (req, res) => {
+    // Handle file upload if present
+    let image = '';
+    const bucketName = process.env.AWS_S3_BUCKET;
+    if (req.file) {
+        try {
+            image = await handleFileUpload(req.file, bucketName);
+        } catch (err) {
+            return responseHandler(res, 500, err.message);
+        }
+        return responseHandler(res, 200, "File uploaded successfully", image);
+    }
+}
 
-//         // Validate the input data
-//         const {error} = EditUserSchema.validate(req.body, {abortEarly: true});
+/****************************************************************************************************/
+/*                                   Function to get user by ID                                     */
+/****************************************************************************************************/
 
-//         // Check if an error exist in the validation
-//         if (error) {
-//             return responseHandler(res, 400, `Invalid input: ${error.message}`);
-//         }
+exports.getUserById = async (req, res) => {
+    
+    const { userId } = req.params;
+    // console.log(`Received userId: ${userId}`);                                       // Debug line
+        
+    if (!userId) {
+        // If userId is not provided, return a 400 status code with the error message
+        // console.log('Invalid request');                                              // Debug line
+        return responseHandler(res, 400, `Invalid request`);
+    }
 
-//         // Find the user by their ID
-//         const user = await User.findById(req.params.id);
-//         if (!user) {
-//             return responseHandler(res, 404, "User not found");
-//         }
+    // Check if a user with this id exists
+    const user = await User.findById(userId);
+    if (!user) {
+        // If the user is not found, return a 404 status code with the error message
+        // console.log('User not found');                                               // Debug line
+        return responseHandler(res, 404, "User not found");
+    }
 
-//         // Update the user's profile with the validated data
-//         Object.assign(user, req.body);
-
-//         // Save the updated user record
-//         await user.save();
-
-//         return responseHandler(res, 200, "User profile updated successfully", user);
-
-// };
+    // console.log(`User retrieved successfully`);                                      // Debug line
+    return responseHandler(res, 200, "User retrieved successfully", user);
+   
+};
 
 /****************************************************************************************************/
 /*                               Function to edit the user profile                                  */
 /****************************************************************************************************/
 
 exports.editProfile = async (req, res) => {
-    
     const { userId } = req.params;
     const data = req.body;
-    // console.log(`Received userId parameter: ${userId}`);                             // Debug line
-    // console.log(`Received body parameter: ${data}`);                                 // Debug line
 
     // Validate the presence of the userId in the request body
-    if(!userId){
-        // console.log(`Requires user id to update the data`);                          // Debug line
+    if (!userId) {
         return responseHandler(res, 400, "Invalid request");
     }
 
     // Validate the input data
-    const {error} = EditUserSchema.validate(data, {abortEarly: true});
+    const { error } = EditUserSchema.validate(data, { abortEarly: true });
 
-    // Check if an error exist in the validation
+    // Check if an error exists in the validation
     if (error) {
-        // console.log(`Error validating the data: ${error.message}`);                  // Debug line
         return responseHandler(res, 400, `Invalid input: ${error.message}`);
     }
 
@@ -161,55 +176,61 @@ exports.editProfile = async (req, res) => {
     if (!currentUser) {
         return responseHandler(res, 404, "User not found");
     }
-    
+
+    const bucketName = process.env.AWS_S3_BUCKET;
+
+    // Handle deletion of old files if new URLs are provided
+    const fieldsToCheck = ['awards', 'certificates', 'brochure'];
+    for (const field of fieldsToCheck) {
+        if (data[field]) {
+            for (const item of currentUser[field]) {
+                const isStillPresent = data[field].some(newItem => newItem.url === item.url);
+                if (!isStillPresent && item.url) {
+                    let oldFileKey = path.basename(item.url);
+                    await deleteFile(bucketName, oldFileKey);
+                }
+            }
+        }
+    }
+
     // Update the user's profile with the validated data
     const updatedUser = await User.findByIdAndUpdate(userId, data, { new: true, runValidators: true });
+
     if (!updatedUser) {
-        // console.log(`User not found`);                                               // Debug line
         return responseHandler(res, 404, "User not found");
     }
 
     // Update products if any changes exist in the data
-    // Check for product changes
     if (data.products) {
-        // Fetch current products for the user
         const currentProducts = await Product.find({ seller_id: userId });
-        // console.log(`Current products: ${currentProducts}`);                         // Debug line
-        // console.log(`Data products: ${data.products}`);                              // Debug line
-    
-        // Convert current products to a map for easier comparison
         const currentProductsMap = new Map(currentProducts.map(product => [product._id.toString(), product]));
-        // console.log(`Current products map: ${currentProductsMap}`);                  // Debug line
 
         for (let productData of data.products) {
-            // If the product contains an ID update the product in the database else add the  
             if (productData._id) {
-                // Update existing products
                 const existingProduct = currentProductsMap.get(productData._id);
                 if (existingProduct) {
                     await Product.findByIdAndUpdate(productData._id, productData, { new: true, runValidators: true });
                     currentProductsMap.delete(productData._id);
                 } else {
-                    // console.log(`Product not found with the Id provided`);           // Debug line
                     return responseHandler(res, 404, "Invalid request");
                 }
             } else {
-                // Add new products
                 const newProduct = new Product({ ...productData, seller_id: userId });
                 await newProduct.save();
-                // console.console.log(`Product added successfully! ${newProduct}`);                   // Debug line
             }
         }
-    
-        // Remove products that were not in the update request
+
+        // Remove products that were not in the update request, and delete associated images
         for (let remainingProduct of currentProductsMap.values()) {
+            if (remainingProduct.image) {
+                let oldImageKey = path.basename(remainingProduct.image);
+                await deleteFile(bucketName, oldImageKey);
+            }
             await Product.findByIdAndDelete(remainingProduct._id);
         }
     }
 
-    // console.log(`User profile updated successfully`);                                // Debug line
     return responseHandler(res, 200, "User profile updated successfully", updatedUser);
-
 };
 
 /****************************************************************************************************/

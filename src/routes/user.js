@@ -1,31 +1,36 @@
 const express = require("express");
 const userController = require("../controllers/userController");
-const authVerify = require("../middlewares/authVerify");
 const asyncHandler = require("../utils/asyncHandler");
+const upload = require("../middlewares/uploads");
 const userRoute = express.Router();
 
+
 userRoute
-    .route("/login")
-    .post(asyncHandler(userController.verifyOtp))
+  .route("/login")
+  .post(asyncHandler(userController.verifyOtp));
 
 userRoute  
-    .route("/login/:mobile")
-    .get(asyncHandler(userController.sendOtp))
-
-
-// Edit an existing user
-userRoute
-    .route('/edit/:userId')
-    .put(asyncHandler(userController.editProfile))
+  .route("/login/:mobile")
+  .get(asyncHandler(userController.sendOtp));
 
 userRoute  
-    .route("/search/:name")
-    .get(asyncHandler(userController.findUserByName))
+  .route("/:userId")
+  .get(asyncHandler(userController.getUserById));
+
+userRoute
+  .route("/upload")
+  .put(upload.single('file'),asyncHandler(userController.uploadImages));
+
+userRoute
+  .route('/edit/:userId')
+  .put(asyncHandler(userController.editProfile));
+  
+userRoute  
+  .route("/search/:name")
+  .get(asyncHandler(userController.findUserByName));
 
 userRoute 
-    .route("/find/:membershipId")
-    .get(asyncHandler(userController.findUserByMembershipId))
-
-// userRoute.use(authVerify);
+  .route("/find/:membershipId")
+  .get(asyncHandler(userController.findUserByMembershipId));
 
 module.exports = userRoute;

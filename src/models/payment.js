@@ -18,6 +18,7 @@ const paymentSchema = new mongoose.Schema({
      },
     invoice_url: { type: String },
     remarks: { type: String },
+    reason: { type: String },
 });
 
 const payment = mongoose.model('Payment', paymentSchema);
