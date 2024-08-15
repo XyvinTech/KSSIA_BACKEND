@@ -12,6 +12,8 @@
  *     summary: Create a new event
  *     tags: 
  *       - Events
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       description: Event object that needs to be added to the system. Includes file uploads for images.
  *       required: true
@@ -82,6 +84,8 @@
  *     summary: Retrieve all events
  *     tags: 
  *       - Events
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Events retrieved successfully
@@ -102,6 +106,8 @@
  *     summary: Retrieve a single event by ID
  *     tags: 
  *       - Events
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: eventId
@@ -129,6 +135,8 @@
  *     summary: Update an existing event by ID
  *     tags: 
  *       - Events
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: eventId
@@ -208,6 +216,8 @@
  *     summary: Delete an event by ID
  *     tags: 
  *       - Events
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: eventId

@@ -12,6 +12,8 @@
  *     summary: Create a new payment
  *     tags: 
  *       - Payments
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       description: Payment object that needs to be added to the system
  *       required: true
@@ -75,6 +77,8 @@
  *     summary: Update an existing payment
  *     tags: 
  *       - Payments
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: paymentID
@@ -147,6 +151,8 @@
  *     summary: Delete a payment
  *     tags: 
  *       - Payments
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: paymentID
@@ -170,6 +176,8 @@
  *     summary: Update the status of a payment
  *     tags: 
  *       - Payments
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: paymentID

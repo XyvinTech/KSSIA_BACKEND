@@ -7,7 +7,6 @@ const upload = require("../middlewares/uploads");
 
 eventRoute.use(authVerify);
 
-
 // Get all events and add a new event
 eventRoute
   .route("/events")

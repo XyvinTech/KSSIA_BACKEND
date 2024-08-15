@@ -2,6 +2,7 @@ const express = require("express");
 const userController = require("../controllers/userController");
 const asyncHandler = require("../utils/asyncHandler");
 const upload = require("../middlewares/uploads");
+const authVerify = require("../middlewares/authVerify");
 const userRoute = express.Router();
 
 
@@ -12,6 +13,8 @@ userRoute
 userRoute  
   .route("/login/:mobile")
   .get(asyncHandler(userController.sendOtp));
+
+userRoute.use(authVerify);
 
 userRoute  
   .route("/:userId")

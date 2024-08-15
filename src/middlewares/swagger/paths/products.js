@@ -12,6 +12,8 @@
  *     summary: Add a new product
  *     tags: 
  *       - Products
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       description: Product object that needs to be added to the system
  *       required: true
@@ -57,6 +59,8 @@
  *     summary: Retrieve all products
  *     tags: 
  *       - Products
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Products retrieved successfully
@@ -77,6 +81,8 @@
  *     summary: Retrieve a single product by ID
  *     tags: 
  *       - Products
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: productId
@@ -104,6 +110,8 @@
  *     summary: Update a product by ID
  *     tags: 
  *       - Products
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: productId
@@ -156,6 +164,8 @@
  *     summary: Delete a product by ID
  *     tags: 
  *       - Products
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: productId
@@ -179,6 +189,8 @@
  *     summary: Retrieve products by seller ID
  *     tags: 
  *       - Products
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: sellerId

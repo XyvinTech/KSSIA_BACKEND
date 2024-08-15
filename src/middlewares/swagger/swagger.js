@@ -58,6 +58,13 @@ const options = {
       },
     ],
     components: {
+      securitySchemes: {
+        BearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
       schemas: {
         User: {
           type: 'object',
@@ -71,101 +78,124 @@ const options = {
               properties: {
                 first_name: {
                   type: 'string',
-                  example: 'John'
+                  example: 'John',
                 },
                 middle_name: {
                   type: 'string',
-                  example: 'Doe'
+                  example: 'Doe',
                 },
                 last_name: {
                   type: 'string',
-                  example: 'Smith'
+                  example: 'Smith',
                 },
               },
+              required: ['first_name', 'last_name'],
             },
             membership_id: {
               type: 'string',
-              example: 'MEM12345'
+              example: 'MEM12345',
             },
             blood_group: {
               type: 'string',
-              example: 'O+'
+              example: 'O+',
             },
             email: {
               type: 'string',
               format: 'email',
-              example: 'john.doe@example.com'
+              example: 'john.doe@example.com',
             },
             profile_picture: {
               type: 'string',
               format: 'uri',
-              example: 'http://example.com/profile.jpg'
+              example: 'http://example.com/profile.jpg',
             },
             phone_numbers: {
               type: 'object',
               properties: {
                 personal: {
                   type: 'number',
-                  example: 1234567890
+                  example: 1234567890,
                 },
                 landline: {
                   type: 'number',
-                  example: 9876543210
+                  example: 9876543210,
                 },
                 company_phone_number: {
-                  type: 'number'
+                  type: 'number',
                 },
                 whatsapp_number: {
-                  type: 'number'
+                  type: 'number',
                 },
                 whatsapp_business_number: {
-                  type: 'number'
+                  type: 'number',
                 },
               },
+              required: ['personal'],
             },
             otp: {
               type: 'number',
-              description: 'One Time Password'
+              description: 'One Time Password',
             },
             designation: {
               type: 'string',
-              example: 'Software Engineer'
+              example: 'Software Engineer',
             },
             company_name: {
               type: 'string',
-              example: 'TechCorp'
+              example: 'TechCorp',
+            },
+            company_address: {
+              type: 'string',
+            },
+            company_logo: {
+              type: 'string',
+              format: 'uri',
             },
             company_email: {
               type: 'string',
               format: 'email',
-              example: 'contact@techcorp.com'
+              example: 'contact@techcorp.com',
             },
             business_category: {
               type: 'string',
-              example: 'IT Services'
+              example: 'IT Services',
             },
             sub_category: {
               type: 'string',
-              example: 'Software Development'
+              example: 'Software Development',
+            },
+            bio: {
+              type: 'string',
             },
             address: {
               type: 'object',
               properties: {
                 street: {
                   type: 'string',
-                  example: '123 Tech Road'
                 },
                 city: {
                   type: 'string',
-                  example: 'Tech City'
                 },
                 state: {
                   type: 'string',
-                  example: 'Tech State'
                 },
                 zip: {
                   type: 'string',
-                  example: '12345'
+                },
+              },
+            },
+            social_media: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  platform: {
+                    type: 'string',
+                  },
+                  url: {
+                    type: 'string',
+                    format: 'uri',
+                  },
                 },
               },
             },
@@ -176,25 +206,97 @@ const options = {
                 properties: {
                   name: {
                     type: 'string',
-                    example: 'TechCorp Website'
+                    example: 'TechCorp Website',
                   },
                   url: {
                     type: 'string',
                     format: 'uri',
-                    example: 'http://techcorp.com'
+                    example: 'http://techcorp.com',
+                  },
+                },
+              },
+            },
+            video: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  name: {
+                    type: 'string',
+                  },
+                  url: {
+                    type: 'string',
+                    format: 'uri',
+                  },
+                },
+              },
+            },
+            awards: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  url: {
+                    type: 'string',
+                    format: 'uri',
+                  },
+                  name: {
+                    type: 'string',
+                  },
+                  authority_name: {
+                    type: 'string',
+                  },
+                },
+              },
+            },
+            certificates: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  name: {
+                    type: 'string',
+                  },
+                  url: {
+                    type: 'string',
+                    format: 'uri',
+                  },
+                },
+              },
+            },
+            brochure: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  name: {
+                    type: 'string',
+                  },
+                  url: {
+                    type: 'string',
+                    format: 'uri',
                   },
                 },
               },
             },
             is_active: {
               type: 'boolean',
-              example: true
+              example: true,
             },
             is_deleted: {
               type: 'boolean',
-              example: false
+              example: false,
+            },
+            selectedTheme: {
+              type: 'string',
+              default: 'white',
             },
           },
+          required: [
+            'name',
+            'membership_id',
+            'phone_numbers',
+          ],
         },
         CreateUserRequest: {
           type: 'object',
@@ -376,15 +478,31 @@ const options = {
                 },
               },
             },
+            otp: {
+              type: 'number'
+            },
             designation: {
               type: 'string'
             },
             company_name: {
               type: 'string'
             },
+            company_address: {
+              type: 'string'
+            },
+            company_logo: {
+              type: 'string',
+              format: 'uri'
+            },
             company_email: {
               type: 'string',
               format: 'email'
+            },
+            business_category: {
+              type: 'string'
+            },
+            sub_category: {
+              type: 'string'
             },
             bio: {
               type: 'string'
@@ -463,6 +581,9 @@ const options = {
                     type: 'string',
                     format: 'uri'
                   },
+                  authority_name: {
+                    type: 'string'
+                  }
                 },
               },
             },
@@ -496,12 +617,61 @@ const options = {
                 },
               },
             },
+            product: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  _id: {
+                    type: 'string'
+                  },
+                  seller_id: {
+                    type: 'string'
+                  },
+                  name: {
+                    type: 'string'
+                  },
+                  image: {
+                    type: 'string',
+                    format: 'uri'
+                  },
+                  price: {
+                    type: 'number'
+                  },
+                  offer_price: {
+                    type: 'number'
+                  },
+                  description: {
+                    type: 'string'
+                  },
+                  moq: {
+                    type: 'integer'
+                  },
+                  units: {
+                    type: 'string'
+                  },
+                  status: {
+                    type: 'string'
+                  },
+                  tags: {
+                    type: 'array',
+                    items: {
+                      type: 'string'
+                    }
+                  }
+                }
+              }
+            },
             is_active: {
               type: 'boolean'
             },
             is_deleted: {
               type: 'boolean'
             },
+            selectedTheme: {
+              type: 'string',
+              default: 'white'
+            }
           },
         },
         Product: {
@@ -768,6 +938,9 @@ const options = {
         },
       },
     },
+    security: [{
+      BearerAuth: [],
+    }, ],
   },
   apis: ['./src/middlewares/swagger/paths/*.js'], // Path to your API routes
 };

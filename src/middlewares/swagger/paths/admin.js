@@ -5,6 +5,8 @@
  *     summary: Returns a set of all users in the database
  *     tags: 
  *       - Admin
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Users retrieved successfully
@@ -25,6 +27,8 @@
  *     summary: Create a new user
  *     tags: 
  *       - Admin
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       description: User object that needs to be added to the system
  *       required: true
@@ -54,6 +58,8 @@
  *     summary: Retrieve a single user by ID
  *     tags: 
  *       - Admin
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -81,6 +87,8 @@
  *     summary: Update a user by ID
  *     tags: 
  *       - Admin
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -117,6 +125,8 @@
  *     summary: Delete a user by ID
  *     tags: 
  *       - Admin
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -140,6 +150,8 @@
  *     summary: Delete a user by membership ID
  *     tags: 
  *       - Admin
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: membership_id

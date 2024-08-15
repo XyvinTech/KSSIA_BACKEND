@@ -1,7 +1,10 @@
 const express = require("express");
 const adminController = require("../controllers/adminController");
 const asyncHandler = require("../utils/asyncHandler");
+const authVerify = require("../middlewares/authVerify");
 const adminRoute = express.Router();
+
+adminRoute.use(authVerify);
 
 adminRoute.route('/users').get(asyncHandler(adminController.getAllUsers));
 adminRoute.route('/users').post(asyncHandler(adminController.createUser));

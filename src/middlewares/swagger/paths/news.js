@@ -12,6 +12,8 @@
  *     summary: Create a new news article
  *     tags: 
  *       - News
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       description: News article object that needs to be added to the system. Includes file uploads for images.
  *       required: true
@@ -49,6 +51,8 @@
  *     summary: Retrieve all news articles
  *     tags: 
  *       - News
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: News articles retrieved successfully
@@ -69,6 +73,8 @@
  *     summary: Retrieve a single news article by ID
  *     tags: 
  *       - News
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: newsId
@@ -96,6 +102,8 @@
  *     summary: Update an existing news article by ID
  *     tags: 
  *       - News
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: newsId
@@ -142,6 +150,8 @@
  *     summary: Delete a news article by ID
  *     tags: 
  *       - News
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: newsId

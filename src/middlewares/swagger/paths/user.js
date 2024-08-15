@@ -55,6 +55,8 @@
  *     summary: Edit user profile
  *     tags: 
  *       - User
+ *     security:
+ *       - BearerAuth: []
  *     description: Edit the profile of an existing user.
  *     parameters:
  *       - in: path
@@ -83,6 +85,8 @@
  *     summary: Search for users by name
  *     tags: 
  *       - User
+ *     security:
+ *       - BearerAuth: []
  *     description: Find users matching the specified name.
  *     parameters:
  *       - in: path
@@ -111,6 +115,8 @@
  *     summary: Find a user by membership ID
  *     tags: 
  *       - User
+ *     security:
+ *       - BearerAuth: []
  *     description: Retrieve user details using the membership ID.
  *     parameters:
  *       - in: path
@@ -137,6 +143,8 @@
  *     summary: Retrieve a single user by ID
  *     tags: 
  *       - User
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -165,6 +173,8 @@
  *     description: Handles file upload to an AWS S3 bucket and returns the URL of the uploaded file.
  *     tags:
  *       - User
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:

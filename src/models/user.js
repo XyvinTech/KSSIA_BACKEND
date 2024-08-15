@@ -26,6 +26,8 @@ const userSchema = new mongoose.Schema(
         otp: { type: Number },
         designation: { type: String },
         company_name: { type: String },
+        company_address: { type: String },
+        company_logo: { type: String },
         company_email: { type: String },
         business_category: { type: String },
         sub_category: { type: String },

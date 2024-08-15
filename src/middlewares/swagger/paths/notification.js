@@ -12,6 +12,8 @@
  *     summary: Retrieve all in-app notifications
  *     tags:
  *       - Notifications
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Successfully retrieved all in-app notifications
@@ -35,6 +37,8 @@
  *     summary: Create a new in-app notification
  *     tags:
  *       - Notifications
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       description: In-app notification object that needs to be added to the system. Includes optional file uploads for media.
  *       required: true
@@ -79,6 +83,8 @@
  *     summary: Retrieve unread in-app notifications for a user
  *     tags:
  *       - Notifications
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -109,6 +115,8 @@
  *     summary: Retrieve read in-app notifications for a user
  *     tags:
  *       - Notifications
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -139,6 +147,8 @@
  *     summary: Update an existing in-app notification
  *     tags:
  *       - Notifications
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: notificationId
@@ -188,6 +198,8 @@
  *     summary: Mark an in-app notification as read
  *     tags:
  *       - Notifications
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: notificationId
@@ -225,6 +237,8 @@
  *     summary: Count unread in-app notifications for a user
  *     tags:
  *       - Notifications
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -258,6 +272,8 @@
  *     summary: Delete an in-app notification
  *     tags:
  *       - Notifications
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: notificationId
@@ -282,6 +298,8 @@
  *     summary: Create and send an email notification
  *     tags:
  *       - Notifications
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       description: Email notification object that needs to be created and sent. Includes optional file uploads for attachments.
  *       required: true

@@ -12,6 +12,8 @@
  *     summary: Create a new promotion
  *     tags: 
  *       - Promotions
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       description: Promotion object that needs to be added to the system. Includes file uploads for images and videos.
  *       required: true
@@ -70,6 +72,8 @@
  *     summary: Retrieve all promotions
  *     tags: 
  *       - Promotions
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Promotions retrieved successfully
@@ -90,6 +94,8 @@
  *     summary: Retrieve a single promotion by ID
  *     tags: 
  *       - Promotions
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: promotionId
@@ -117,6 +123,8 @@
  *     summary: Update an existing promotion by ID
  *     tags: 
  *       - Promotions
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: promotionId
@@ -184,6 +192,8 @@
  *     summary: Delete a promotion by ID
  *     tags: 
  *       - Promotions
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: promotionId
