@@ -13,10 +13,13 @@ const promotionRoute = require("./src/routes/promotion");
 const notificationRoute = require("./src/routes/notification");
 const rolesRoute = require("./src/routes/roles");
 const authRoutes = require('./src/routes/auth');
+const paymentRoute = require("./src/routes/payments");
+const { specs, swaggerUi } = require('./src/middlewares/swagger/swagger');
 
 const CONSTANTS = require('./constants');
 const app = express();
 app.use(volleyball);
+
 //* Define the PORT, NODE_ENV & API version based on environment variable
 const { PORT, NODE_ENV } = process.env;
 //* Enable Cross-Origin Resource Sharing (CORS) middleware
@@ -28,19 +31,23 @@ app.use(express.json());
 //* Set the base path for API routes
 const BASE_PATH = CONSTANTS.BASE_PATH;
 
-//* Import database connection module
+//* Import database connection modules
 require("./src/helpers/connection");
 
 //* Configure routes for user API
 app.use(`${BASE_PATH}/${CONSTANTS.AUTH_ROUTE}`,authRoutes)
+
 app.use(`${BASE_PATH}/user`, userRoute);
 app.use(`${BASE_PATH}/admin`, adminRoute);
-app.use(`${BASE_PATH}/product`, productRoute);
+app.use(`${BASE_PATH}/products`, productRoute);
 app.use(`${BASE_PATH}/events`, eventRoute);
 app.use(`${BASE_PATH}/news`, newsRoute);
 app.use(`${BASE_PATH}/promotions`, promotionRoute);
 app.use(`${BASE_PATH}/notification`, notificationRoute);
 app.use(`${BASE_PATH}/roles`, rolesRoute);
+app.use(`${BASE_PATH}/payments`, paymentRoute);
+app.use(`${BASE_PATH}/api-docs`, swaggerUi.serve, swaggerUi.setup(specs));
+
 
 //? Define a route for the API root
 app.get(BASE_PATH, (req, res) => {
@@ -61,7 +68,7 @@ app.all('*', (req, res, next) => {
   );
 });
 
-//! Start the server and listen on the specified port from environment variable
+//! Start the server and listen on the specified port from environment variabless
 app.listen(PORT, () => {
   const portMessage = clc.redBright(`✓ App is running on port: ${PORT}`);
   const envMessage = clc.yellowBright(

@@ -11,5 +11,5 @@ function createCommentHeader(title) {
 // Example usage
 console.log(createCommentHeader
     (
-        "Function to delete product"
+        "Function to create email notification"
     ));

@@ -124,23 +124,23 @@ exports.EditEventsSchema = Joi.object({
 // notificationSchema validation
 
 exports.emailNotificationSchema = Joi.object({
-    to: Joi.string().required(),
-    subject: Joi.string().required(),
-    content: Joi.string().required(),
-    upload_url: Joi.string(),
-    upload_file_url: Joi.string(),
-    url: Joi.string().uri(),
-    type: Joi.boolean()
+    to: Joi.array().items(Joi.string().hex().length(24)).required(),
+    subject: Joi.string().min(1).max(255).required(),
+    content: Joi.string(),
+    media_url: Joi.string().uri().allow(''),
+    file_url: Joi.string().uri().allow(''),
+    link_url: Joi.string().uri().allow(''),
+    type: Joi.string().valid('email').required()
 });
 
 exports.inAppNotificationSchema = Joi.object({
-    to: Joi.string().required(),
-    subject: Joi.string().required(),
-    content: Joi.string().required(),
-    upload_url: Joi.string(),
-    url: Joi.string().uri(),
-    type: Joi.boolean(),
-    read_status: Joi.boolean()
+    to: Joi.array().items(Joi.string().hex().length(24)).required(),
+    subject: Joi.string().min(1).max(255).required(),
+    content: Joi.string(),
+    media_url: Joi.string().uri().allow(''),
+    link_url: Joi.string().uri().allow(''),
+    type: Joi.string().valid('in-app').required(),
+    readBy: Joi.array().items(Joi.string().hex().length(24)).default([])
 });
 
 exports.NewsSchema = Joi.object({
@@ -162,4 +162,16 @@ exports.EditPromotionSchema = Joi.object({
     status: Joi.boolean().default(false),
     startDate: Joi.date(),
     endDate: Joi.date()
+});
+
+exports.PaymentSchema = Joi.object({
+    member: Joi.string().hex().length(24).required(),
+    date: Joi.date().required(),
+    time: Joi.date().required(),
+    amount: Joi.number().positive().required(),
+    mode_of_payment: Joi.string().required(),
+    category: Joi.string().required(),
+    status: Joi.string().valid('pending', 'accepted', 'resubmit', 'rejected').default('pending'),
+    invoice_url: Joi.string().uri().allow(''),
+    remarks: Joi.string().allow(''),
 });

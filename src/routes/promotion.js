@@ -2,28 +2,19 @@ const express = require("express");
 const promotionController = require("../controllers/promotionController");
 const authVerify = require("../middlewares/authVerify");
 const asyncHandler = require("../utils/asyncHandler");
-const promotionRoute = express.Router();
 const upload = require("../middlewares/uploads");
-
+const promotionRoute = express.Router();
 
 // Protect all routes with authentication middleware
 promotionRoute.use(authVerify);
 
-// Get all promotions and add a new promotion
-promotionRoute
-  .route("/promotions")
-  .post(upload.single('file'), asyncHandler(promotionController.createPromotion))
-  .get(asyncHandler(promotionController.getAllPromotions));
 
-// Edit an existing promotion by ID
-promotionRoute
-  .route("/promotions/:promotionId")
-  .get(asyncHandler(promotionController.getPromotionById))
-  .put(upload.single('file'), asyncHandler(promotionController.editPromotion));
+promotionRoute.post('/', upload.single('file'), asyncHandler(promotionController.createPromotion));
 
-// Delete a promotion by ID
-promotionRoute
-  .route("/promotions/:promotionId")
-  .delete(asyncHandler(promotionController.deletePromotion));
+promotionRoute.get('/promotions', asyncHandler(promotionController.getAllPromotions));
+
+promotionRoute.get('/:promotionId', asyncHandler(promotionController.getPromotionById));
+promotionRoute.put('/:promotionId', upload.single('file'), asyncHandler(promotionController.editPromotion));
+promotionRoute.delete('/:promotionId', asyncHandler(promotionController.deletePromotion));
 
 module.exports = promotionRoute;

@@ -1,5 +1,8 @@
+require("dotenv").config();
 const responseHandler = require("../helpers/responseHandler");
 const User = require("../models/user");
+const handleFileUpload = require("../utils/fileHandler");
+const deleteFile = require("../helpers/deleteFiles");
 const { CreateUserSchema, EditUserSchema } = require("../validation");
 
 /****************************************************************************************************/
@@ -134,11 +137,12 @@ exports.editUser = async (req, res) => {
 /****************************************************************************************************/
 
 exports.deleteUser = async (req, res) => {
-   
+
     const { userId } = req.params;
     const { membership_id } = req.params;
     // console.log(`Received userId: ${userId}`);                                       // Debug line
     // console.log(`Received membership_id: ${membership_id}`);                         // Debug line
+    let user;
 
     if (userId) {
         // Find and delete the user using userId
@@ -161,10 +165,48 @@ exports.deleteUser = async (req, res) => {
         // console.log('Invalid request');                                              // Debug line
         return responseHandler(res, 400, `Invalid request`);
     }
-    
+    // Delete user's files
+    if (user.profile_picture) {
+        let oldFileKey = path.basename(user.profile_picture);
+        await deleteFile(bucketName, oldFileKey);
+    }
+
+    if (user.certificates) {
+        for (const cert of user.certificates) {
+            let oldFileKey = path.basename(cert.url);
+            await deleteFile(bucketName, oldFileKey);
+        }
+    }
+
+    if (user.brochure) {
+        for (const brochure of user.brochure) {
+            let oldFileKey = path.basename(brochure.url);
+            await deleteFile(bucketName, oldFileKey);
+        }
+    }
+
+    if (user.awards) {
+        for (const award of user.awards) {
+            let oldFileKey = path.basename(award.url);
+            await deleteFile(bucketName, oldFileKey);
+        }
+    }
+
+    // Delete product images
+    const products = await Product.find({ seller_id: userId });
+    for (const product of products) {
+        if (product.image_url) {
+            let oldFileKey = path.basename(product.image_url);
+            await deleteFile(bucketName, oldFileKey);
+        }
+    }
+
+    // Delete products
+    await Product.deleteMany({ seller_id: userId });
+
     // console.log(`User deleted successfully`);                                        // Debug line
     return responseHandler(res, 200, "User deleted successfully");
-    
+
 };
 
 /****************************************************************************************************/
