@@ -50,7 +50,7 @@ exports.deleteFile = async (req, res) => {
         await deleteFile(bucketName, fileKey);
         return responseHandler(res, 200, "File deleted successfully");
     } catch (err) {
-        if( err == "File not found"){
+        if( err.message == "File not found"){
             return responseHandler(res, 404, "File not found");
         }
         return responseHandler(res, 500, err.message);
