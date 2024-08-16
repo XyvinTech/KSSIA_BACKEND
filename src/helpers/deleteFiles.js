@@ -13,6 +13,13 @@ const s3 = new S3Client({ region: process.env.AWS_REGION });
 
 const deleteFile = async (bucketName, fileKey) => {
     try {
+        
+        // Check if fileKey exists and is not an empty string
+        if (!fileKey || fileKey.trim() === '') {
+            console.warn('No file key provided, skipping deletion.');
+            return; // Skip the deletion if fileKey is invalid
+        }
+
         const params = {
             Bucket: bucketName,
             Key: fileKey,
