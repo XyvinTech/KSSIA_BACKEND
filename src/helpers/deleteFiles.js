@@ -30,7 +30,7 @@ const deleteFile = async (bucketName, fileKey) => {
         } catch (err) {
             if (err.name === 'NotFound') {
                 console.error('File not found in S3:', fileKey);
-                throw new Error('File not found in S3');
+                throw new Error('File not found');
             }
             throw err; // Re-throw other unexpected errors
         }
@@ -43,7 +43,7 @@ const deleteFile = async (bucketName, fileKey) => {
 
         await s3.send(new DeleteObjectCommand(deleteParams));
         console.log(`File with key ${fileKey} deleted successfully from S3.`);
-        
+
     } catch (err) {
         console.error('Error deleting file from S3:', err);
         throw err; // Optional: rethrow the error if you want it to be handled by the caller
