@@ -1,4 +1,4 @@
-const { S3Client, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+const { S3Client, DeleteObjectCommand, HeadObjectCommand } = require('@aws-sdk/client-s3');
 require("dotenv").config();
 
 // Initialize S3 client
@@ -13,20 +13,37 @@ const s3 = new S3Client({ region: process.env.AWS_REGION });
 
 const deleteFile = async (bucketName, fileKey) => {
     try {
-        
         // Check if fileKey exists and is not an empty string
         if (!fileKey || fileKey.trim() === '') {
             console.warn('No file key provided, skipping deletion.');
-            return; // Skip the deletion if fileKey is invalid
+            return;
         }
 
-        const params = {
+        // Check if the file exists in the S3 bucket using HeadObjectCommand
+        const headParams = {
             Bucket: bucketName,
             Key: fileKey,
         };
 
-        // Delete file from S3
-        await s3.send(new DeleteObjectCommand(params));
+        try {
+            await s3.send(new HeadObjectCommand(headParams));
+        } catch (err) {
+            if (err.name === 'NotFound') {
+                console.error('File not found in S3:', fileKey);
+                throw new Error('File not found in S3');
+            }
+            throw err; // Re-throw other unexpected errors
+        }
+
+        // Proceed to delete the file
+        const deleteParams = {
+            Bucket: bucketName,
+            Key: fileKey,
+        };
+
+        await s3.send(new DeleteObjectCommand(deleteParams));
+        console.log(`File with key ${fileKey} deleted successfully from S3.`);
+        
     } catch (err) {
         console.error('Error deleting file from S3:', err);
         throw err; // Optional: rethrow the error if you want it to be handled by the caller
