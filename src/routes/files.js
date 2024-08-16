@@ -2,6 +2,7 @@ const express = require("express");
 const filesController = require("../controllers/filesController");
 const asyncHandler = require("../utils/asyncHandler");
 const authVerify = require("../middlewares/authVerify");
+const upload = require("../middlewares/uploads");
 const filesRoute = express.Router();
 
 filesRoute.use(authVerify);
