@@ -162,6 +162,17 @@ exports.editProfile = async (req, res) => {
     const bucketName = process.env.AWS_S3_BUCKET;
 
     // Handle deletion of old files if new URLs are provided
+
+    if ( (!data.profile_picture) || (data.profile_picture !== currentUser.profile_picture)) {
+        const oldFileKey = path.basename(currentUser.profile_picture);
+        await deleteFile(bucketName, oldFileKey);
+    }
+
+    if ((!data.company_logo) || (data.company_logo !== currentUser.company_logo)) {
+        const oldFileKey = path.basename(currentUser.company_logo);
+        await deleteFile(bucketName, oldFileKey);
+    }
+
     const fieldsToCheck = ['awards', 'certificates', 'brochure'];
     for (const field of fieldsToCheck) {
         if (data[field]) {

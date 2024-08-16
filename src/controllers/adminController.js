@@ -136,6 +136,11 @@ exports.deleteUser = async (req, res) => {
         await deleteFile(bucketName, oldFileKey);
     }
 
+    if (user.company_logo){
+        let oldFileKey = path.basename(user.company_logo);
+        await deleteFile(bucketName, oldFileKey);
+    }
+
     if (user.certificates) {
         for (const cert of user.certificates) {
             let oldFileKey = path.basename(cert.url);
