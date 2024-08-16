@@ -21,10 +21,6 @@ userRoute
   .get(asyncHandler(userController.getUserById));
 
 userRoute
-  .route("/upload")
-  .put(upload.single('file'),asyncHandler(userController.uploadImages));
-
-userRoute
   .route('/edit/:userId')
   .put(asyncHandler(userController.editProfile));
   

@@ -45,6 +45,10 @@ const options = {
         name: 'Payments',
         description: 'Operations related to payments'
       },
+      {
+        name: 'Files',
+        description: 'Operations related to handeling files in AWS S3 Bucket'
+      },
     ],
     servers: [
       // {

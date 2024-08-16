@@ -105,24 +105,6 @@ exports.verifyOtp = async (req, res) => {
 };
 
 /****************************************************************************************************/
-/*                                   Function to upload files                                       */
-/****************************************************************************************************/
-
-exports.uploadImages = async (req, res) => {
-    // Handle file upload if present
-    let image = '';
-    const bucketName = process.env.AWS_S3_BUCKET;
-    if (req.file) {
-        try {
-            image = await handleFileUpload(req.file, bucketName);
-        } catch (err) {
-            return responseHandler(res, 500, err.message);
-        }
-        return responseHandler(res, 200, "File uploaded successfully", image);
-    }
-}
-
-/****************************************************************************************************/
 /*                                   Function to get user by ID                                     */
 /****************************************************************************************************/
 
@@ -331,7 +313,3 @@ exports.findUserByMembershipId = async (req,res) => {
     return responseHandler(res, 200, "User found", user);
 
 }
-
-exports.register = (req, res) => {
-    res.send("register");
-};
