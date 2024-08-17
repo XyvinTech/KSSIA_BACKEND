@@ -14,6 +14,7 @@ const {
 
 // Create a new event
 exports.createEvent = async (req, res) => {
+    
     const data = req.body;
 
     // Parse the speakers field, which is coming as a JSON string in form-data
