@@ -224,7 +224,7 @@
  *       properties:
  *         member:
  *           type: string
- *           description: ID of the user making the payment
+ *           description: The ID of the user associated with the payment
  *         date:
  *           type: string
  *           format: date
@@ -235,27 +235,30 @@
  *           description: Time of the payment
  *         amount:
  *           type: number
- *           format: float
- *           description: Amount of the payment
+ *           description: Amount paid
  *         mode_of_payment:
  *           type: string
- *           description: Payment mode
+ *           description: Method of payment (e.g., credit card, bank transfer)
  *         category:
  *           type: string
- *           description: Payment category
+ *           description: Payment category (e.g., membership, event fees)
  *         status:
  *           type: string
+ *           enum:
+ *             - pending
+ *             - accepted
+ *             - resubmit
+ *             - rejected
  *           description: Status of the payment
  *         invoice_url:
  *           type: string
- *           format: uri
- *           description: URL of the invoice
+ *           description: URL of the payment invoice
  *         remarks:
  *           type: string
- *           description: Additional remarks
+ *           description: Remarks about the payment
  *         reason:
  *           type: string
- *           description: Reason for status update
+ *           description: Reason for payment status (if rejected or resubmit)
  *       required:
  *         - member
  *         - date

@@ -172,21 +172,7 @@ const options = {
               type: 'string',
             },
             address: {
-              type: 'object',
-              properties: {
-                street: {
-                  type: 'string',
-                },
-                city: {
-                  type: 'string',
-                },
-                state: {
-                  type: 'string',
-                },
-                zip: {
-                  type: 'string',
-                },
-              },
+              type: 'string',
             },
             social_media: {
               type: 'array',
@@ -387,25 +373,7 @@ const options = {
               example: 'Software Development'
             },
             address: {
-              type: 'object',
-              properties: {
-                street: {
-                  type: 'string',
-                  example: '123 Tech Road'
-                },
-                city: {
-                  type: 'string',
-                  example: 'Tech City'
-                },
-                state: {
-                  type: 'string',
-                  example: 'Tech State'
-                },
-                zip: {
-                  type: 'string',
-                  example: '12345'
-                },
-              },
+              type: 'string',
             },
             websites: {
               type: 'array',
@@ -512,21 +480,7 @@ const options = {
               type: 'string'
             },
             address: {
-              type: 'object',
-              properties: {
-                street: {
-                  type: 'string'
-                },
-                city: {
-                  type: 'string'
-                },
-                state: {
-                  type: 'string'
-                },
-                zip: {
-                  type: 'string'
-                },
-              },
+              type: 'string',
             },
             social_media: {
               type: 'array',

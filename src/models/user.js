@@ -32,12 +32,7 @@ const userSchema = new mongoose.Schema(
         business_category: { type: String },
         sub_category: { type: String },
         bio: { type: String },
-        address: {
-            street: String,
-            city: String,
-            state: String,
-            zip: String
-        },
+        address: { type: String },
         social_media: [
             {
                 platform: { type: String },

@@ -31,4 +31,8 @@ userRoute
   .route("/find/:membershipId")
   .get(asyncHandler(userController.findUserByMembershipId));
 
+userRoute 
+  .route("/payments/:userId")
+  .get(asyncHandler(userController.getUserPayments));
+
 module.exports = userRoute;
