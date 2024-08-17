@@ -28,5 +28,11 @@ function secureHash(data) {
 	hash.update(data);
 	return hash.digest('hex');
 }
+function encode(str) {
+    return Buffer.from(str.toString()).toString('base64');
+}
+function decode(encodedStr) {
+    return Buffer.from(encodedStr, 'base64').toString('utf8');
+}
 
-module.exports = { encrypt, decrypt ,secureHash };
+module.exports = { encrypt, decrypt ,secureHash ,encode,decode};

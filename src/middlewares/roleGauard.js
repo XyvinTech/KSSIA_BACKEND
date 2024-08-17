@@ -6,7 +6,7 @@ function rolesGuard(permissionName) {
 			
 		const userPermissions = Object.values(req.user.role.permissions)
 		const hasPermission = userPermissions.some(
-			(permission) => permission.name === permissionName && permission.value === true
+			(permission) => permission.name === permissionName && permission.value
 		  );
 		
 		if(hasPermission) return next()
