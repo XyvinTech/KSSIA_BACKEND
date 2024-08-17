@@ -4,55 +4,45 @@ const User = require("../models/user");
 const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
 const { CreateUserSchema, EditUserSchema } = require("../validation");
-
+const path = require('path')
 /****************************************************************************************************/
 /*                                 Function to create a new user                                    */
 /****************************************************************************************************/
-
+function modifyIncomingData(createData){
+    createData.name = {
+        first_name:createData.first_name,
+        middle_name:createData.middle_name,
+        last_name:createData.last_name,
+    }
+    createData.phone_numbers = {
+        personal:createData.phone_number,
+        landline:createData.landline,
+        company_phone_number:createData.companyphone,
+        whatsapp_number:createData.whatsapp_number,
+        whatsapp_business_number:createData.whatsapp_business_number
+    }
+    delete createData.first_name
+    delete createData.middle_name
+    delete createData.last_name
+    delete createData.phone_number
+    delete createData.landline
+    delete createData.companyphone
+    delete createData.whatsapp_number
+    delete createData.whatsapp_business_number
+    delete createData.status
+    // temporary delete
+    delete createData.personaladdress
+    return createData
+}
 exports.createUser = async (req, res) => {
   
-    const data = {
-        name: {
-            first_name: "John",
-            middle_name: "Doe",
-            last_name: "Smith"
-        },
-        membership_id: "123456789", // Make sure this is unique if you plan on inserting multiple users
-        blood_group: "O+",
-        email: "john.doe@example.com",
-        profile_picture: "http://example.com/profile.jpg",
-        phone_numbers: {
-            personal: "9567742775", // Note: I've changed this to String as per best practices
-            landline: "9876543210", // Note: I've changed this to String as per best practices
-            company_phone_number: "1112223333", // Note: I've changed this to String as per best practices
-            whatsapp_number: "2223334444", // Note: I've changed this to String as per best practices
-            whatsapp_business_number: "3334445555" // Note: I've changed this to String as per best practices
-        },
-        designation: "Software Engineer",
-        company_name: "Example Company",
-        company_email: "info@example.com",
-        business_category: "Technology",
-        sub_category: "Software Development",
-        address: {
-            street: "123 Main Street",
-            city: "Anytown",
-            state: "CA",
-            zip: "12345"
-        },
-        social_media: [
-            { platform: "LinkedIn", url: "https://linkedin.com/in/johndoe" },
-            { platform: "Twitter", url: "https://twitter.com/johndoe" }
-        ],
-        websites: [{ name: "Portfolio", url: "https://johndoe.com" }],
-        video: [{ name: "Demo Video", url: "https://youtube.com/johndoevideo" }],
-        awards: [{ name: "Award 1", url: "http://example.com/award1" }],
-        certificates: [{ name: "Certificate 1", url: "http://example.com/certificate1" }],
-        brochure: [{ name: "Company Brochure", url: "http://example.com/brochure" }]
-    };
+    const data = req.body;
     // console.log(`Received data parameter: ${data}`);                                 // Debug line
-
+    
     // Validate the input data
-    const { error } = {error:false}
+    const { error } = CreateUserSchema.validate(modifyIncomingData(data), {
+        abortEarly: true
+    });
 
     // Check if an error exists in the validation
     if (error) {
@@ -146,7 +136,7 @@ exports.deleteUser = async (req, res) => {
 
     if (userId) {
         // Find and delete the user using userId
-        const user = await User.findByIdAndDelete(userId);
+        user = await User.findByIdAndDelete(userId);
         if (!user) {
             // If the user is not found, return a 404 status code with the error message
             // console.log('User not found');                                           // Debug line
@@ -154,7 +144,7 @@ exports.deleteUser = async (req, res) => {
         }
     } else if (membership_id) {
         // Find and delete the user using membership_id
-        const user = await User.findOneAndDelete(membership_id);
+        user = await User.findOneAndDelete(membership_id);
         if (!user) {
             // If the user is not found, return a 404 status code with the error message
             // console.log('User not found');                                           // Debug line
@@ -174,6 +164,7 @@ exports.deleteUser = async (req, res) => {
     if (user.certificates) {
         for (const cert of user.certificates) {
             let oldFileKey = path.basename(cert.url);
+            // here bucketname is not defined
             await deleteFile(bucketName, oldFileKey);
         }
     }
@@ -214,8 +205,26 @@ exports.deleteUser = async (req, res) => {
 /****************************************************************************************************/
 
 exports.getAllUsers = async (req, res) => {
-  
-    const users = await User.find();
+    
+    const users = (await User.find({}, {
+        '_id':1,
+        'name.first_name': 1,
+        'name.middle_name': 1,
+        'name.last_name': 1,
+        'membership_id': 1,
+        'company_name': 1,
+        'designation': 1,
+        'phone_numbers.personal': 1,
+        'is_active': 1,
+    }).lean()).map(user=>({
+        id:user._id,
+        name: `${user.name.first_name} ${user.name.middle_name || ''} ${user.name.last_name}`.trim(),
+        companyname: user.company_name,
+        designation: user.designation,
+        phonenumber: user.phone_numbers.personal,
+        status: user.is_active,
+        rating: user.rating
+    })); 
     // console.log(users);                                                              // Debug line
     return responseHandler(res, 200, "Users retrieved successfully", users);
    
@@ -237,13 +246,21 @@ exports.getUserById = async (req, res) => {
     }
 
     // Check if a user with this id exists
-    const user = await User.findById(userId);
+    let user = await User.findById(userId);
     if (!user) {
         // If the user is not found, return a 404 status code with the error message
         // console.log('User not found');                                               // Debug line
         return responseHandler(res, 404, "User not found");
     }
-
+    user = user.toObject()
+    const name =  `${user.name.first_name} ${user.name.middle_name || ''} ${user.name.last_name}`.trim();
+    user.name = name
+    user.img = user.profile_picture
+    delete user.profile_picture
+    user.id = user._id
+    delete user._id
+    user.phone = user.phone_numbers.personal
+    user.company_phone_number = user.phone_numbers.company_phone_number
     // console.log(`User retrieved successfully`);                                      // Debug line
     return responseHandler(res, 200, "User retrieved successfully", user);
    

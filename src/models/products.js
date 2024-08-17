@@ -7,7 +7,7 @@ const productSchema = new mongoose.Schema(
             ref: "User",
             required: true
         },
-        name: { type: String, required:true },
+        productname: { type: String, required:true },
         image: { type: String },
         price: { type: Number, min: 0, required:true },
         offer_price: { type: Number, min: 0 },

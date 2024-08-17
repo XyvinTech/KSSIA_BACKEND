@@ -17,8 +17,8 @@ const userSchema = new mongoose.Schema(
         email: { type: String, unique: true },
         profile_picture: { type: String },
         phone_numbers: {
-            personal: { type: Number, required: true, unique: true },
-            landline: { type: Number, unique: true },
+            personal: { type: String, required: true, unique: true },
+            landline: { type: String, unique: true },
             company_phone_number: { type: Number },
             whatsapp_number: { type: Number },
             whatsapp_business_number: { type: Number },

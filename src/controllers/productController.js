@@ -22,7 +22,7 @@ exports.addProduct = async (req, res) => {
     }
 
     // Check if the product exists in the database
-    const productExist = await Product.findOne({ name: data.name, seller_id: data.seller_id });
+    const productExist = await Product.findOne({ name: data.productname, seller_id: data.seller_id });
     if (productExist) {
         return responseHandler(res, 400, "Product already exists");
     }
@@ -97,7 +97,11 @@ exports.editProduct = async (req, res) => {
 /*                                  Function to get all products                                    */
 /****************************************************************************************************/
 exports.getAllProducts = async (req, res) => {
-    const products = await Product.find().populate({ path: 'seller_id', select: 'name membership_id' }).exec();
+    const products = (await Product.find().populate({ path: 'seller_id', select: 'name membership_id' }).exec()).map(product=>({
+        id : product._id,
+        ...product.toObject()
+
+    }));
     return responseHandler(res, 200, "Products retrieved successfully!", products);
 };
 
