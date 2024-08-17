@@ -57,11 +57,13 @@
  *                       type: string
  *                     speaker_designation:
  *                       type: string
- *                     speaker_image:
- *                       type: string
- *                       format: binary
  *                     speaker_role:
  *                       type: string
+ *               speaker_images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
  *               activate:
  *                 type: boolean
  *     responses:

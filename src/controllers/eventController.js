@@ -14,7 +14,6 @@ const {
 
 // Create a new event
 exports.createEvent = async (req, res) => {
-
     const data = req.body;
 
     // Validate the input data
@@ -44,10 +43,12 @@ exports.createEvent = async (req, res) => {
             if (req.files.guest_image) {
                 data.guest_image = await handleFileUpload(req.files.guest_image[0], bucketName);
             }
+
+            // Handle speaker images separately from speakers array
             if (data.speakers && Array.isArray(data.speakers)) {
                 data.speakers = await Promise.all(data.speakers.map(async (speaker, index) => {
-                    if (req.files[`speaker_image_${index}`]) {
-                        speaker.speaker_image = await handleFileUpload(req.files[`speaker_image_${index}`][0], bucketName);
+                    if (req.files.speaker_images && req.files.speaker_images[index]) {
+                        speaker.speaker_image = await handleFileUpload(req.files.speaker_images[index], bucketName);
                     }
                     return speaker;
                 }));
@@ -65,9 +66,7 @@ exports.createEvent = async (req, res) => {
         return responseHandler(res, 500, `Error saving event: ${err.message}`);
     }
 
-
     return responseHandler(res, 201, "New event created successfully!", newEvent);
-
 };
 
 /****************************************************************************************************/

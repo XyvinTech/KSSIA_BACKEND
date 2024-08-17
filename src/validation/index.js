@@ -101,21 +101,21 @@ exports.productsSchemaval = productsSchema;
 const speakerSchema = Joi.object({
     speaker_name: Joi.string().required(),
     speaker_designation: Joi.string().required(),
-    speaker_image: Joi.string().required(),
+    speaker_image: Joi.string().uri(),
     speaker_role: Joi.string().required()
 });
 
 exports.EditEventsSchema = Joi.object({
     name: Joi.string().required(),
     type: Joi.string().required(),
-    image: Joi.string(),
+    image: Joi.string().uri(),
     date: Joi.date(),
     time: Joi.date(),
     platform: Joi.string(),
     meeting_link: Joi.string(),
     organiser_name: Joi.string().required(),
     organiser_company_name: Joi.string().required(),
-    guest_image: Joi.string(),
+    guest_image: Joi.string().uri(),
     organiser_role: Joi.string().required(),
     speakers: Joi.array().items(speakerSchema),
     activate: Joi.boolean()
