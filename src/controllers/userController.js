@@ -5,7 +5,6 @@ const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
 const responseHandler = require("../helpers/responseHandler");
 const User = require("../models/user");
-const Payments = require("../models/payment");
 const {
     CreateUserSchema,
     EditUserSchema,
@@ -323,38 +322,5 @@ exports.findUserByMembershipId = async (req,res) => {
     }
     // console.log('User found in database');                                           // Debug line
     return responseHandler(res, 200, "User found", user);
-
-}
-
-/****************************************************************************************************/
-/*                             Function to get users payments history                               */
-/****************************************************************************************************/
-
-exports.getUserPayments = async (req,res) => {
-
-    const { userId } = req.params;
-    // console.log(`Received userId parameter: ${userId}`);                             // Debug line
-
-    // Check if the user id is present in the request
-    if (!userId) {
-        // console.log('User ID is required');                                          // Debug line
-        return responseHandler(res, 400, "Invalid request");
-    }
-
-    // Check if the user id exist in the database
-    const user = await User.findById(userId);
-    if (!user) {
-        // console.log('User not found in database');                                   // Debug line
-        return responseHandler(res, 404, "User not found");
-    }
-
-    const payments = await Payments.find({ member: userId })
-
-    if (!payments){
-        return responseHandler(res, 404, "No payments found");
-    }
-
-    // console.log('Successfully retrived payments');                                   // Debug line
-    return responseHandler(res, 200, "Successfully retrived payments", payments);
 
 }

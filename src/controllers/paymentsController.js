@@ -3,6 +3,7 @@ const path = require('path');
 const responseHandler = require("../helpers/responseHandler");
 const deleteFile = require("../helpers/deleteFiles");
 const Payment = require("../models/payment");
+const User = require("../models/user");
 const { PaymentSchema } = require("../validation");
 const handleFileUpload = require("../utils/fileHandler");
 
@@ -141,4 +142,29 @@ exports.updatePaymentStatus = async (req, res) => {
     } catch (err) {
         return responseHandler(res, 500, `Error saving payment: ${err.message}`);
     }
+};
+
+/****************************************************************************************************/
+/*                             Function to get users payments history                               */
+/****************************************************************************************************/
+exports.getUserPayments = async (req, res) => {
+
+    const { userId } = req.params;
+
+    if (!userId) {
+        return responseHandler(res, 400, "Invalid request");
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+        return responseHandler(res, 404, "User not found");
+    }
+
+    const payments = await Payment.find({ member: userId });
+
+    if (payments.length === 0) {
+        return responseHandler(res, 404, "No payments found");
+    }
+
+    return responseHandler(res, 200, "Successfully retrieved payments", payments);
 };

@@ -217,6 +217,39 @@
 
 /**
  * @swagger
+ * /payments/{userId}:
+ *   get:
+ *     summary: Retrieve payment history for a user by userId
+ *     tags: 
+ *       - Payments
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the user whose payment history is to be retrieved
+ *     responses:
+ *       200:
+ *         description: Payment history retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Payment'
+ *       400:
+ *         description: Invalid request, missing or invalid userId
+ *       404:
+ *         description: User or payments not found
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
  * components:
  *   schemas:
  *     Payment:

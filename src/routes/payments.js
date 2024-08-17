@@ -21,4 +21,7 @@ paymentRoute.delete('/:paymentID', asyncHandler(paymentController.deletePayment)
 // Route to update the status of a payment
 paymentRoute.patch('/:paymentID/status', asyncHandler(paymentController.updatePaymentStatus));
 
+// Route to get the payments of a user
+paymentRoute.get('/:userId', asyncHandler(paymentController.getUserPayments));
+
 module.exports = paymentRoute;
