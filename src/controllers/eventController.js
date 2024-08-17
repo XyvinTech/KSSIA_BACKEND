@@ -16,6 +16,14 @@ const {
 exports.createEvent = async (req, res) => {
     const data = req.body;
 
+    // Validate the input data
+    const {
+        error
+    } = EditEventsSchema.validate(data, {
+        abortEarly: true
+    });
+    if (error) return responseHandler(res, 400, `Invalid input: ${error.message}`);
+
     // Check if an event with the same details already exists
     const eventExist = await Event.findOne({
         name: data.name,
@@ -49,14 +57,6 @@ exports.createEvent = async (req, res) => {
     } catch (err) {
         return responseHandler(res, 500, `Error uploading file: ${err.message}`);
     }
-
-    // Validate the input data
-    const {
-        error
-    } = EditEventsSchema.validate(data, {
-        abortEarly: true
-    });
-    if (error) return responseHandler(res, 400, `Invalid input: ${error.message}`);
 
     try {
         // Create and save the new event
