@@ -17,13 +17,13 @@ exports.createEvent = async (req, res) => {
     const data = req.body;
 
     // Parse the speakers field, which is coming as a JSON string in form-data
-    if (typeof data.speakers === 'string') {
+    if (typeof req.body.speakers === 'string') {
         try {
-            data.speakers = JSON.parse(data.speakers);
+            req.body.speakers = JSON.parse(req.body.speakers);
         } catch (err) {
             return responseHandler(res, 400, 'Invalid input: "speakers" must be a valid JSON array');
         }
-    }
+    }    
 
     // Validate the input data using Joi
     const {

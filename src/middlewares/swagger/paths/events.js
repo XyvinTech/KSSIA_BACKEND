@@ -15,7 +15,8 @@
  *     security:
  *       - BearerAuth: []
  *     requestBody:
- *       description: Event object that needs to be added to the system. Includes file uploads for images.
+ *       description: Event object that needs to be added to the system. Includes file uploads for images. 
+ *                    The `speakers` field must be sent as a JSON string.
  *       required: true
  *       content:
  *         multipart/form-data:
@@ -49,16 +50,8 @@
  *               organiser_role:
  *                 type: string
  *               speakers:
- *                 type: array
- *                 items:
- *                   type: object
- *                   properties:
- *                     speaker_name:
- *                       type: string
- *                     speaker_designation:
- *                       type: string
- *                     speaker_role:
- *                       type: string
+ *                 type: string
+ *                 description: "JSON array of speakers, sent as a string."
  *               speaker_images:
  *                 type: array
  *                 items:
