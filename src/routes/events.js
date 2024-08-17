@@ -9,7 +9,7 @@ eventRoute.use(authVerify);
 
 // Get all events and add a new event
 eventRoute
-  .route("/events")
+  .route("/")
   .post(upload.fields([{
       name: 'image',
       maxCount: 1
@@ -30,7 +30,7 @@ eventRoute
 
 // Edit an existing event by ID
 eventRoute
-  .route("/events/:eventId")
+  .route("/:eventId")
   .get(asyncHandler(eventController.getEventById))
   .put(upload.fields([{
       name: 'image',
@@ -50,7 +50,7 @@ eventRoute
 
 // Delete an event by ID
 eventRoute
-  .route("/events/:eventId")
+  .route("/:eventId")
   .delete(asyncHandler(eventController.deleteEvent));
 
 

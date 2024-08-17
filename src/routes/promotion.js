@@ -11,7 +11,7 @@ promotionRoute.use(authVerify);
 
 promotionRoute.post('/', upload.single('file'), asyncHandler(promotionController.createPromotion));
 
-promotionRoute.get('/promotions', asyncHandler(promotionController.getAllPromotions));
+promotionRoute.get('/', asyncHandler(promotionController.getAllPromotions));
 
 promotionRoute.get('/:promotionId', asyncHandler(promotionController.getPromotionById));
 promotionRoute.put('/:promotionId', upload.single('file'), asyncHandler(promotionController.editPromotion));
