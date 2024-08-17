@@ -342,7 +342,7 @@ exports.getUserPayments = async (req,res) => {
     }
 
     // Check if the user id exist in the database
-    const user = await User.findOne(userId);
+    const user = await User.findById(userId);
     if (!user) {
         // console.log('User not found in database');                                   // Debug line
         return responseHandler(res, 404, "User not found");
