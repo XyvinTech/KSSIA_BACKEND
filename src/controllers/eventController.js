@@ -14,7 +14,7 @@ const {
 
 // Create a new event
 exports.createEvent = async (req, res) => {
-    let data = req.body;
+    const data = req.body;
 
     // Parse the speakers field, which is coming as a JSON string in form-data
     if (typeof data.speakers === 'string') {
@@ -26,7 +26,11 @@ exports.createEvent = async (req, res) => {
     }
 
     // Validate the input data using Joi
-    const { error } = EditEventsSchema.validate(data, { abortEarly: true });
+    const {
+        error
+    } = EditEventsSchema.validate(data, {
+        abortEarly: true
+    });
     if (error) return responseHandler(res, 400, `Invalid input: ${error.message}`);
 
     // Check if an event with the same details already exists
