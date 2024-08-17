@@ -14,14 +14,19 @@ const {
 
 // Create a new event
 exports.createEvent = async (req, res) => {
-    const data = req.body;
+    let data = req.body;
 
-    // Validate the input data
-    const {
-        error
-    } = EditEventsSchema.validate(data, {
-        abortEarly: true
-    });
+    // Parse the speakers field, which is coming as a JSON string in form-data
+    if (typeof data.speakers === 'string') {
+        try {
+            data.speakers = JSON.parse(data.speakers);
+        } catch (err) {
+            return responseHandler(res, 400, 'Invalid input: "speakers" must be a valid JSON array');
+        }
+    }
+
+    // Validate the input data using Joi
+    const { error } = EditEventsSchema.validate(data, { abortEarly: true });
     if (error) return responseHandler(res, 400, `Invalid input: ${error.message}`);
 
     // Check if an event with the same details already exists
@@ -44,7 +49,7 @@ exports.createEvent = async (req, res) => {
                 data.guest_image = await handleFileUpload(req.files.guest_image[0], bucketName);
             }
 
-            // Handle speaker images separately from speakers array
+            // Handle speaker images and assign them to the appropriate speaker
             if (data.speakers && Array.isArray(data.speakers)) {
                 data.speakers = await Promise.all(data.speakers.map(async (speaker, index) => {
                     if (req.files.speaker_images && req.files.speaker_images[index]) {
