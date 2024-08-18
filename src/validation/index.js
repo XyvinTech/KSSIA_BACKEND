@@ -51,12 +51,7 @@ exports.CreateUserSchema = Joi.object({
     company_email: Joi.string().email(),
     business_category: Joi.string(),
     sub_category: Joi.string(),
-    address: Joi.object({
-        street: Joi.string(),
-        city: Joi.string(),
-        state: Joi.string(),
-        zip: Joi.string()
-    }),
+    address: Joi.string(),
     websites: Joi.array().items(otherSchema),
     is_active: Joi.boolean().default(true),
     is_deleted: Joi.boolean().default(false)
