@@ -21,6 +21,6 @@ const paymentSchema = new mongoose.Schema({
     reason: { type: String },
 });
 
-const payment = mongoose.model('Payment', paymentSchema);
+const Payment = mongoose.model('Payment', paymentSchema);
 
-module.exports = payment;
+module.exports = Payment;

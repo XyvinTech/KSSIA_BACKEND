@@ -68,15 +68,15 @@ exports.createEvent = async (req, res) => {
         return responseHandler(res, 500, `Error uploading file: ${err.message}`);
     }
 
+    // Create and save the new event
+    const newEvent = new Event(data);
+
     try {
-        // Create and save the new event
-        const newEvent = new Event(data);
         await newEvent.save();
+        return responseHandler(res, 201, "New event created successfully!", newEvent);
     } catch (err) {
         return responseHandler(res, 500, `Error saving event: ${err.message}`);
     }
-
-    return responseHandler(res, 201, "New event created successfully!", newEvent);
 };
 
 /****************************************************************************************************/

@@ -21,6 +21,6 @@ const newsSchema = new mongoose.Schema({
     timestamps: true,
 });
 
-const news = mongoose.model('News', newsSchema);
+const News = mongoose.model('News', newsSchema);
 
-module.exports = news;
+module.exports = News;
