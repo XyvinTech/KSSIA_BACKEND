@@ -27,6 +27,8 @@
  *                 type: string
  *               name:
  *                 type: string
+ *               description:
+ *                 type: string
  *               image:
  *                 type: string
  *                 format: binary
@@ -151,6 +153,8 @@
  *                 type: string
  *               name:
  *                 type: string
+ *               description:
+ *                 type: string
  *               image:
  *                 type: string
  *                 format: binary
@@ -246,6 +250,9 @@
  *         image:
  *           type: string
  *           description: URL of the event image
+ *         description:
+ *           type: string
+ *           description: description of the event
  *         date:
  *           type: string
  *           format: date-time

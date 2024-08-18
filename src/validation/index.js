@@ -111,6 +111,7 @@ exports.EditEventsSchema = Joi.object({
     name: Joi.string().required(),
     type: Joi.string().required(),
     image: Joi.string().uri(),
+    description: Joi.string(),
     date: Joi.date(),
     time: Joi.date(),
     platform: Joi.string(),

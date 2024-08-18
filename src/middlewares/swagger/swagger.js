@@ -713,6 +713,11 @@ const options = {
               description: 'URL of the event image',
               example: 'http://example.com/event.jpg',
             },
+            description: {
+              type: 'string',
+              description: 'Description of the event',
+              example: 'Annual Tech Conference is a big event conducted by xyz',
+            },
             date: {
               type: 'string',
               format: 'date',
