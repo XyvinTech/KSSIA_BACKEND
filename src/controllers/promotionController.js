@@ -29,16 +29,10 @@ exports.createPromotion = async (req, res) => {
         type: data.type,
         startDate: data.startDate,
         endDate: data.endDate,
-        ...data.type === 'banner' && {
-            banner_image_url: data.banner_image_url
-        },
+    
         ...data.type === 'video' && {
-            upload_video: data.upload_video,
             yt_link: data.yt_link,
             video_title: data.video_title
-        },
-        ...data.type === 'poster' && {
-            poster_image_url: data.poster_image_url
         },
         ...data.type === 'notice' && {
             notice_title: data.notice_title,
@@ -51,9 +45,9 @@ exports.createPromotion = async (req, res) => {
 
     // Handle file upload if present
     const bucketName = process.env.AWS_S3_BUCKET;
-    let banner_image_url = '';
-    let upload_video = '';
-    let poster_image_url = '';
+    const banner_image_url = '';
+    const upload_video = '';
+    const poster_image_url = '';
 
     if (req.file) {
         if (data.type === 'banner') {
