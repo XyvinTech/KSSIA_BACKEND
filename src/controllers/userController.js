@@ -5,6 +5,7 @@ const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
 const responseHandler = require("../helpers/responseHandler");
 const User = require("../models/user");
+const Product = require("../models/products");
 const {
     CreateUserSchema,
     EditUserSchema,
@@ -127,8 +128,16 @@ exports.getUserById = async (req, res) => {
         return responseHandler(res, 404, "User not found");
     }
 
+    const products = await Product.find({ seller_id: userId }).exec();
+    if (!products.length) {
+        products = "Seller has no products";
+    }
+
+    // Prepare response with user data and products
+    const userData = { ...user._doc, products: products };
+
     // console.log(`User retrieved successfully`);                                      // Debug line
-    return responseHandler(res, 200, "User retrieved successfully", user);
+    return responseHandler(res, 200, "User retrieved successfully", userData);
    
 };
 
