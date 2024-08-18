@@ -17,11 +17,13 @@ const schemaUrl = Joi.object({
 
 const otherSchema = Joi.object({
     name: Joi.string(),
-    url: Joi.string().uri()
+    url: Joi.string().uri(),
+    authority_name : Joi.string()
 });
 
 const productsSchema = Joi.object({
     seller_id: Joi.string().required(),
+    _id: Joi.string(),
     name: Joi.string().required(),
     image: Joi.string().uri(),
     price: Joi.number().min(0).required(),
@@ -29,6 +31,7 @@ const productsSchema = Joi.object({
     description: Joi.string(),
     date: Joi.date(),
     units: Joi.number().min(0),
+    moq: Joi.number().min(0),
     status: Joi.boolean().default(true),
     tags: Joi.array().items(Joi.string())
 });
@@ -49,6 +52,8 @@ exports.CreateUserSchema = Joi.object({
     designation: Joi.string(),
     company_name: Joi.string(),
     company_email: Joi.string().email(),
+    company_address: Joi.string(),
+    company_logo: Joi.string().uri(),
     business_category: Joi.string(),
     sub_category: Joi.string(),
     address: Joi.string(),
@@ -72,22 +77,24 @@ exports.EditUserSchema = Joi.object({
     designation: Joi.string(),
     company_name: Joi.string(),
     company_email: Joi.string().email(),
+    company_address: Joi.string(),
+    company_logo: Joi.string().uri(),
+    business_category: Joi.string(),
+    sub_category: Joi.string(),
     // business_category: Joi.string(),
     // sub_category: Joi.string(),
     bio: Joi.string(),
-    address: Joi.object({
-        street: Joi.string(),
-        city: Joi.string(),
-        state: Joi.string(),
-        zip: Joi.string()
-    }),
+    address: Joi.string(),
     social_media: Joi.array().items(schemaUrl),
     websites: Joi.array().items(otherSchema),
     video: Joi.array().items(otherSchema),
     awards: Joi.array().items(otherSchema),
     certificates: Joi.array().items(otherSchema),
     brochure: Joi.array().items(otherSchema),
-    products: Joi.array().items(productsSchema)
+    products: Joi.array().items(productsSchema),
+    is_active: Joi.boolean().default(true),
+    is_deleted: Joi.boolean().default(false),
+    selectedTheme: Joi.string()
 });
 
 exports.productsSchemaval = productsSchema;
