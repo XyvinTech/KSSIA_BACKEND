@@ -153,11 +153,11 @@ exports.NewsSchema = Joi.object({
 
 exports.EditPromotionSchema = Joi.object({
     type: Joi.string().valid('banner', 'video', 'poster', 'notice').required(),
-    banner_image_url: Joi.string().when('type', { is: 'banner', then: Joi.required() }),
-    upload_video: Joi.string().when('type', { is: 'video', then: Joi.required() }),
+    banner_image_url: Joi.string(),
+    upload_video: Joi.string(),
     yt_link: Joi.string().when('type', { is: 'video', then: Joi.required() }),
     video_title: Joi.string().when('type', { is: 'video', then: Joi.required() }),
-    poster_image_url: Joi.string().when('type', { is: 'poster', then: Joi.required() }),
+    poster_image_url: Joi.string(),
     notice_title: Joi.string().when('type', { is: 'notice', then: Joi.required() }),
     notice_description: Joi.string().when('type', { is: 'notice', then: Joi.required() }),
     notice_link: Joi.string().when('type', { is: 'notice', then: Joi.required() }),
