@@ -3,7 +3,6 @@ const path = require('path');
 const responseHandler = require("../helpers/responseHandler");
 const Message = require("../models/messages");
 const ChatThread = require("../models/chats");
-const User = require("../models/user");
 const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
 
