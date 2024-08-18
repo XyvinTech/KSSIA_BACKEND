@@ -105,9 +105,9 @@ exports.editPromotion = async (req, res) => {
     try {
         // Handle file upload if present
         const bucketName = process.env.AWS_S3_BUCKET;
-        let banner_image_url = promotion.banner_image_url;
-        let upload_video = promotion.upload_video;
-        let poster_image_url = promotion.poster_image_url;
+        const banner_image_url = promotion.banner_image_url;
+        const upload_video = promotion.upload_video;
+        const poster_image_url = promotion.poster_image_url;
 
         if (req.file) {
             // Delete old file

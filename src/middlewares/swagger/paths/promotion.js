@@ -25,19 +25,13 @@
  *               type:
  *                 type: string
  *                 enum: ['banner', 'video', 'poster', 'notice']
- *               banner_image_url:
- *                 type: string
- *                 format: binary
- *               upload_video:
+ *               file:
  *                 type: string
  *                 format: binary
  *               yt_link:
  *                 type: string
  *               video_title:
  *                 type: string
- *               poster_image_url:
- *                 type: string
- *                 format: binary
  *               notice_title:
  *                 type: string
  *               notice_description:
@@ -143,19 +137,13 @@
  *               type:
  *                 type: string
  *                 enum: ['banner', 'video', 'poster', 'notice']
- *               banner_image_url:
- *                 type: string
- *                 format: binary
- *               upload_video:
+ *               file:
  *                 type: string
  *                 format: binary
  *               yt_link:
  *                 type: string
  *               video_title:
  *                 type: string
- *               poster_image_url:
- *                 type: string
- *                 format: binary
  *               notice_title:
  *                 type: string
  *               notice_description:
