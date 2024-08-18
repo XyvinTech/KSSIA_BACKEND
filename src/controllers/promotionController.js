@@ -24,24 +24,27 @@ exports.createPromotion = async (req, res) => {
     });
     if (error) return responseHandler(res, 400, `Invalid input: ${error.message}`);
 
-    // Check if a promotion with the same data already exists
-    const promotionExist = await Promotion.findOne({
-        type: data.type,
-        startDate: data.startDate,
-        endDate: data.endDate,
+    if (data.type !== 'banner'){
 
-        ...data.type === 'video' && {
-            yt_link: data.yt_link,
-            video_title: data.video_title
-        },
-        ...data.type === 'notice' && {
-            notice_title: data.notice_title,
-            notice_description: data.notice_description,
-            notice_link: data.notice_link
-        }
-    });
+        // Check if a promotion with the same data already exists
+        const promotionExist = await Promotion.findOne({
+            type: data.type,
+            startDate: data.startDate,
+            endDate: data.endDate,
 
-    if (promotionExist) return responseHandler(res, 400, "Promotion already exists");
+            ...data.type === 'video' && {
+                yt_link: data.yt_link,
+                video_title: data.video_title
+            },
+            ...data.type === 'notice' && {
+                notice_title: data.notice_title,
+                notice_description: data.notice_description,
+                notice_link: data.notice_link
+            }
+        });
+
+        if (promotionExist) return responseHandler(res, 400, "Promotion already exists");
+    }
 
     // Handle file upload if present
     const bucketName = process.env.AWS_S3_BUCKET;
