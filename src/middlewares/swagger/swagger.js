@@ -49,6 +49,10 @@ const options = {
         name: 'Files',
         description: 'Operations related to handeling files in AWS S3 Bucket'
       },
+      {
+        name: 'Chats',
+        description: 'Operations related to handling Chats'
+      },
     ],
     servers: [
       // {
@@ -894,6 +898,48 @@ const options = {
             }
           }
         },
+        Messages:{
+          type: 'object',
+          properties:{
+            _id:{
+              type: 'string',
+              format: 'uuid'
+            },
+            from:{
+              type: 'string',
+              format: 'uuid'
+            },
+            to:{
+              type: 'string',
+              format: 'uuid'
+            },
+            content:{
+              type: 'string'
+            },
+            attachments:{
+              type: 'array',
+              items:{
+                type: 'object',
+                properties:{
+                  fileType:{
+                    type: 'string'
+                  },
+                  url:{
+                    type: 'string'
+                  }
+                }
+              }
+            },
+            status:{
+              type: 'string',
+              enum: ['sent', 'delivered', 'seen']
+            },
+            timestamp:{
+              type: 'string',
+              format: 'date-time'
+            }
+          }
+        }
       },
     },
     security: [{
