@@ -10,7 +10,7 @@ const productRoute = express.Router();
 productRoute.use(authVerify);
 
 // Route to add a new product
-productRoute.post('/', upload.single('file'), asyncHandler(productController.addProduct));
+productRoute.post('/', upload.single('image'), asyncHandler(productController.addProduct));
 
 // Route to retrieve all products
 productRoute.get('/', asyncHandler(productController.getAllProducts));
@@ -19,7 +19,7 @@ productRoute.get('/', asyncHandler(productController.getAllProducts));
 productRoute.get('/:productId', asyncHandler(productController.getProductsById));
 
 // Route to update a product by ID
-productRoute.put('/:productId', upload.single('file'), asyncHandler(productController.editProduct));
+productRoute.put('/:productId', upload.single('image'), asyncHandler(productController.editProduct));
 
 // Route to delete a product by ID
 productRoute.delete('/:productId', asyncHandler(productController.deleteProduct));
