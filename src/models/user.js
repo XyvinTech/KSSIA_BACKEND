@@ -50,6 +50,10 @@ const userSchema = new mongoose.Schema(
         ],
         certificates: [Subschema],
         brochure: [Subschema],
+        status: {
+            type: String,
+            enum: ['active', 'inactive', 'suspended', 'notice']
+        },
         is_active: { type: Boolean, default: true },
         is_deleted: { type: Boolean, default: false },
         selectedTheme: { type: String, default:'white'}

@@ -48,6 +48,7 @@ exports.CreateUserSchema = Joi.object({
     blood_group: Joi.string(),
     email: Joi.string().email().required(),
     profile_picture: Joi.string().uri(),
+    bio: Joi.string(),
     phone_numbers: phoneSchema.required(),
     designation: Joi.string(),
     company_name: Joi.string(),
@@ -58,6 +59,7 @@ exports.CreateUserSchema = Joi.object({
     sub_category: Joi.string(),
     address: Joi.string(),
     websites: Joi.array().items(otherSchema),
+    status: Joi.string(),
     is_active: Joi.boolean().default(true),
     is_deleted: Joi.boolean().default(false)
 });
@@ -92,6 +94,7 @@ exports.EditUserSchema = Joi.object({
     certificates: Joi.array().items(otherSchema),
     brochure: Joi.array().items(otherSchema),
     products: Joi.array().items(productsSchema),
+    status: Joi.string(),
     is_active: Joi.boolean().default(true),
     is_deleted: Joi.boolean().default(false),
     selectedTheme: Joi.string()

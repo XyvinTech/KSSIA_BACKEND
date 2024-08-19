@@ -102,35 +102,7 @@ exports.editUser = async (req, res) => {
 /*                                   Function to delete an user                                     */
 /****************************************************************************************************/
 
-exports.deleteUser = async (req, res) => {
-
-    const { userId } = req.params;
-    const { membership_id } = req.params;
-    // console.log(`Received userId: ${userId}`);                                       // Debug line
-    // console.log(`Received membership_id: ${membership_id}`);                         // Debug line
-    let user;
-
-    if (userId) {
-        // Find and delete the user using userId
-        const user = await User.findByIdAndDelete(userId);
-        if (!user) {
-            // If the user is not found, return a 404 status code with the error message
-            // console.log('User not found');                                           // Debug line
-            return responseHandler(res, 404, "User not found");
-        }
-    } else if (membership_id) {
-        // Find and delete the user using membership_id
-        const user = await User.findOneAndDelete( {membership_id: membership_id} );
-        if (!user) {
-            // If the user is not found, return a 404 status code with the error message
-            // console.log('User not found');                                           // Debug line
-            return responseHandler(res, 404, "User not found");
-        }
-    } else {
-        // If neither userId nor membership_id is provided, return a 400 status code with the error
-        // console.log('Invalid request');                                              // Debug line
-        return responseHandler(res, 400, `Invalid request`);
-    }
+const deleteUserFiles = async (user) => {
     // Delete user's files
     if (user.profile_picture) {
         let oldFileKey = path.basename(user.profile_picture);
@@ -161,6 +133,43 @@ exports.deleteUser = async (req, res) => {
             let oldFileKey = path.basename(award.url);
             await deleteFile(bucketName, oldFileKey);
         }
+    }
+};
+
+exports.deleteUser = async (req, res) => {
+
+    const { userId } = req.params;
+    const { membership_id } = req.params;
+    // console.log(`Received userId: ${userId}`);                                       // Debug line
+    // console.log(`Received membership_id: ${membership_id}`);                         // Debug line
+    let user;
+
+    if (userId) {
+        // Find and delete the user using userId
+        const user = await User.findByIdAndDelete(userId);
+        if (!user) {
+            // If the user is not found, return a 404 status code with the error message
+            // console.log('User not found');                                           // Debug line
+            return responseHandler(res, 404, "User not found");
+        }
+
+        await deleteUserFiles(user);
+
+    } else if (membership_id) {
+        // Find and delete the user using membership_id
+        const user = await User.findOneAndDelete( {membership_id: membership_id} );
+        if (!user) {
+            // If the user is not found, return a 404 status code with the error message
+            // console.log('User not found');                                           // Debug line
+            return responseHandler(res, 404, "User not found");
+        }
+
+        await deleteUserFiles(user);
+
+    } else {
+        // If neither userId nor membership_id is provided, return a 400 status code with the error
+        // console.log('Invalid request');                                              // Debug line
+        return responseHandler(res, 400, `Invalid request`);
     }
 
     // Delete product images
