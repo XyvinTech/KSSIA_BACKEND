@@ -128,7 +128,7 @@ exports.getUserById = async (req, res) => {
         return responseHandler(res, 404, "User not found");
     }
 
-    const products = await Product.find({ seller_id: userId }).exec();
+    let products = await Product.find({ seller_id: userId }).exec();
     if (!products.length) {
         products = "Seller has no products";
     }
