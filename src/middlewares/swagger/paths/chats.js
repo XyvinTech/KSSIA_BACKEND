@@ -25,14 +25,9 @@
  *               attachments:
  *                 type: array
  *                 items:
- *                   type: object
- *                   properties:
- *                     fileType:
- *                       type: string
- *                       description: MIME type of the file
- *                     url:
- *                       type: string
- *                       description: URL of the uploaded file
+ *                   type: string
+ *                   format: binary
+ *                   description: File to be uploaded
  *     responses:
  *       201:
  *         description: Successfully sent the message
@@ -181,6 +176,53 @@
  *         description: Internal server error
  */
 
+/**
+ * @swagger
+ * /chats/notifications/{userId}:
+ *   get:
+ *     summary: Get unread message notifications
+ *     tags: [Chats]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         description: ID of the user to retrieve notifications for
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved unread notifications
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   chatThreadId:
+ *                     type: string
+ *                     description: ID of the chat thread
+ *                   lastMessage:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         description: ID of the last message
+ *                       content:
+ *                         type: string
+ *                         description: Content of the last message
+ *                       timestamp:
+ *                         type: string
+ *                         format: date-time
+ *                         description: Timestamp of the last message
+ *                   unreadCount:
+ *                     type: integer
+ *                     description: Number of unread messages in the chat thread
+ *       500:
+ *         description: Internal server error
+ */
 
 
 /**

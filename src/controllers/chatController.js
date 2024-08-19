@@ -190,22 +190,56 @@ exports.deleteAllMessagesOfUser = async (req, res) => {
     const { userId } = req.params;
 
     try {
-        const result = await Message.deleteMany({
-            $or: [
-                { from: userId },
-                { to: userId }
-            ]
-        });
+        // Add userId to the deletedBy array for all messages where the user is a participant
+        const messages = await Message.updateMany(
+            {
+                $or: [
+                    { from: userId },
+                    { to: userId }
+                ]
+            },
+            {
+                $addToSet: { deletedBy: userId }
+            }
+        );
 
-        // Remove chat threads involving the user
-        await ChatThread.deleteMany({
-            participants: userId
-        });
+        // Remove chat threads only for the current user
+        const chatThreads = await ChatThread.updateMany(
+            { participants: userId },
+            {
+                $pull: { participants: userId }
+            }
+        );
 
-        return responseHandler(res, 200, `Deleted ${result.deletedCount} messages successfully!`);
+        return responseHandler(res, 200, `Deleted messages and chat threads successfully for current user!`);
     } catch (error) {
-        console.error('Error deleting messages:', error);
+        console.error('Error deleting messages and chat threads:', error);
         return responseHandler(res, 500, 'Internal Server Error');
     }
 };
 
+
+exports.getUnreadNotifications = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const chatThreads = await ChatThread.find({ participants: userId })
+            .populate('participants', 'username profilePicture')
+            .populate('lastMessage')
+            .exec();
+
+        // Filter chat threads to include only those with unread messages
+        const notifications = chatThreads
+            .filter(thread => thread.unreadCount.get(userId) > 0)
+            .map(thread => ({
+                chatThreadId: thread._id,
+                lastMessage: thread.lastMessage,
+                unreadCount: thread.unreadCount.get(userId)
+            }));
+
+        return responseHandler(res, 200, "Unread notifications retrieved successfully!", notifications);
+    } catch (error) {
+        console.error('Error retrieving unread notifications:', error);
+        return responseHandler(res, 500, 'Internal Server Error');
+    }
+};
