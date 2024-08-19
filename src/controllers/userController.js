@@ -324,7 +324,7 @@ exports.findUserByMembershipId = async (req,res) => {
     }
 
     // Check if the membership id exist in the database
-    const user = await User.findOne({ membershipId });
+    const user = await User.findOne({ membership_id: membershipId });
     if (!user) {
         // console.log('User not found in database');                                   // Debug line
         return responseHandler(res, 404, "User not found");
