@@ -11,6 +11,7 @@ const deleteFile = require("../helpers/deleteFiles");
 /****************************************************************************************************/
 exports.sendMessage = async (req, res) => {
     const { from, to, content } = req.body;
+    const io = req.io; // Get io instance from the request
 
     // Handle file upload if present
     let attachments = [];
@@ -60,6 +61,9 @@ exports.sendMessage = async (req, res) => {
 
         await chatThread.save();
 
+        // Emit the message to the receiver's room
+        io.to(chatThread._id.toString()).emit('message', newMessage);
+
         return responseHandler(res, 201, "Message sent successfully!", newMessage);
     } catch (error) {
         console.error('Error sending message:', error);
@@ -67,15 +71,15 @@ exports.sendMessage = async (req, res) => {
     }
 };
 
-
 exports.getMessagesBetweenUsers = async (req, res) => {
     const { userId1, userId2 } = req.params;
+    const io = req.io; // Get io instance from the request
 
     try {
         const messages = await Message.find({
             $or: [
                 { from: userId1, to: userId2 },
-                // { from: userId2, to: userId1 },
+                { from: userId2, to: userId1 },
             ],
         }).sort({ timestamp: 1 });
 
@@ -91,14 +95,15 @@ exports.getMessagesBetweenUsers = async (req, res) => {
             { $set: { [`unreadCount.${userId1}`]: 0 } }
         );
 
+        // Emit an event to notify that messages were retrieved and seen
+        io.to(userId1.toString()).emit('messagesSeen', { userId2, messages });
+
         return responseHandler(res, 200, "Messages retrieved successfully!", messages);
     } catch (error) {
         console.error('Error retrieving messages:', error);
         return responseHandler(res, 500, 'Internal Server Error');
     }
 };
-
-
 
 exports.getChatThreads = async (req, res) => {
     const { userId } = req.params;
@@ -115,9 +120,9 @@ exports.getChatThreads = async (req, res) => {
     }
 };
 
-
 exports.markMessagesAsSeen = async (req, res) => {
     const { userId, otherUserId } = req.params;
+    const io = req.io; // Get io instance from the request
 
     try {
         await Message.updateMany(
@@ -134,6 +139,9 @@ exports.markMessagesAsSeen = async (req, res) => {
             { $set: { [`unreadCount.${userId}`]: 0 } }
         );
 
+        // Emit a socket event to notify the sender that messages have been seen
+        io.to(otherUserId.toString()).emit('messagesSeen', userId);
+
         return responseHandler(res, 200, "Messages marked as seen!");
     } catch (error) {
         console.error('Error marking messages as seen:', error);
@@ -141,16 +149,19 @@ exports.markMessagesAsSeen = async (req, res) => {
     }
 };
 
-
-
 exports.deleteMessage = async (req, res) => {
     const { messageId } = req.params;
+    const io = req.io; // Get io instance from the request
 
     try {
         const message = await Message.findByIdAndDelete(messageId);
         if (!message) {
             return responseHandler(res, 404, "Message not found");
         }
+
+        // Emit message deletion to both users
+        io.to(message.from).emit('messageDeleted', messageId);
+        io.to(message.to).emit('messageDeleted', messageId);
 
         // If the message has attachments, delete them from S3
         const bucketName = process.env.AWS_S3_BUCKET;
@@ -183,9 +194,6 @@ exports.deleteMessage = async (req, res) => {
     }
 };
 
-
-
-
 exports.deleteAllMessagesOfUser = async (req, res) => {
     const { userId } = req.params;
 
@@ -217,7 +225,6 @@ exports.deleteAllMessagesOfUser = async (req, res) => {
         return responseHandler(res, 500, 'Internal Server Error');
     }
 };
-
 
 exports.getUnreadNotifications = async (req, res) => {
     const { userId } = req.params;
