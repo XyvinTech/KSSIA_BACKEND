@@ -119,7 +119,7 @@ exports.deleteUser = async (req, res) => {
         }
     } else if (membership_id) {
         // Find and delete the user using membership_id
-        const user = await User.findOneAndDelete(membership_id);
+        const user = await User.findOneAndDelete( {membership_id: membership_id} );
         if (!user) {
             // If the user is not found, return a 404 status code with the error message
             // console.log('User not found');                                           // Debug line
