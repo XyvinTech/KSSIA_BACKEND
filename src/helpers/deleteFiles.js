@@ -25,15 +25,15 @@ const deleteFile = async (bucketName, fileKey) => {
             Key: fileKey,
         };
 
-        try {
-            await s3.send(new HeadObjectCommand(headParams));
-        } catch (err) {
-            if (err.name === 'NotFound') {
-                console.error('File not found in S3:', fileKey);
-                throw new Error('File not found');
-            }
-            throw err; // Re-throw other unexpected errors
-        }
+        // try {
+        //     await s3.send(new HeadObjectCommand(headParams));
+        // } catch (err) {
+        //     if (err.name === 'NotFound') {
+        //         console.error('File not found in S3:', fileKey);
+        //         throw new Error('File not found');
+        //     }
+        //     throw err; // Re-throw other unexpected errors
+        // }
 
         // Proceed to delete the file
         const deleteParams = {
