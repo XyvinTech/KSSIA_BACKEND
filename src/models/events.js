@@ -59,12 +59,24 @@ const eventSchema = new mongoose.Schema({
             required: true
         }
     }],
+    rsvp: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    }],
     activate: {
         type: Boolean
     }
 }, {
     timestamps: true,
 });
+
+eventSchema.methods.markrsvp = function (userId) {
+    if (!this.rsvp.includes(userId)) {
+        this.rsvp.push(userId);
+        return this.save();
+    }
+    return Promise.resolve(this); // Return the existing document if no change was made.
+};
 
 const Event = mongoose.model("Event", eventSchema);
 

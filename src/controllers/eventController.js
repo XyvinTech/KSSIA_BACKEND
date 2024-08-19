@@ -240,3 +240,40 @@ exports.deleteEvent = async (req, res) => {
     return responseHandler(res, 200, "Event deleted successfully");
 
 };
+
+/****************************************************************************************************/
+/*                                  Function to mark as rsvp of user                                */
+/****************************************************************************************************/
+
+exports.addRsvp = async (req, res) => {
+
+    const {
+        eventId
+    } = req.params;
+    const {
+        userId
+    } = req.params;
+
+    if (!eventId) {
+        // If eventId is not provided, return a 400 status code with the error message
+        // console.log('Invalid request');                                              // Debug line
+        return responseHandler(res, 400, `Invalid request`);
+    }
+    if (!userId) {
+        // If userId is not provided, return a 400 status code with the error message
+        // console.log('Invalid request');                                              // Debug line
+        return responseHandler(res, 400, `Invalid request`);
+    }
+
+    try {
+        const event = await Event.findById(eventId);
+        if (!event) {
+            return responseHandler(res, 404, 'Event not found.');
+        }
+
+        await Event.markrsvp(userId);
+        return responseHandler(res, 200, 'RSVP updated successfully!', event);
+    } catch (err) {
+        return responseHandler(res, 500, `Server error: ${err.message}`);
+    }
+};

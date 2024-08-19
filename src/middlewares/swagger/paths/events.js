@@ -235,6 +235,45 @@
 
 /**
  * @swagger
+ * /events/rsvp/:eventId/mark/:userId:
+ *   put:
+ *     summary: Mark an rsvp to an event
+ *     tags:
+ *       - Events
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: eventId
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         required: true
+ *         description: The ID of the event to add rsvp to
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         required: true
+ *         description: The ID of the user marking the rsvp
+ *     responses:
+ *       200:
+ *         description: RSVP marked successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Event'
+ *       400:
+ *         description: Invalid request
+ *       404:
+ *         description: Notification not found
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
  * components:
  *   schemas:
  *     Event:

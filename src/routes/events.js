@@ -43,5 +43,11 @@ eventRoute
   .route("/:eventId")
   .delete(asyncHandler(eventController.deleteEvent));
 
+// Route to mark a rsvp 
+eventRoute.put(
+  '/rsvp/:eventId/mark/:userId', 
+  asyncHandler(eventController.addRsvp)
+);
+
 
 module.exports = eventRoute;
