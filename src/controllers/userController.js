@@ -172,12 +172,12 @@ exports.editProfile = async (req, res) => {
 
     // Handle deletion of old files if new URLs are provided
 
-    if ( (!data.profile_picture) || (data.profile_picture !== currentUser.profile_picture) && (currentUser.profile_picture != '')) {
+    if ( (!data.profile_picture) || (data.profile_picture !== currentUser.profile_picture) && (currentUser.profile_picture !== undefined) && (currentUser.profile_picture != '')) {
         const oldFileKey = path.basename(currentUser.profile_picture);
         await deleteFile(bucketName, oldFileKey);
     }
 
-    if ((!data.company_logo) || (data.company_logo !== currentUser.company_logo) && (currentUser.company_logo != '')) {
+    if ((!data.company_logo) || (data.company_logo !== currentUser.company_logo) && (currentUser.company_logo !== undefined) && (currentUser.company_logo != '')) {
         const oldFileKey = path.basename(currentUser.company_logo);
         await deleteFile(bucketName, oldFileKey);
     }
@@ -187,7 +187,7 @@ exports.editProfile = async (req, res) => {
         if (data[field]) {
             for (const item of currentUser[field]) {
                 const isStillPresent = data[field].some(newItem => newItem.url === item.url);
-                if (!isStillPresent && item.url && item.url != '') {
+                if (!isStillPresent && item.url && item.url != '' && item.url !== undefined) {
                     let oldFileKey = path.basename(item.url);
                     await deleteFile(bucketName, oldFileKey);
                 }
@@ -213,12 +213,13 @@ exports.editProfile = async (req, res) => {
                 if (existingProduct) {
                     await Product.findByIdAndUpdate(productData._id, productData, { new: true, runValidators: true });
                     currentProductsMap.delete(productData._id);
+                
                 } else {
-                    return responseHandler(res, 404, "Invalid request");
+                    const newProduct = new Product({ ...productData, seller_id: userId });
+                    await newProduct.save();
                 }
             } else {
-                const newProduct = new Product({ ...productData, seller_id: userId });
-                await newProduct.save();
+                    return responseHandler(res, 404, "Invalid request");
             }
         }
 
