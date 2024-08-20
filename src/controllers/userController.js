@@ -8,6 +8,7 @@ const User = require("../models/user");
 const Product = require("../models/products");
 const {
     CreateUserSchema,
+    ReviewSchema,
     EditUserSchema,
 } = require("../validation");
 
@@ -334,3 +335,60 @@ exports.findUserByMembershipId = async (req,res) => {
     return responseHandler(res, 200, "User found", user);
 
 }
+
+/****************************************************************************************************/
+/*                                    function to add a review                                      */
+/****************************************************************************************************/
+
+exports.addReview = async (req, res) => {
+    const { userId } = req.params;
+    const reviewData = req.body;
+
+    if (!userId || !reviewData) {
+        return responseHandler(res, 400, "Invalid request");
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+        return responseHandler(res, 404, "User not found");
+    }
+
+    // Validate the input data
+    const { error } = ReviewSchema.validate(reviewData, { abortEarly: true });
+
+    // Check if an error exists in the validation
+    if (error) {
+        return responseHandler(res, 400, `Invalid input: ${error.message}`);
+    }
+
+    try {
+        const user = await User.addReview(userId, reviewData);
+        return responseHandler(res, 200, "Review added successfully", user);
+    } catch (error) {
+        return responseHandler(res, 500, `Server error: ${error.message}`);
+    }
+};
+
+/****************************************************************************************************/
+/*                                   function to delete a review                                    */
+/****************************************************************************************************/
+
+exports.deleteReview = async (req, res) => {
+    const { userId, reviewId } = req.params;
+
+    if (!userId || !reviewId) {
+        return responseHandler(res, 400, "Invalid request");
+    }
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return responseHandler(res, 404, "User not found");
+        }
+
+        await user.deleteReview(reviewId);
+        return responseHandler(res, 200, "Review deleted successfully", user);
+    } catch (error) {
+        return responseHandler(res, 500, `Server error: ${error.message}`);
+    }
+};

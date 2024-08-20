@@ -5,6 +5,13 @@ const Subschema = new mongoose.Schema({
     url: { type: String }
 },{ _id: false });
 
+const reviewSchema = new mongoose.Schema({
+    reviewer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    content: { type: String, required: true },
+    rating: { type: Number, required: true, min: 1, max: 5 },
+    created_at: { type: Date, default: Date.now }
+});
+
 const userSchema = new mongoose.Schema(
     {   name: {
             first_name: { type: String, required: true },
@@ -56,12 +63,28 @@ const userSchema = new mongoose.Schema(
         },
         is_active: { type: Boolean, default: true },
         is_deleted: { type: Boolean, default: false },
-        selectedTheme: { type: String, default:'white'}
+        selectedTheme: { type: String, default:'white'},
+        reviews: [reviewSchema]
     },
     {
         timestamps: true,
     }
 );
+
+/// Add a review static method
+userSchema.statics.addReview = function (userId, reviewData) {
+    return this.findByIdAndUpdate(
+        userId,
+        { $push: { reviews: reviewData } },
+        { new: true, runValidators: true } // Return the updated document, and run validators
+    );
+};
+
+/// Remove a review instance method
+userSchema.methods.deleteReview = function (reviewerId) {
+    this.reviews = this.reviews.filter(review => review.reviewer.toString() !== reviewerId.toString());
+    return this.save(); // Save the updated document
+};
 
 const User = mongoose.model('User', userSchema);
 

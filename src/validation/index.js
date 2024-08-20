@@ -180,3 +180,9 @@ exports.PaymentSchema = Joi.object({
     invoice_url: Joi.string().uri().allow(''),
     remarks: Joi.string().allow(''),
 });
+
+exports.ReviewSchema = Joi.object({
+    reviewer: Joi.string().hex().length(24).required(),
+    content: Joi.string().required(),
+    rating: Joi.number().integer().min(1).max(5).required(),
+});

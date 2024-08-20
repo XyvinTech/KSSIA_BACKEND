@@ -164,3 +164,103 @@
  *       500:
  *         description: Internal server error
  */
+
+/**
+ * @swagger
+ * /user/{userId}/reviews:
+ *   post:
+ *     summary: Add a review for a user
+ *     tags: 
+ *       - User
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the user to add a review for
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Review'
+ *     responses:
+ *       200:
+ *         description: Review added successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Invalid request or input data
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /user/{userId}/reviews/{reviewId}:
+ *   delete:
+ *     summary: Delete a review for a user
+ *     tags:
+ *       - User
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the user whose review will be deleted
+ *       - in: path
+ *         name: reviewId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the review to delete
+ *     responses:
+ *       200:
+ *         description: Review deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Invalid request or review ID
+ *       404:
+ *         description: User or review not found
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Review:
+ *       type: object
+ *       properties:
+ *         reviewer:
+ *           type: string
+ *           description: The ID of the reviewer
+ *         content:
+ *           type: string
+ *           description: The content of the review
+ *         rating:
+ *           type: integer
+ *           description: The rating given in the review (1-5)
+ *       required:
+ *         - reviewer
+ *         - content
+ *         - rating
+ *       example:
+ *         reviewer: "60d21b4667d0d8992e610c85"
+ *         content: "Great service and support!"
+ *         rating: 5
+ */

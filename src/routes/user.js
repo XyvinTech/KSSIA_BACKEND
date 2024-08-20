@@ -31,4 +31,12 @@ userRoute
   .route("/find/:membershipId")
   .get(asyncHandler(userController.findUserByMembershipId));
 
+userRoute 
+  .route('/:userId/reviews')
+  .post(asyncHandler(userController.addReview));
+
+userRoute 
+  .route('/:userId/reviews/:reviewId')
+  .delete(asyncHandler(userController.deleteReview));
+
 module.exports = userRoute;
