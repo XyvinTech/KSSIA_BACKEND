@@ -25,6 +25,9 @@
  *               member:
  *                 type: string
  *                 description: ID of the user making the payment
+ *               membership_id:
+ *                 type: string
+ *                 description: Membership ID of the user making the payment
  *               date:
  *                 type: string
  *                 format: date
@@ -46,10 +49,6 @@
  *               status:
  *                 type: string
  *                 description: Status of the payment
- *               invoice_url:
- *                 type: string
- *                 format: uri
- *                 description: URL of the invoice
  *               remarks:
  *                 type: string
  *                 description: Additional remarks
@@ -97,6 +96,9 @@
  *               member:
  *                 type: string
  *                 description: ID of the user making the payment
+ *               membership_id:
+ *                 type: string
+ *                 description: Membership ID of the user making the payment
  *               date:
  *                 type: string
  *                 format: date
@@ -118,10 +120,6 @@
  *               status:
  *                 type: string
  *                 description: Status of the payment
- *               invoice_url:
- *                 type: string
- *                 format: uri
- *                 description: URL of the invoice
  *               remarks:
  *                 type: string
  *                 description: Additional remarks

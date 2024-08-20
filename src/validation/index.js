@@ -171,6 +171,7 @@ exports.EditPromotionSchema = Joi.object({
 
 exports.PaymentSchema = Joi.object({
     member: Joi.string().hex().length(24).required(),
+    membership_id: Joi.string(),
     date: Joi.date().required(),
     time: Joi.date().required(),
     amount: Joi.number().positive().required(),
@@ -185,4 +186,10 @@ exports.ReviewSchema = Joi.object({
     reviewer: Joi.string().hex().length(24).required(),
     content: Joi.string().required(),
     rating: Joi.number().integer().min(1).max(5).required(),
+});
+
+exports.RequirementsSchema = Joi.object({
+    author: Joi.string().hex().length(24).required(),
+    content: Joi.string().required(),
+    status: Joi.string().valid('pending', 'approved', 'rejected').default('pending'),
 });

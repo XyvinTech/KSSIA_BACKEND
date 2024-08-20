@@ -17,6 +17,7 @@ const notificationRoute = require("./src/routes/notification");
 const paymentRoute = require("./src/routes/payments");
 const filesRoute = require("./src/routes/files");
 const chatRoute = require('./src/routes/chats');
+const requirementsRoute = require('./src/routes/requirements')
 const { specs, swaggerUi } = require('./src/middlewares/swagger/swagger');
 
 const app = express();
@@ -55,6 +56,7 @@ app.use(`${BASE_PATH}/notification`, notificationRoute);
 app.use(`${BASE_PATH}/payments`, paymentRoute);
 app.use(`${BASE_PATH}/files`, filesRoute);
 app.use(`${BASE_PATH}/chats`, chatRoute);
+app.use(`${BASE_PATH}/requirements`, requirementsRoute);
 app.use(`${BASE_PATH}/api-docs`, swaggerUi.serve, swaggerUi.setup(specs));
 
 
