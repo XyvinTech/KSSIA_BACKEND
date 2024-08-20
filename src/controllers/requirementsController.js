@@ -1,4 +1,5 @@
 require("dotenv").config();
+const path = require('path');
 const responseHandler = require("../helpers/responseHandler");
 const User = require("../models/user");
 const Requirements = require("../models/requirements");
