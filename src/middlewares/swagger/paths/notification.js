@@ -312,20 +312,20 @@
  *                 type: array
  *                 items:
  *                   type: string
- *                   format: email
  *               subject:
  *                 type: string
  *               content:
  *                 type: string
  *               media_url:
  *                 type: string
+ *                 format: binary
  *               file_url:
- *                 type: string
+ *                 type: array
+ *                 items:
+ *                     type: string
+ *                     format: binary
  *               link_url:
  *                 type: string
- *               attachment:
- *                 type: string
- *                 format: binary
  *     responses:
  *       201:
  *         description: Email notification created and sent successfully

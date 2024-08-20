@@ -326,7 +326,13 @@ exports.formatNotificationEmails = async (notification) => {
 };
 
 exports.createAndSendEmailNotification = async (req, res) => {
+    
     const data = req.body;
+
+    // Ensure the `to` field is an array
+    if (!Array.isArray(data.to)) {
+        data.to = [data.to];
+    }
 
     // Validate the input data
     const {

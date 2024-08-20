@@ -36,7 +36,7 @@ notificationRoute.get(
 // Route to update an in-app notification (e.g., adding a new media URL)
 notificationRoute.put(
     '/in-app/:notificationId', 
-    upload.single('image'),
+    upload.single('file_url'),
     asyncHandler(notificationController.updateInAppNotification)
 );
 
@@ -61,6 +61,12 @@ notificationRoute.delete(
 // Route to create and send email notifications
 notificationRoute.post(
     '/email', 
+    upload.fields(
+        [
+            { name: 'file_url', maxCount: 1 },
+            { name: 'attachments', maxCount: 10 }
+          ]
+    ),
     asyncHandler(notificationController.createAndSendEmailNotification)
 );
 
