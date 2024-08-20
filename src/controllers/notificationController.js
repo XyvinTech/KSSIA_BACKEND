@@ -1,4 +1,5 @@
 require("dotenv").config();
+const nodemailer = require('nodemailer');
 const responseHandler = require("../helpers/responseHandler");
 const Notification = require("../models/notifications");
 const User = require("../models/user");
@@ -306,7 +307,7 @@ exports.deleteInAppNotification = async (req, res) => {
 /*                             Function to create email notification                              */
 /****************************************************************************************************/
 
-exports.formatNotificationEmails = async (notification) => {
+const formatNotificationEmails = async (notification) => {
     try {
         // Populate the `to` field with user data
         const users = await User.find({
@@ -329,10 +330,14 @@ exports.createAndSendEmailNotification = async (req, res) => {
     
     const data = req.body;
 
+    console.log(data);
+
     // Ensure the `to` field is an array
     if (!Array.isArray(data.to)) {
         data.to = [data.to];
     }
+
+    console.log(data);
 
     // Validate the input data
     const {
@@ -378,8 +383,10 @@ exports.createAndSendEmailNotification = async (req, res) => {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS
             }
+            
         });
-
+        console.log("Email User:", process.env.EMAIL_USER);
+        console.log("Email Pass:", process.env.EMAIL_PASS);
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: formattedEmails,
