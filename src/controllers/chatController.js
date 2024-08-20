@@ -5,25 +5,25 @@ const Message = require("../models/messages");
 const ChatThread = require("../models/chats");
 const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
+const { getReceiverSocketId, io } = require("../socket/socket.js"); // Import the socket utility
 
 /****************************************************************************************************/
 /*                                   Function to send a message                                     */
 /****************************************************************************************************/
 exports.sendMessage = async (req, res) => {
     const { from, to, content } = req.body;
-    const io = req.io; // Get io instance from the request
+    // const { content } = req.body;
+    // const { to } = req.params;
+    // const from = req.user._id;
 
-    // Handle file upload if present
     let attachments = [];
     const bucketName = process.env.AWS_S3_BUCKET;
+
     if (req.files && req.files.length > 0) {
         try {
             for (const file of req.files) {
                 const url = await handleFileUpload(file, bucketName);
-                attachments.push({
-                    fileType: file.mimetype,
-                    url: url
-                });
+                attachments.push({ fileType: file.mimetype, url });
             }
         } catch (err) {
             return responseHandler(res, 500, `Error uploading file: ${err.message}`);
@@ -31,38 +31,32 @@ exports.sendMessage = async (req, res) => {
     }
 
     try {
-        // Create and save a new message
-        const newMessage = new Message({
-            from,
-            to,
-            content,
-            attachments,
-            status: 'sent',
-        });
-        await newMessage.save();
 
-        // Find or create the chat thread
-        let chatThread = await ChatThread.findOne({
-            participants: { $all: [from, to] }
-        });
+        let chatThread = await ChatThread.findOne({ participants: { $all: [from, to] } });
+        const newMessage = new Message({ from, to, content, attachments, status: 'sent' });
+        if (newMessage) {
+			chatThread.lastMessage.push(newMessage._id);
+		}
+        await newMessage.save();
 
         if (!chatThread) {
             chatThread = new ChatThread({
                 participants: [from, to],
                 lastMessage: newMessage._id,
-                unreadCount: {
-                    [to]: 1
-                }
+                unreadCount: { [to]: 1 },
             });
         } else {
             chatThread.lastMessage = newMessage._id;
             chatThread.unreadCount.set(to, (chatThread.unreadCount.get(to) || 0) + 1);
         }
+		await Promise.all([chatThread.save(), newMessage.save()]);
 
         await chatThread.save();
 
-        // Emit the message to the receiver's room
-        io.to(chatThread._id.toString()).emit('message', newMessage);
+        const receiverSocketId = getReceiverSocketId(to);
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit('message', newMessage);
+        }
 
         return responseHandler(res, 201, "Message sent successfully!", newMessage);
     } catch (error) {
