@@ -166,11 +166,21 @@ exports.getAllPromotions = async (req, res) => {
 /****************************************************************************************************/
 
 exports.getPromotionsByType = async (req, res) => {
-    const type = req.params.type;
+    const { type } = req.params;
     const types = ['banner', 'video', 'poster', 'notice'];
-    if (!type || (!types.some(type))) return responseHandler(res, 400, "Invalid request");
-    const promotions = await Promotion.find({ type: type });
-    return responseHandler(res, 200, "Promotions retrieved successfully", promotions);
+
+    // Validate the `type` parameter
+    if (!type || !types.includes(type)) {
+        return responseHandler(res, 400, "Invalid request");
+    }
+
+    try {
+        // Retrieve promotions by type
+        const promotions = await Promotion.find({ type: type });
+        return responseHandler(res, 200, "Promotions retrieved successfully", promotions);
+    } catch (err) {
+        return responseHandler(res, 500, `Server error: ${err.message}`);
+    }
 };
 
 /****************************************************************************************************/

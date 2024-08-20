@@ -83,7 +83,7 @@
 
 /**
  * @swagger
- * /promotions:
+ * /promotions/{type}:
  *   get:
  *     summary: Function to get all promotions by type
  *     tags: 
@@ -96,7 +96,7 @@
  *         schema:
  *           type: string
  *         required: true
- *         description: The ID of the promotion to retrieve
+ *         description: The type of the promotion to retrieve
  *     responses:
  *       200:
  *         description: Promotions retrieved successfully
