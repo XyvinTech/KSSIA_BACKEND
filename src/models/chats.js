@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 
 const ChatThreadSchema = new mongoose.Schema({
     participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }],
-    messages: [{ type: mongoose.Schema.Types.ObjectId, ref: "Message", default: []}],
     lastMessage: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Message', required: false }],
     unreadCount: { type: Map, of: Number, default: {} }, // Keeps track of unread messages for each participant
     createdAt: { type: Date, default: Date.now }
