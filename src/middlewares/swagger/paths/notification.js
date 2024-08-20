@@ -60,7 +60,7 @@
  *                 type: string
  *               link_url:
  *                 type: string
- *               image:
+ *               file_url:
  *                 type: string
  *                 format: binary
  *     responses:

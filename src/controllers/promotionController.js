@@ -162,6 +162,18 @@ exports.getAllPromotions = async (req, res) => {
 };
 
 /****************************************************************************************************/
+/*                              Function to get all promotions by type                              */
+/****************************************************************************************************/
+
+exports.getPromotionsByType = async (req, res) => {
+    const type = req.params.type;
+    const types = ['banner', 'video', 'poster', 'notice'];
+    if (!type || (!types.some(type))) return responseHandler(res, 400, "Invalid request");
+    const promotions = await Promotion.find({ type: type });
+    return responseHandler(res, 200, "Promotions retrieved successfully", promotions);
+};
+
+/****************************************************************************************************/
 /*                                Function to get promotion by id                                  */
 /****************************************************************************************************/
 

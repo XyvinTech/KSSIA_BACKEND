@@ -17,7 +17,7 @@ notificationRoute.get(
 // Route to create in-app notifications with an optional image upload
 notificationRoute.post(
     '/in-app',
-    upload.single('image'),
+    upload.single('file_url'),
     asyncHandler(notificationController.createInAppNotification)
 );
 

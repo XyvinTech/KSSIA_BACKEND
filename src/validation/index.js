@@ -144,6 +144,7 @@ exports.inAppNotificationSchema = Joi.object({
     content: Joi.string(),
     media_url: Joi.string().uri().allow(''),
     link_url: Joi.string().uri().allow(''),
+    file_url: Joi.string().uri().allow(''),
     readBy: Joi.array().items(Joi.string().hex().length(24)).default([])
 });
 

@@ -21,7 +21,7 @@ exports.createInAppNotification = async (req, res) => {
     if (req.file) {
         try {
             const bucketName = process.env.AWS_S3_BUCKET;
-            data.image = await handleFileUpload(req.file, bucketName);
+            data.file_url = await handleFileUpload(req.file, bucketName);
         } catch (err) {
             return responseHandler(res, 500, `Error uploading file: ${err.message}`);
         }

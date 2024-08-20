@@ -83,6 +83,35 @@
 
 /**
  * @swagger
+ * /promotions:
+ *   get:
+ *     summary: Function to get all promotions by type
+ *     tags: 
+ *       - Promotions
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: type
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the promotion to retrieve
+ *     responses:
+ *       200:
+ *         description: Promotions retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Promotion'
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
  * /promotions/{promotionId}:
  *   get:
  *     summary: Retrieve a single promotion by ID
