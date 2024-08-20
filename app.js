@@ -4,7 +4,8 @@ const cors = require("cors");
 const volleyball = require("volleyball");
 const clc = require("cli-color");
 const http = require("http");
-const { Server } = require("socket.io");
+const { initializeSocket } = require("./src/socket/socket.js"); // Import the socket module
+
 const responseHandler = require("./src/helpers/responseHandler");
 const userRoute = require("./src/routes/user");
 const adminRoute = require("./src/routes/admin");
@@ -19,8 +20,10 @@ const chatRoute = require('./src/routes/chats');
 const { specs, swaggerUi } = require('./src/middlewares/swagger/swagger');
 
 const app = express();
-const server = http.createServer(app); // Create HTTP server
-const io = new Server(server); // Initialize socket.io with the server
+const server = http.createServer(app);
+
+// Initialize Socket.io
+const io = initializeSocket(server);
 
 app.use(volleyball);
 
@@ -74,44 +77,9 @@ app.all('*', (req, res, next) => {
   );
 });
 
-//* Socket.io connection
-io.on('connection', (socket) => {
-  console.log('A user connected:', socket.id);
-
-  socket.on('joinRoom', ({ chatThreadId }) => {
-      socket.join(chatThreadId);
-      console.log(`User ${socket.id} joined room ${chatThreadId}`);
-  });
-
-  socket.on('sendMessage', (message) => {
-      const { chatThreadId } = message;
-      io.to(chatThreadId).emit('message', message);
-  });
-
-    // Mark messages as seen
-    socket.on('markMessagesAsSeen', ({ chatThreadId, userId }) => {
-      io.to(chatThreadId).emit('messagesSeen', userId);
-  });
-
-    // Notify users of unread notifications
-    socket.on('unreadNotifications', ({ userId }) => {
-      io.to(userId).emit('unreadNotifications');
-  });
-  
-  // Delete a message
-  socket.on('deleteMessage', (messageId) => {
-      // Emit deletion to all users in the chat thread
-      io.emit('messageDeleted', messageId);
-  });
-
-
-  socket.on('disconnect', () => {
-      console.log('User disconnected:', socket.id);
-  });
-});
 
 //! Start the server and listen on the specified port from environment variabless
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   const portMessage = clc.redBright(`✓ App is running on port: ${PORT}`);
   const envMessage = clc.yellowBright(
     `✓ Environment: ${NODE_ENV || "development"}`
