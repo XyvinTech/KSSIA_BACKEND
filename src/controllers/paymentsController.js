@@ -102,6 +102,8 @@ exports.deletePayment = async (req, res) => {
         return responseHandler(res, 404, "Payment details do not exist");
     }
 
+    const bucketName = process.env.AWS_S3_BUCKET;
+    
     if (payment.invoice_url) {
         try {
             const oldImageKey = path.basename(payment.invoice_url);
