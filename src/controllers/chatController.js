@@ -64,10 +64,11 @@ exports.sendMessage = async (req, res) => {
         return responseHandler(res, 500, 'Internal Server Error');
     }
 };
-
+/****************************************************************************************************/
+/*                                   Function to get messages between users                         */
+/****************************************************************************************************/
 exports.getMessagesBetweenUsers = async (req, res) => {
     const { userId1, userId2 } = req.params;
-    const io = req.io; // Get io instance from the request
 
     try {
         const messages = await Message.find({
@@ -89,8 +90,6 @@ exports.getMessagesBetweenUsers = async (req, res) => {
             { $set: { [`unreadCount.${userId1}`]: 0 } }
         );
 
-        // Emit an event to notify that messages were retrieved and seen
-        io.to(userId1.toString()).emit('messagesSeen', { userId2, messages });
 
         return responseHandler(res, 200, "Messages retrieved successfully!", messages);
     } catch (error) {
@@ -98,7 +97,9 @@ exports.getMessagesBetweenUsers = async (req, res) => {
         return responseHandler(res, 500, 'Internal Server Error');
     }
 };
-
+/****************************************************************************************************/
+/*                                   Function to get chat threads                                   */
+/****************************************************************************************************/
 exports.getChatThreads = async (req, res) => {
     const { userId } = req.params;
     try {
@@ -113,7 +114,9 @@ exports.getChatThreads = async (req, res) => {
         return responseHandler(res, 500, 'Internal Server Error');
     }
 };
-
+/****************************************************************************************************/
+/*                                   Function to mark message seen                                  */
+/****************************************************************************************************/
 exports.markMessagesAsSeen = async (req, res) => {
     const { userId, otherUserId } = req.params;
     const io = req.io; // Get io instance from the request
@@ -142,7 +145,9 @@ exports.markMessagesAsSeen = async (req, res) => {
         return responseHandler(res, 500, 'Internal Server Error');
     }
 };
-
+/****************************************************************************************************/
+/*                                   Function to delete message                                     */
+/****************************************************************************************************/
 exports.deleteMessage = async (req, res) => {
     const { messageId } = req.params;
     const io = req.io; // Get io instance from the request
@@ -187,7 +192,9 @@ exports.deleteMessage = async (req, res) => {
         return responseHandler(res, 500, `Error deleting message: ${err.message}`);
     }
 };
-
+/****************************************************************************************************/
+/*                                   Function to delete chats                                       */
+/****************************************************************************************************/
 exports.deleteAllMessagesOfUser = async (req, res) => {
     const { userId } = req.params;
 
@@ -219,7 +226,9 @@ exports.deleteAllMessagesOfUser = async (req, res) => {
         return responseHandler(res, 500, 'Internal Server Error');
     }
 };
-
+/****************************************************************************************************/
+/*                                   Function to get unread notification                            */
+/****************************************************************************************************/
 exports.getUnreadNotifications = async (req, res) => {
     const { userId } = req.params;
 
