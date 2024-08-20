@@ -15,16 +15,21 @@ const deleteFile = require("../helpers/deleteFiles");
 
 exports.createInAppNotification = async (req, res) => {
 
-    const data = req.body;
+    let data = req.body;
 
     // Handle file uploads if present
     if (req.file) {
         try {
             const bucketName = process.env.AWS_S3_BUCKET;
-            data.media_url = await handleFileUpload(req.file, bucketName);
+            data.image = await handleFileUpload(req.file, bucketName);
         } catch (err) {
             return responseHandler(res, 500, `Error uploading file: ${err.message}`);
         }
+    }
+
+     // Ensure the `to` field is an array
+     if (!Array.isArray(data.to)) {
+        data.to = [data.to];
     }
 
     // Validate the input data

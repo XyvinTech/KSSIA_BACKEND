@@ -23,7 +23,7 @@ const notificationSchema = new mongoose.Schema(
     }
 );
 
-notificationSchema.index({ to: 1, readBy: 1 });
+notificationSchema.index({ to: 1, type: 1 });
 
 notificationSchema.statics.countUnread = function (userId) {
     return this.countDocuments({ to: userId, readBy: { $ne: userId }, type: 'in-app' });

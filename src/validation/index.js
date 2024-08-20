@@ -130,22 +130,20 @@ exports.EditEventsSchema = Joi.object({
 // notificationSchema validation
 
 exports.emailNotificationSchema = Joi.object({
-    to: Joi.array().items(Joi.string().hex().length(24)).required(),
+    to: Joi.array().items(Joi.string()).required(),
     subject: Joi.string().min(1).max(255).required(),
     content: Joi.string(),
     media_url: Joi.string().uri().allow(''),
     file_url: Joi.string().uri().allow(''),
     link_url: Joi.string().uri().allow(''),
-    type: Joi.string().valid('email').required()
 });
 
 exports.inAppNotificationSchema = Joi.object({
-    to: Joi.array().items(Joi.string().hex().length(24)).required(),
+    to: Joi.array().items(Joi.string()).required(),
     subject: Joi.string().min(1).max(255).required(),
     content: Joi.string(),
     media_url: Joi.string().uri().allow(''),
     link_url: Joi.string().uri().allow(''),
-    type: Joi.string().valid('in-app').required(),
     readBy: Joi.array().items(Joi.string().hex().length(24)).default([])
 });
 
