@@ -200,7 +200,7 @@ exports.getAllUsers = async (req, res) => {
   const mappedData = users.map((user) => {
     return {
       ...user._doc,
-      name: `${user.name.first_name} ${user.name.middle_name} ${user.name.last_name}`,
+      full_name: `${user.name.first_name} ${user.name.middle_name} ${user.name.last_name}`,
       mobile: user.phone_numbers.personal,
     };
   });
