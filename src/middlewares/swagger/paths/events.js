@@ -247,14 +247,12 @@
  *         name: eventId
  *         schema:
  *           type: string
- *           format: uuid
  *         required: true
  *         description: The ID of the event to add rsvp to
  *       - in: path
  *         name: userId
  *         schema:
  *           type: string
- *           format: uuid
  *         required: true
  *         description: The ID of the user marking the rsvp
  *     responses:

@@ -51,7 +51,6 @@
  *                 type: array
  *                 items:
  *                   type: string
- *                   format: uuid
  *               subject:
  *                 type: string
  *               content:
@@ -121,7 +120,6 @@
  *         name: userId
  *         schema:
  *           type: string
- *           format: uuid
  *         required: true
  *         description: The ID of the user to retrieve read notifications for
  *     responses:
@@ -153,7 +151,6 @@
  *         name: notificationId
  *         schema:
  *           type: string
- *           format: uuid
  *         required: true
  *         description: The ID of the notification to update
  *     requestBody:
@@ -204,14 +201,12 @@
  *         name: notificationId
  *         schema:
  *           type: string
- *           format: uuid
  *         required: true
  *         description: The ID of the notification to mark as read
  *       - in: path
  *         name: userId
  *         schema:
  *           type: string
- *           format: uuid
  *         required: true
  *         description: The ID of the user marking the notification as read
  *     responses:
@@ -243,7 +238,6 @@
  *         name: userId
  *         schema:
  *           type: string
- *           format: uuid
  *         required: true
  *         description: The ID of the user to count unread notifications for
  *     responses:
@@ -278,7 +272,6 @@
  *         name: notificationId
  *         schema:
  *           type: string
- *           format: uuid
  *         required: true
  *         description: The ID of the notification to delete
  *     responses:
@@ -348,7 +341,6 @@
  *           type: array
  *           items:
  *             type: string
- *             format: uuid
  *         subject:
  *           type: string
  *         content:
@@ -366,7 +358,6 @@
  *           type: array
  *           items:
  *             type: string
- *             format: uuid
  *         createdAt:
  *           type: string
  *           format: date-time
