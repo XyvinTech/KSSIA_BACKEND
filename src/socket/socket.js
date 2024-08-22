@@ -6,15 +6,16 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ["http://43.205.89.79"],
+    origin: ["http://localhost:3000"],
     methods: ["GET", "POST"],
   },
 });
+
 // Use a namespace for your chat
 const chatNamespace = io.of("/api/v1/chats");
 
 // Map to store user IDs and their corresponding socket IDs
-const userSocketMap = {}; // {userId: socketId}
+const userSocketMap = {}; // { userId: socketId }
 
 // Function to get the receiver's socket ID based on user ID
 const getReceiverSocketId = (receiverId) => {
@@ -42,5 +43,5 @@ chatNamespace.on("connection", (socket) => {
   });
 });
 
-// Export the server and io instances
-module.exports = { app, server, io, getReceiverSocketId };
+// Export the server and the chatNamespace instance
+module.exports = { app, server, io, chatNamespace, getReceiverSocketId };
