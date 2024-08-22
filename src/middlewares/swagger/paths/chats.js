@@ -1,11 +1,18 @@
 /**
  * @swagger
- * /chats/send:
+ * /chats/send/{id}:
  *   post:
  *     summary: Send a new message
  *     tags: [Chats]
  *     security:
  *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID of the receiver
+ *         schema:
+ *           type: string
  *     requestBody:
  *       required: true
  *       content:
@@ -15,10 +22,7 @@
  *             properties:
  *               from:
  *                 type: string
- *                 description: ID of the sender
- *               to:
- *                 type: string
- *                 description: ID of the receiver
+ *                 description: ID of the sender (will be derived from the token)
  *               content:
  *                 type: string
  *                 description: The message content

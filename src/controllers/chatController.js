@@ -11,10 +11,11 @@ const { getReceiverSocketId, io } = require("../socket/socket.js"); // Import th
 /*                                   Function to send a message                                     */
 /****************************************************************************************************/
 exports.sendMessage = async (req, res) => {
-    const { from, to, content } = req.body;
-    // const { content } = req.body;
-    // const { to } = req.params;
-    // const from = req.user._id;
+    // const { from, to, content } = req.body;
+    const { from, content } = req.body;
+    const to  = req.params.id;
+    // const from = "66bfba179188b5e50d864db7";
+    // const from = req.userId;
 
     let attachments = [];
     const bucketName = process.env.AWS_S3_BUCKET;
@@ -33,11 +34,13 @@ exports.sendMessage = async (req, res) => {
     try {
 
         let chatThread = await ChatThread.findOne({ participants: { $all: [from, to] } });
+        
+        console.log(chatThread);
         const newMessage = new Message({ from, to, content, attachments, status: 'sent' });
         if (newMessage) {
+            console.log(newMessage);
 			chatThread.lastMessage.push(newMessage._id);
 		}
-        await newMessage.save();
 
         if (!chatThread) {
             chatThread = new ChatThread({
@@ -51,9 +54,8 @@ exports.sendMessage = async (req, res) => {
         }
 		await Promise.all([chatThread.save(), newMessage.save()]);
 
-        await chatThread.save();
-
         const receiverSocketId = getReceiverSocketId(to);
+        console.log(receiverSocketId);
         if (receiverSocketId) {
             io.to(receiverSocketId).emit('message', newMessage);
         }
@@ -119,7 +121,6 @@ exports.getChatThreads = async (req, res) => {
 /****************************************************************************************************/
 exports.markMessagesAsSeen = async (req, res) => {
     const { userId, otherUserId } = req.params;
-    const io = req.io; // Get io instance from the request
 
     try {
         await Message.updateMany(
@@ -150,7 +151,6 @@ exports.markMessagesAsSeen = async (req, res) => {
 /****************************************************************************************************/
 exports.deleteMessage = async (req, res) => {
     const { messageId } = req.params;
-    const io = req.io; // Get io instance from the request
 
     try {
         const message = await Message.findByIdAndDelete(messageId);
