@@ -230,6 +230,11 @@ exports.getUserById = async (req, res) => {
     return responseHandler(res, 404, "User not found");
   }
 
+  const mappedData = {
+    ...user._doc,
+    full_name: `${user.name.first_name} ${user.name.middle_name} ${user.name.last_name}`,
+  };
+
   // console.log(`User retrieved successfully`);                                      // Debug line
-  return responseHandler(res, 200, "User retrieved successfully", user);
+  return responseHandler(res, 200, "User retrieved successfully", mappedData);
 };
