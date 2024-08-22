@@ -53,6 +53,30 @@
 
 /**
  * @swagger
+ * /requirements:
+ *   get:
+ *     summary: Fetch all requirements
+ *     tags: 
+ *       - Requirements
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved all requirements
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Requirement'
+ *       404:
+ *         description: No requirements found
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
  * /requirements/{requirementID}:
  *   put:
  *     summary: Update an existing requirement

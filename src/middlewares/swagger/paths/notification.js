@@ -90,7 +90,6 @@
  *         name: userId
  *         schema:
  *           type: string
- *           format: uuid
  *         required: true
  *         description: The ID of the user to retrieve unread notifications for
  *     responses:

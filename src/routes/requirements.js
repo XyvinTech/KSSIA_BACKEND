@@ -12,6 +12,9 @@ requirementsRoute.use(authVerify);
 // Route to create a new requirement
 requirementsRoute.post('/', upload.single('file'), asyncHandler(requirementsController.createRequirement));
 
+// Route to get all requirements
+requirementsRoute.get('/', asyncHandler(requirementsController.getAllRequirements));
+
 // Route to update a requirement
 requirementsRoute.put('/:requirementID', upload.single('file'), asyncHandler(requirementsController.updateRequirement));
 

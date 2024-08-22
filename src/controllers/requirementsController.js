@@ -88,6 +88,21 @@ exports.updateRequirement = async (req, res) => {
 };
 
 /****************************************************************************************************/
+/*                                Function to get all requirements                                  */
+/****************************************************************************************************/
+exports.getAllRequirements = async (req, res) => {
+    try {
+        const requirements = await Requirements.find().populate('author', 'name email');
+        if (requirements.length === 0) {
+            return responseHandler(res, 404, "No requirements found");
+        }
+        return responseHandler(res, 200, "Successfully retrieved all requirements", requirements);
+    } catch (err) {
+        return responseHandler(res, 500, `Error retrieving requirements: ${err.message}`);
+    }
+};
+
+/****************************************************************************************************/
 /*                                Function to delete requirement                                   */
 /****************************************************************************************************/
 exports.deleteRequirement = async (req, res) => {
