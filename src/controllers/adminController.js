@@ -233,6 +233,7 @@ exports.getUserById = async (req, res) => {
   const mappedData = {
     ...user._doc,
     full_name: `${user.name.first_name} ${user.name.middle_name} ${user.name.last_name}`,
+    mobile: user.phone_numbers.personal,
   };
 
   // console.log(`User retrieved successfully`);                                      // Debug line
