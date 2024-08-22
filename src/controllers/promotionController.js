@@ -25,23 +25,39 @@ exports.createPromotion = async (req, res) => {
     if (error) return responseHandler(res, 400, `Invalid input: ${error.message}`);
 
     if (data.type !== 'banner'){
-
-        // Check if a promotion with the same data already exists
-        const promotionExist = await Promotion.findOne({
+        const query = {
             type: data.type,
             startDate: data.startDate,
             endDate: data.endDate,
+        };
+        
+        if (data.type === 'video') {
+            query.yt_link = data.yt_link;
+            query.video_title = data.video_title;
+        } else if (data.type === 'notice') {
+            query.notice_title = data.notice_title;
+            query.notice_description = data.notice_description;
+            query.notice_link = data.notice_link;
+        }
+        
+        const promotionExist = await Promotion.findOne(query);
 
-            ...data.type === 'video' && {
-                yt_link: data.yt_link,
-                video_title: data.video_title
-            },
-            ...data.type === 'notice' && {
-                notice_title: data.notice_title,
-                notice_description: data.notice_description,
-                notice_link: data.notice_link
-            }
-        });
+        // Check if a promotion with the same data already exists
+        // const promotionExist = await Promotion.findOne({
+        //     type: data.type,
+        //     startDate: data.startDate,
+        //     endDate: data.endDate,
+
+        //     ...data.type === 'video' && {
+        //         yt_link: data.yt_link,
+        //         video_title: data.video_title,
+        //     },
+        //     ...data.type === 'notice' && {
+        //         notice_title: data.notice_title,
+        //         notice_description: data.notice_description,
+        //         notice_link: data.notice_link
+        //     }
+        // });
 
         if (promotionExist) return responseHandler(res, 400, "Promotion already exists");
     }
@@ -201,6 +217,35 @@ exports.getPromotionById = async (req, res) => {
 
     return responseHandler(res, 200, "Promotion retrieved successfully", promotion);
 
+};
+/****************************************************************************************************/
+/*                Function to get promotions by type and/or get promotion by id                     */
+/****************************************************************************************************/
+
+exports.getPromotionsByTypeAndId = async (req, res) => {
+    const { type, promotionId } = req.params;
+    const types = ['banner', 'video', 'poster', 'notice'];
+
+    // Validate the `type` parameter
+    if (!type || !types.includes(type)) {
+        return responseHandler(res, 400, "Invalid request: Invalid type parameter");
+    }
+
+    try {
+        if (promotionId) {
+            // If promotionId is provided, retrieve the promotion by ID and type
+            const promotion = await Promotion.findOne({ _id: promotionId, type: type });
+            if (!promotion) return responseHandler(res, 404, "Promotion not found");
+
+            return responseHandler(res, 200, "Promotion retrieved successfully", promotion);
+        } else {
+            // If promotionId is not provided, retrieve all promotions by type
+            const promotions = await Promotion.find({ type: type });
+            return responseHandler(res, 200, "Promotions retrieved successfully", promotions);
+        }
+    } catch (err) {
+        return responseHandler(res, 500, `Server error: ${err.message}`);
+    }
 };
 
 /****************************************************************************************************/

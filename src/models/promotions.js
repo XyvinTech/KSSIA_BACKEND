@@ -13,7 +13,7 @@ const promotionSchema = new mongoose.Schema({
     },
     upload_video: { 
         type: String, 
-        required: function() { return this.type === 'video';} 
+        // required: function() { return this.type === 'video';} 
     },
     yt_link: { 
         type: String, 

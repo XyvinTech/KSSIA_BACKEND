@@ -13,9 +13,12 @@ promotionRoute.post('/', upload.single("file"), asyncHandler(promotionController
 
 promotionRoute.get('/', asyncHandler(promotionController.getAllPromotions));
 
-promotionRoute.get('/:type', asyncHandler(promotionController.getPromotionsByType));
+// promotionRoute.get('/:type', asyncHandler(promotionController.getPromotionsByType));
 
-promotionRoute.get('/:promotionId', asyncHandler(promotionController.getPromotionById));
+// promotionRoute.get('/:promotionId', asyncHandler(promotionController.getPromotionById));
+
+promotionRoute.get('/:type/:promotionId', asyncHandler(promotionController.getPromotionsByTypeAndId));
+
 promotionRoute.put('/:promotionId', upload.single("file"), asyncHandler(promotionController.editPromotion));
 promotionRoute.delete('/:promotionId', asyncHandler(promotionController.deletePromotion));
 

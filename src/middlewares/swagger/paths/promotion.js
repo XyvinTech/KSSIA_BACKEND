@@ -141,6 +141,107 @@
 
 /**
  * @swagger
+ * /promotions/{type}/{promotionId}:
+ *   get:
+ *     summary: Retrieve promotions by type or a specific promotion by ID and type
+ *     tags: [Promotions]
+ *     parameters:
+ *       - in: path
+ *         name: type
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [banner, video, poster, notice]
+ *         description: Type of the promotion (e.g., banner, video, poster, notice)
+ *       - in: path
+ *         name: promotionId
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: ID of the specific promotion (optional)
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved promotions or a specific promotion
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: Promotions retrieved successfully
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         description: Promotion ID
+ *                       type:
+ *                         type: string
+ *                         description: Type of the promotion
+ *                       title:
+ *                         type: string
+ *                         description: Title of the promotion
+ *                       description:
+ *                         type: string
+ *                         description: Description of the promotion
+ *                       imageUrl:
+ *                         type: string
+ *                         description: URL of the promotion image
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         description: Creation date of the promotion
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
+ *                         description: Last update date of the promotion
+ *       400:
+ *         description: Invalid request (e.g., invalid type parameter)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 400
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Promotion not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 404
+ *                 message:
+ *                   type: string
+ *                   example: Promotion not found
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: integer
+ *                   example: 500
+ *                 message:
+ *                   type: string
+ */
+
+/**
+ * @swagger
  * /promotions/{promotionId}:
  *   put:
  *     summary: Update an existing promotion by ID
