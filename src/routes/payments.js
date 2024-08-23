@@ -12,6 +12,12 @@ paymentRoute.use(authVerify);
 // Route to create a new payment
 paymentRoute.post('/', upload.single('file'), asyncHandler(paymentController.createPayment));
 
+// Route to get all payments
+paymentRoute.get('/', asyncHandler(paymentController.getAllPayments));
+
+// Route to get a specific payment by ID
+paymentRoute.get('/:paymentID', asyncHandler(paymentController.getPaymentById));
+
 // Route to update a payment
 paymentRoute.put('/:paymentID', upload.single('file'), asyncHandler(paymentController.updatePayment));
 

@@ -92,6 +92,38 @@ exports.updatePayment = async (req, res) => {
 };
 
 /****************************************************************************************************/
+/*                                  Function to get all payments                                     */
+/****************************************************************************************************/
+exports.getAllPayments = async (req, res) => {
+    try {
+        const payments = await Payment.find({});
+        if (payments.length === 0) {
+            return responseHandler(res, 404, "No payments found");
+        }
+        return responseHandler(res, 200, "Successfully retrieved all payments", payments);
+    } catch (err) {
+        return responseHandler(res, 500, `Error retrieving payments: ${err.message}`);
+    }
+};
+
+/****************************************************************************************************/
+/*                                  Function to get payment by id                                   */
+/****************************************************************************************************/
+exports.getPaymentById = async (req, res) => {
+    const { paymentID } = req.params;
+
+    try {
+        const payment = await Payment.findById(paymentID);
+        if (!payment) {
+            return responseHandler(res, 404, "Payment not found");
+        }
+        return responseHandler(res, 200, "Successfully retrieved payment", payment);
+    } catch (err) {
+        return responseHandler(res, 500, `Error retrieving payment: ${err.message}`);
+    }
+};
+
+/****************************************************************************************************/
 /*                                  Function to delete payments                                     */
 /****************************************************************************************************/
 exports.deletePayment = async (req, res) => {

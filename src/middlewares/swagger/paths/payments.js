@@ -71,6 +71,59 @@
 
 /**
  * @swagger
+ * /payments:
+ *   get:
+ *     summary: Retrieve all payments
+ *     tags:
+ *       - Payments
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved all payments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Payment'
+ *       404:
+ *         description: No payments found
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /payments/{paymentID}:
+ *   get:
+ *     summary: Retrieve a payment by ID
+ *     tags:
+ *       - Payments
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: paymentID
+ *         required: true
+ *         description: ID of the payment to retrieve
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved the payment
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Payment'
+ *       404:
+ *         description: Payment not found
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
  * /payments/{paymentID}:
  *   put:
  *     summary: Update an existing payment
