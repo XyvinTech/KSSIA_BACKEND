@@ -5,6 +5,8 @@ const asyncHandler = require("../utils/asyncHandler");
 const authVerify = require('../middlewares/authVerify'); 
 const chatRoute = express.Router();
 
+chatRoute.use(authVerify);
+
 chatRoute.post('/send/:id', upload.array('attachments', 10), asyncHandler(chatController.sendMessage));
 chatRoute.get('/messages/:userId1/:userId2', authVerify, asyncHandler(chatController.getMessagesBetweenUsers));
 chatRoute.get('/threads/:userId', authVerify, asyncHandler(chatController.getChatThreads));
