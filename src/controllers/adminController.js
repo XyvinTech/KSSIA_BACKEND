@@ -4,7 +4,10 @@ const User = require("../models/user");
 const Product = require("../models/products");
 const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
-const { CreateUserSchema, EditUserSchema } = require("../validation");
+const {
+  CreateUserSchema,
+  EditUserSchema
+} = require("../validation");
 
 /****************************************************************************************************/
 /*                                 Function to create a new user                                    */
@@ -15,7 +18,9 @@ exports.createUser = async (req, res) => {
   // console.log(`Received data parameter: ${data}`);                                 // Debug line
 
   // Validate the input data
-  const { error } = CreateUserSchema.validate(data, {
+  const {
+    error
+  } = CreateUserSchema.validate(data, {
     abortEarly: true,
   });
 
@@ -49,19 +54,76 @@ exports.createUser = async (req, res) => {
 };
 
 /****************************************************************************************************/
+/*                                 Function to bulk add new user                                    */
+/****************************************************************************************************/
+
+exports.createUserBulk = async (req, res) => {
+  const data = req.body;
+  // console.log(`Received data parameter: ${data}`);                                 // Debug line
+
+  // Validate and filter out invalid users
+  const validUsers = [];
+  const errors = [];
+
+  for (const user of data) {
+    const {
+      error
+    } = CreateUserSchema.validate(user, {
+      abortEarly: true
+    });
+    if (error) {
+      errors.push(`Invalid user data: ${error.message} for user ${user.name?.first_name} ${user.name?.last_name} membership ID: ${user.membership_id}`);
+    } else {
+      // Check if the user already exists
+      const existingUser = await User.findOne({
+        "phone_numbers.personal": user.phone_numbers.personal,
+      });
+
+      if (existingUser) {
+        errors.push(`User with phone number ${user.phone_numbers.personal} already exists.`);
+      } else {
+        validUsers.push(user);
+      }
+    }
+  }
+
+  if (validUsers.length === 0) {
+    return responseHandler(res, 400, 'No valid users to create.', {
+      errors
+    });
+  }
+
+  // Insert valid users into the database
+  const insertedUsers = await User.insertMany(validUsers);
+
+  return responseHandler(res, 201, 'Users created successfully.', {
+    insertedUsers,
+    errors,
+  });
+};
+
+/****************************************************************************************************/
 /*                                     Function to edit user                                        */
 /****************************************************************************************************/
 
 exports.editUser = async (req, res) => {
-  const { userId } = req.params;
-  const { membership_id } = req.params;
+  const {
+    userId
+  } = req.params;
+  const {
+    membership_id
+  } = req.params;
   const data = req.body;
   // console.log(`Received userId parameter: ${userId}`);                             // Debug line
   // console.log(`Received membership_id parameter: ${membership_id}`);               // Debug line
   // console.log(`Received data parameter: ${data}`);                                 // Debug line
 
   // Validate the input data
-  const { error } = EditUserSchema.validate(data, { abortEarly: true });
+  const {
+    error
+  } = EditUserSchema.validate(data, {
+    abortEarly: true
+  });
 
   // Check if an error exists in the validation
   if (error) {
@@ -143,8 +205,12 @@ const deleteUserFiles = async (user) => {
 };
 
 exports.deleteUser = async (req, res) => {
-  const { userId } = req.params;
-  const { membership_id } = req.params;
+  const {
+    userId
+  } = req.params;
+  const {
+    membership_id
+  } = req.params;
   // console.log(`Received userId: ${userId}`);                                       // Debug line
   // console.log(`Received membership_id: ${membership_id}`);                         // Debug line
   let user;
@@ -161,7 +227,9 @@ exports.deleteUser = async (req, res) => {
     await deleteUserFiles(user);
   } else if (membership_id) {
     // Find and delete the user using membership_id
-    const user = await User.findOneAndDelete({ membership_id: membership_id });
+    const user = await User.findOneAndDelete({
+      membership_id: membership_id
+    });
     if (!user) {
       // If the user is not found, return a 404 status code with the error message
       // console.log('User not found');                                           // Debug line
@@ -176,7 +244,9 @@ exports.deleteUser = async (req, res) => {
   }
 
   // Delete product images
-  const products = await Product.find({ seller_id: userId });
+  const products = await Product.find({
+    seller_id: userId
+  });
   for (const product of products) {
     if (product.image_url) {
       let oldFileKey = path.basename(product.image_url);
@@ -185,7 +255,9 @@ exports.deleteUser = async (req, res) => {
   }
 
   // Delete products
-  await Product.deleteMany({ seller_id: userId });
+  await Product.deleteMany({
+    seller_id: userId
+  });
 
   // console.log(`User deleted successfully`);                                        // Debug line
   return responseHandler(res, 200, "User deleted successfully");
@@ -213,7 +285,9 @@ exports.getAllUsers = async (req, res) => {
 /****************************************************************************************************/
 
 exports.getUserById = async (req, res) => {
-  const { userId } = req.params;
+  const {
+    userId
+  } = req.params;
   // console.log(`Received userId: ${userId}`);                                       // Debug line
 
   if (!userId) {

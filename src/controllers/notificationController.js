@@ -95,6 +95,9 @@ exports.getUnreadInAppNotifications = async (req, res) => {
             },
             type: 'in-app'
         });
+        for (const notification of notifications){
+            await notification.markAsRead(userId);
+        }
         return responseHandler(res, 200, 'Unread notifications retrieved successfully!', notifications);
     } catch (err) {
         return responseHandler(res, 500, `Server error: ${err.message}`);

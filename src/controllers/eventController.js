@@ -14,7 +14,7 @@ const {
 
 // Create a new event
 exports.createEvent = async (req, res) => {
-    
+
     const data = req.body;
 
     // Parse the speakers field, which is coming as a JSON string in form-data
@@ -24,7 +24,7 @@ exports.createEvent = async (req, res) => {
         } catch (err) {
             return responseHandler(res, 400, 'Invalid input: "speakers" must be a valid JSON array');
         }
-    }    
+    }
 
     // Validate the input data using Joi
     const {
@@ -277,3 +277,60 @@ exports.addRsvp = async (req, res) => {
         return responseHandler(res, 500, `Server error: ${err.message}`);
     }
 };
+
+/****************************************************************************************************/
+/*                                  Function to postpond the events                                 */
+/****************************************************************************************************/
+
+exports.postpondEvents = async (req, res) => {
+    const {
+        eventId
+    } = req.params;
+    const data = req.body;
+
+    if (!eventId) {
+        // If eventId is not provided, return a 400 status code with the error message
+        // console.log('Invalid request');                                              // Debug line
+        return responseHandler(res, 400, `Invalid request`);
+    }
+    if (!data) {
+        // If data is not provided, return a 400 status code with the error message
+        // console.log('Invalid request');                                              // Debug line
+        return responseHandler(res, 400, `Invalid request`);
+    }
+
+    const event = await Event.findByIdAndUpdate(eventId, data, {
+        new: true
+    });
+    if (!event) {
+        return responseHandler(res, 404, 'Event not found.');
+    }
+    return responseHandler(res, 200, 'Event updated successfully!', event);
+}
+
+/****************************************************************************************************/
+/*                                  Function to postpond the events                                 */
+/****************************************************************************************************/
+
+exports.cancelEvent = async (req, res) => {
+    const {
+        eventId
+    } = req.params;
+    if (!eventId) {
+        // If eventId is not provided, return a 400 status code with the error message
+        // console.log('Invalid request');                                              // Debug line
+        return responseHandler(res, 400, `Invalid request`);
+    }
+    const event = await Event.findById(eventId);
+    if (!event) {
+        return responseHandler(res, 404, 'Event not found.');
+    }
+    // Check if the event is already cancelled
+    if (event.status === 'cancelled') {
+        return responseHandler(res, 400, 'Event is already cancelled.');
+    }
+    // Update the event status to cancelled
+    event.status = 'cancelled';
+    await event.save();
+    return responseHandler(res, 200, 'Event cancelled successfully!', event);
+}

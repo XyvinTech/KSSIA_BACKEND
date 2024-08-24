@@ -6,30 +6,30 @@ const Subschema = new mongoose.Schema({
 },{ _id: false });
 
 const reviewSchema = new mongoose.Schema({
-    reviewer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    content: { type: String, required: true },
-    rating: { type: Number, required: true, min: 1, max: 5 },
+    reviewer: { type: mongoose.Schema.Types.ObjectId, ref: 'User'},
+    content: { type: String },
+    rating: { type: Number, min: 1, max: 5 },
     created_at: { type: Date, default: Date.now }
 });
 
 const userSchema = new mongoose.Schema(
     {   name: {
-            first_name: { type: String, required: true },
-            middle_name: { type: String, required: false },
-            last_name: { type: String, required: true }, 
+            first_name: { type: String },
+            middle_name: { type: String },
+            last_name: { type: String }, 
         },
-        membership_id: { type: String, required: true, unique: true },
+        membership_id: { type: String, unique: true },
         blood_group: { type: String },
         email: { type: String, unique: true },
         profile_picture: { type: String },
         phone_numbers: {
-            personal: { type: Number, required: true, unique: true },
+            personal: { type: Number, unique: true },
             landline: { type: Number, unique: true },
             company_phone_number: { type: Number },
             whatsapp_number: { type: Number },
             whatsapp_business_number: { type: Number },
         },
-        // password: { type: String, required: true },
+        // password: { type: String, },
         otp: { type: Number },
         designation: { type: String },
         company_name: { type: String },

@@ -59,6 +59,11 @@ const eventSchema = new mongoose.Schema({
             required: true
         }
     }],
+    status: { 
+        type: String,
+        enum: ['upcoming', 'postponded', 'live', 'cancelled'],
+        default: 'upcoming'
+    },
     rsvp: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"

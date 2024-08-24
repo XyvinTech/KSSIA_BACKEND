@@ -177,6 +177,7 @@ exports.PaymentSchema = Joi.object({
     amount: Joi.number().positive().required(),
     mode_of_payment: Joi.string().required(),
     category: Joi.string().required(),
+    invoice_id: Joi.string(),
     status: Joi.string().valid('pending', 'accepted', 'resubmit', 'rejected').default('pending'),
     invoice_url: Joi.string().uri().allow(''),
     remarks: Joi.string().allow(''),

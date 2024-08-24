@@ -49,5 +49,14 @@ eventRoute.put(
   asyncHandler(eventController.addRsvp)
 );
 
+// Cancel an event by ID
+eventRoute
+  .route("/:eventId/cancel")
+  .put(asyncHandler(eventController.cancelEvent));
+
+// Cancel an event by ID
+eventRoute
+  .route(":eventId/postpond")
+  .put(asyncHandler(eventController.postpondEvents));
 
 module.exports = eventRoute;

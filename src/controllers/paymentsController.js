@@ -96,7 +96,7 @@ exports.updatePayment = async (req, res) => {
 /****************************************************************************************************/
 exports.getAllPayments = async (req, res) => {
     try {
-        const payments = await Payment.find({});
+        const payments = await Payment.find();
         if (payments.length === 0) {
             return responseHandler(res, 404, "No payments found");
         }
@@ -202,3 +202,8 @@ exports.getUserPayments = async (req, res) => {
 
     return responseHandler(res, 200, "Successfully retrieved payments", payments);
 };
+
+
+exports.createUserPayment = async (req, res) => {
+
+}

@@ -8,6 +8,7 @@ adminRoute.use(authVerify);
 
 adminRoute.route('/users').get(asyncHandler(adminController.getAllUsers));
 adminRoute.route('/users').post(asyncHandler(adminController.createUser));
+adminRoute.route('/users/bulk').post(asyncHandler(adminController.createUserBulk));
 adminRoute.route('/users/:userId').get(asyncHandler(adminController.getUserById));
 adminRoute.route('/users/:userId').put(asyncHandler(adminController.editUser));
 adminRoute.route('/users/:userId').delete(asyncHandler(adminController.deleteUser));
