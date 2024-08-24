@@ -56,7 +56,7 @@ eventRoute
 
 // Cancel an event by ID
 eventRoute
-  .route(":eventId/postpond")
+  .route("/:eventId/postpond")
   .put(asyncHandler(eventController.postpondEvents));
 
 module.exports = eventRoute;
