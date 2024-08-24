@@ -18,6 +18,7 @@ exports.sendMessage = async (req, res) => {
   const { content } = req.body;
   const to = req.params.id;
   const from = req.userId;
+  console.log("🚀 ~ exports.sendMessage= ~ from:", from)
 
   let attachments = [];
   const bucketName = process.env.AWS_S3_BUCKET;
