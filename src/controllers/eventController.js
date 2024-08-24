@@ -286,7 +286,8 @@ exports.postpondEvents = async (req, res) => {
     const {
         eventId
     } = req.params;
-    const data = req.body;
+
+    req.body.status = "postponded";
 
     if (!eventId) {
         // If eventId is not provided, return a 400 status code with the error message
@@ -299,7 +300,7 @@ exports.postpondEvents = async (req, res) => {
         return responseHandler(res, 400, `Invalid request`);
     }
 
-    const event = await Event.findByIdAndUpdate(eventId, data, {
+    const event = await Event.findByIdAndUpdate(eventId, req.body, {
         new: true
     });
     if (!event) {
