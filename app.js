@@ -16,6 +16,7 @@ const paymentRoute = require("./src/routes/payments");
 const filesRoute = require("./src/routes/files");
 const chatRoute = require('./src/routes/chats');
 const requirementsRoute = require('./src/routes/requirements');
+const authRoute = require('./src/routes/auth');
 const { specs, swaggerUi } = require('./src/middlewares/swagger/swagger');
 const { app, server } = require("./src/socket/socket.js"); // Import server and io from socket file
 
@@ -41,6 +42,7 @@ require("./src/helpers/connection");
 // Configure routes for the API
 app.use(`${BASE_PATH}/user`, userRoute);
 app.use(`${BASE_PATH}/admin`, adminRoute);
+app.use(`${BASE_PATH}/auth`, authRoute);
 app.use(`${BASE_PATH}/products`, productRoute);
 app.use(`${BASE_PATH}/events`, eventRoute);
 app.use(`${BASE_PATH}/news`, newsRoute);

@@ -22,6 +22,10 @@ const options = {
         description: 'Administrative operations'
       },
       {
+        name: 'Admin create and Auth',
+        description: 'Operations related to admin creation and auth'
+      },
+      {
         name: 'Products',
         description: 'Operations related to products'
       },
@@ -635,6 +639,58 @@ const options = {
               default: 'white'
             }
           },
+        },
+        Admin: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+              example: 'John Doe',
+              description: 'The admin\'s full name',
+            },
+            email: {
+              type: 'string',
+              format: 'email',
+              example: 'admin@example.com',
+              description: 'The admin\'s email address',
+            },
+            password: {
+              type: 'string',
+              format: 'password',
+              description: 'The admin\'s password (hashed)',
+            },
+            role: {
+              type: 'string',
+              example: 'Administrator',
+              description: 'The role assigned to the admin',
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Timestamp when the admin was created',
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Timestamp when the admin was last updated',
+            },
+            is_active: {
+              type: 'boolean',
+              example: true,
+              description: 'Indicates whether the admin is currently active',
+            },
+            is_deleted: {
+              type: 'boolean',
+              example: false,
+              description: 'Indicates whether the admin has been deleted',
+            },
+          },
+          required: [
+            'name',
+            'email',
+            'password',
+            'role',
+          ],
         },
         Product: {
           type: 'object',

@@ -101,7 +101,30 @@ exports.EditUserSchema = Joi.object({
 });
 
 exports.productsSchemaval = productsSchema;
+// Create Admin validation schema
+exports.CreateAdminSchema = Joi.object({
+    name: Joi.string().required(),
+    email: Joi.string().email().required(),
+    password: Joi.string().min(8).required(),
+    role: Joi.string().required(),
+    status: Joi.string(),
+    is_active: Joi.boolean().default(true),
+    is_deleted: Joi.boolean().default(false),
+    createdAt: Joi.date().default(Date.now),
+    updatedAt: Joi.date().default(Date.now)
+});
 
+// Edit Admin validation schema
+exports.EditAdminSchema = Joi.object({
+    name: Joi.string().required(),
+    email: Joi.string().email().required(),
+    password: Joi.string().min(8).optional(),
+    role: Joi.string().required(),
+    status: Joi.string(),
+    is_active: Joi.boolean().default(true),
+    is_deleted: Joi.boolean().default(false),
+    updatedAt: Joi.date().default(Date.now)
+});
 // events array validation
 const speakerSchema = Joi.object({
     speaker_name: Joi.string().required(),

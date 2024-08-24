@@ -17,8 +17,8 @@ const AdminSchema = new Schema({
         required: true,
     },
     role: {
-        type: Schema.Types.ObjectId,
-        ref: 'Role',
+        type: String,
+        enum: ['admin', 'super admin'], // Restrict values to 'admin' or 'super admin'
         required: true,
     }
 },{timestamps: true});
