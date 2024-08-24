@@ -268,7 +268,7 @@
 
 /**
  * @swagger
- * /payments/{userId}:
+ * /payments/user/{userId}:
  *   get:
  *     summary: Retrieve payment history for a user by userId
  *     tags: 
