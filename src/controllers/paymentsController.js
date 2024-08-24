@@ -4,7 +4,10 @@ const responseHandler = require("../helpers/responseHandler");
 const deleteFile = require("../helpers/deleteFiles");
 const Payment = require("../models/payment");
 const User = require("../models/user");
-const { PaymentSchema,UserPaymentSchema } = require("../validation");
+const {
+    PaymentSchema,
+    UserPaymentSchema
+} = require("../validation");
 const handleFileUpload = require("../utils/fileHandler");
 
 /****************************************************************************************************/
@@ -13,17 +16,27 @@ const handleFileUpload = require("../utils/fileHandler");
 exports.createPayment = async (req, res) => {
     const data = req.body;
 
-    const { error } = PaymentSchema.validate(data, { abortEarly: true });
+    const {
+        error
+    } = PaymentSchema.validate(data, {
+        abortEarly: true
+    });
     if (error) {
         return responseHandler(res, 400, `Invalid input: ${error.message}`);
     }
 
-    const paymentExist = await Payment.findOne({ member: data.member, date: data.date, time: data.time, category: data.category});
+    const paymentExist = await Payment.findOne({
+        member: data.member,
+        date: data.date,
+        time: data.time,
+        category: data.category
+    });
     if (paymentExist) {
         return responseHandler(res, 400, "Payment details already exist");
     }
 
     let invoice_url = '';
+    let renewal = '';
     const bucketName = process.env.AWS_S3_BUCKET;
     if (req.file) {
         try {
@@ -33,16 +46,15 @@ exports.createPayment = async (req, res) => {
         }
     }
 
-    if (!data.days){
-        const resultDate = new Date(data.date);
-        resultDate.setDate(resultDate.getDate() + (365));
-        payment.renewal = resultDate;
-    }
     const resultDate = new Date(data.date);
-    resultDate.setDate(resultDate.getDate() + (data.days));
-    payment.renewal = resultDate;
+    resultDate.setDate(resultDate.getDate() + (365));
+    renewal = resultDate;
 
-    const newPayment = new Payment({ ...data, invoice_url });
+    const newPayment = new Payment({
+        ...data,
+        invoice_url,
+        renewal
+    });
 
     try {
         await newPayment.save();
@@ -56,10 +68,17 @@ exports.createPayment = async (req, res) => {
 /*                                   Function to edit payments                                      */
 /****************************************************************************************************/
 exports.updatePayment = async (req, res) => {
-    const { paymentID } = req.params;
+    const {
+        paymentID
+    } = req.params;
     const data = req.body;
+    const year_count = req.body.year_count ? req.body.year_count : 1
 
-    const { error } = PaymentSchema.validate(data, { abortEarly: false });
+    const {
+        error
+    } = PaymentSchema.validate(data, {
+        abortEarly: false
+    });
     if (error) {
         return responseHandler(res, 400, `Invalid input: ${error.details.map(detail => detail.message).join(', ')}`);
     }
@@ -90,16 +109,13 @@ exports.updatePayment = async (req, res) => {
         }
     }
 
-    if (!data.days){
-        const resultDate = new Date(data.date);
-        resultDate.setDate(resultDate.getDate() + (365));
-        payment.renewal = resultDate;
-    }
     const resultDate = new Date(data.date);
-    resultDate.setDate(resultDate.getDate() + (data.days));
+    resultDate.setDate(resultDate.getDate() + (365 * year_count));
     payment.renewal = resultDate;
 
-    Object.assign(payment, data, { invoice_url });
+    Object.assign(payment, data, {
+        invoice_url
+    });
 
     try {
         await payment.save();
@@ -128,7 +144,9 @@ exports.getAllPayments = async (req, res) => {
 /*                                  Function to get payment by id                                   */
 /****************************************************************************************************/
 exports.getPaymentById = async (req, res) => {
-    const { paymentID } = req.params;
+    const {
+        paymentID
+    } = req.params;
 
     try {
         const payment = await Payment.findById(paymentID);
@@ -145,7 +163,9 @@ exports.getPaymentById = async (req, res) => {
 /*                                  Function to delete payments                                     */
 /****************************************************************************************************/
 exports.deletePayment = async (req, res) => {
-    const { paymentID } = req.params;
+    const {
+        paymentID
+    } = req.params;
 
     const payment = await Payment.findById(paymentID);
     if (!payment) {
@@ -153,7 +173,7 @@ exports.deletePayment = async (req, res) => {
     }
 
     const bucketName = process.env.AWS_S3_BUCKET;
-    
+
     if (payment.invoice_url) {
         try {
             const oldImageKey = path.basename(payment.invoice_url);
@@ -172,8 +192,13 @@ exports.deletePayment = async (req, res) => {
 /*                             Function to update status of payments                                */
 /****************************************************************************************************/
 exports.updatePaymentStatus = async (req, res) => {
-    const { paymentID } = req.params;
-    const { status, reason } = req.body;
+    const {
+        paymentID
+    } = req.params;
+    const {
+        status,
+        reason
+    } = req.body;
 
     const validStatuses = ["pending", "accepted", "resubmit", "rejected"];
     if (!validStatuses.includes(status)) {
@@ -201,7 +226,9 @@ exports.updatePaymentStatus = async (req, res) => {
 /****************************************************************************************************/
 exports.getUserPayments = async (req, res) => {
 
-    const { userId } = req.params;
+    const {
+        userId
+    } = req.params;
 
     if (!userId) {
         return responseHandler(res, 400, "Invalid request");
@@ -212,7 +239,9 @@ exports.getUserPayments = async (req, res) => {
         return responseHandler(res, 404, "User not found");
     }
 
-    const payments = await Payment.find({ member: userId });
+    const payments = await Payment.find({
+        member: userId
+    });
 
     if (payments.length === 0) {
         return responseHandler(res, 404, "No payments found");
@@ -225,9 +254,11 @@ exports.getUserPayments = async (req, res) => {
 /*                         Function to create user payment (subscription)                           */
 /****************************************************************************************************/
 exports.createUserPayment = async (req, res) => {
-    const { userId } = req.userId;
+    const {
+        userId
+    } = req.userId;
     const data = req.body;
-    
+
     if (!userId) {
         return responseHandler(res, 400, "Invalid request");
     }
@@ -237,7 +268,11 @@ exports.createUserPayment = async (req, res) => {
         return responseHandler(res, 404, "User not found");
     }
 
-    const { error } = UserPaymentSchema.validate(data, { abortEarly: true });
+    const {
+        error
+    } = UserPaymentSchema.validate(data, {
+        abortEarly: true
+    });
     if (error) {
         return responseHandler(res, 400, `Invalid input: ${error.message}`);
     }
@@ -252,7 +287,10 @@ exports.createUserPayment = async (req, res) => {
         }
     }
 
-    const newPayment = new Payment({ ...data, invoice_url });
+    const newPayment = new Payment({
+        ...data,
+        invoice_url
+    });
 
     try {
         await newPayment.save();
