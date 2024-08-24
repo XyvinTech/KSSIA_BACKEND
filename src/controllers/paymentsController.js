@@ -254,9 +254,7 @@ exports.getUserPayments = async (req, res) => {
 /*                         Function to create user payment (subscription)                           */
 /****************************************************************************************************/
 exports.createUserPayment = async (req, res) => {
-    const {
-        userId
-    } = req.userId;
+    const userId = req.userId;
     const data = req.body;
 
     if (!userId) {
