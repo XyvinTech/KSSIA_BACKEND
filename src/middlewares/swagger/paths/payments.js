@@ -58,66 +58,13 @@
  *                 description: Invoice file
  *     responses:
  *       201:
- *         description: Payment created successfully
+ *         description: Payment submitted successfully
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Payment'
  *       400:
  *         description: Invalid input
- *       500:
- *         description: Internal server error
- */
-
-/**
- * @swagger
- * /payments:
- *   get:
- *     summary: Retrieve all payments
- *     tags:
- *       - Payments
- *     security:
- *       - BearerAuth: []
- *     responses:
- *       200:
- *         description: Successfully retrieved all payments
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Payment'
- *       404:
- *         description: No payments found
- *       500:
- *         description: Internal server error
- */
-
-/**
- * @swagger
- * /payments/{paymentID}:
- *   get:
- *     summary: Retrieve a payment by ID
- *     tags:
- *       - Payments
- *     security:
- *       - BearerAuth: []
- *     parameters:
- *       - in: path
- *         name: paymentID
- *         required: true
- *         description: ID of the payment to retrieve
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Successfully retrieved the payment
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Payment'
- *       404:
- *         description: Payment not found
  *       500:
  *         description: Internal server error
  */
@@ -134,10 +81,10 @@
  *     parameters:
  *       - in: path
  *         name: paymentID
- *         schema:
- *           type: string
  *         required: true
  *         description: ID of the payment to update
+ *         schema:
+ *           type: string
  *     requestBody:
  *       description: Payment object that needs to be updated
  *       required: true
@@ -194,6 +141,62 @@
  *       500:
  *         description: Internal server error
  */
+
+
+/**
+ * @swagger
+ * /payments:
+ *   get:
+ *     summary: Retrieve all payments
+ *     tags:
+ *       - Payments
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved all payments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Payment'
+ *       404:
+ *         description: No payments found
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /payments/{paymentID}:
+ *   get:
+ *     summary: Retrieve a payment by ID
+ *     tags:
+ *       - Payments
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: paymentID
+ *         required: true
+ *         description: ID of the payment to retrieve
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved the payment
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Payment'
+ *       404:
+ *         description: Payment not found
+ *       500:
+ *         description: Internal server error
+ */
+
+
 
 /**
  * @swagger
@@ -295,6 +298,67 @@
  *         description: Invalid request, missing or invalid userId
  *       404:
  *         description: User or payments not found
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /payments/user:
+ *   post:
+ *     summary: Create user payment (subscription)
+ *     tags: 
+ *       - Payments
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       description: User payment details
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               membership_id:
+ *                 type: string
+ *                 description: Membership ID of the user
+ *               date:
+ *                 type: string
+ *                 format: date
+ *                 description: Date of the payment
+ *               time:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Time of the payment
+ *               amount:
+ *                 type: number
+ *                 format: float
+ *                 description: Amount of the payment
+ *               mode_of_payment:
+ *                 type: string
+ *                 description: Payment mode
+ *               category:
+ *                 type: string
+ *                 description: Payment category
+ *               status:
+ *                 type: string
+ *                 description: Status of the payment
+ *               remarks:
+ *                 type: string
+ *                 description: Additional remarks
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: Invoice file
+ *     responses:
+ *       201:
+ *         description: User payment submitted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Payment'
+ *       400:
+ *         description: Invalid input
  *       500:
  *         description: Internal server error
  */
