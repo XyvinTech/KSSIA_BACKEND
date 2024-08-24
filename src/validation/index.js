@@ -156,7 +156,6 @@ exports.emailNotificationSchema = Joi.object({
     to: Joi.array().items(Joi.string()).required(),
     subject: Joi.string().min(1).max(255).required(),
     content: Joi.string(),
-    media_url: Joi.string().uri().allow(''),
     file_url: Joi.string().uri().allow(''),
     link_url: Joi.string().uri().allow(''),
 });
