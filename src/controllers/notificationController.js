@@ -383,15 +383,15 @@ exports.createAndSendEmailNotification = async (req, res) => {
         const transporter = nodemailer.createTransport({
             service: 'Gmail',
             auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
+                user: process.env.NODE_MAILER_USER,
+                pass: process.env.NODE_MAILER_PASS
             }
             
         });
-        console.log("Email User:", process.env.EMAIL_USER);
-        console.log("Email Pass:", process.env.EMAIL_PASS);
+        console.log("Email User:", process.env.NODE_MAILER_USER);
+        console.log("Email Pass:", process.env.NODE_MAILER_PASS);
         const mailOptions = {
-            from: process.env.EMAIL_USER,
+            from: process.env.NODE_MAILER_USER,
             to: formattedEmails,
             subject,
             text: content,
