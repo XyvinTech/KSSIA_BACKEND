@@ -116,9 +116,8 @@ exports.getMessagesBetweenUsers = async (req, res) => {
 /*                                   Function to get chat threads                                   */
 /****************************************************************************************************/
 exports.getChatThreads = async (req, res) => {
-  const { userId } = req.params;
   try {
-    const chatThreads = await ChatThread.find({ participants: userId })
+    const chatThreads = await ChatThread.find({ participants: req.userId })
       .populate("participants", "username profilePicture")
       .populate("lastMessage")
       .exec();
