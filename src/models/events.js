@@ -44,19 +44,15 @@ const eventSchema = new mongoose.Schema({
     speakers: [{
         speaker_name: {
             type: String,
-            required: true
         },
         speaker_designation: {
             type: String,
-            required: true
         },
         speaker_image: {
             type: String,
-            required: false
         },
         speaker_role: {
             type: String,
-            required: true
         }
     }],
     status: { 
