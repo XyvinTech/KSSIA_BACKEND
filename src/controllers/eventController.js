@@ -294,11 +294,6 @@ exports.postpondEvents = async (req, res) => {
         // console.log('Invalid request');                                              // Debug line
         return responseHandler(res, 400, `Invalid request`);
     }
-    if (!data) {
-        // If data is not provided, return a 400 status code with the error message
-        // console.log('Invalid request');                                              // Debug line
-        return responseHandler(res, 400, `Invalid request`);
-    }
 
     const event = await Event.findByIdAndUpdate(eventId, req.body, {
         new: true
