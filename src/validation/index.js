@@ -199,9 +199,16 @@ exports.PaymentSchema = Joi.object({
     time: Joi.date().required(),
     amount: Joi.number().positive().required(),
     mode_of_payment: Joi.string().required(),
-    category: Joi.string().required(),
+    category: Joi.string().required().valid('app', 'membership'),
     invoice_id: Joi.string(),
     status: Joi.string().valid('pending', 'accepted', 'resubmit', 'rejected').default('pending'),
+    invoice_url: Joi.string().uri().allow(''),
+    remarks: Joi.string().allow(''),
+});
+
+exports.UserPaymentSchema = Joi.object({
+    member: Joi.string().hex().length(24).required(),
+    category: Joi.string().required().valid('app', 'membership'),
     invoice_url: Joi.string().uri().allow(''),
     remarks: Joi.string().allow(''),
 });

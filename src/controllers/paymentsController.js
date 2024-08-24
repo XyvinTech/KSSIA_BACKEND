@@ -4,7 +4,7 @@ const responseHandler = require("../helpers/responseHandler");
 const deleteFile = require("../helpers/deleteFiles");
 const Payment = require("../models/payment");
 const User = require("../models/user");
-const { PaymentSchema } = require("../validation");
+const { PaymentSchema,UserPaymentSchema } = require("../validation");
 const handleFileUpload = require("../utils/fileHandler");
 
 /****************************************************************************************************/
@@ -32,6 +32,15 @@ exports.createPayment = async (req, res) => {
             return responseHandler(res, 500, err.message);
         }
     }
+
+    if (!data.days){
+        const resultDate = new Date(data.date);
+        resultDate.setDate(resultDate.getDate() + (365));
+        payment.renewal = resultDate;
+    }
+    const resultDate = new Date(data.date);
+    resultDate.setDate(resultDate.getDate() + (data.days));
+    payment.renewal = resultDate;
 
     const newPayment = new Payment({ ...data, invoice_url });
 
@@ -80,6 +89,15 @@ exports.updatePayment = async (req, res) => {
             return responseHandler(res, 500, err.message);
         }
     }
+
+    if (!data.days){
+        const resultDate = new Date(data.date);
+        resultDate.setDate(resultDate.getDate() + (365));
+        payment.renewal = resultDate;
+    }
+    const resultDate = new Date(data.date);
+    resultDate.setDate(resultDate.getDate() + (data.days));
+    payment.renewal = resultDate;
 
     Object.assign(payment, data, { invoice_url });
 
@@ -203,7 +221,43 @@ exports.getUserPayments = async (req, res) => {
     return responseHandler(res, 200, "Successfully retrieved payments", payments);
 };
 
-
+/****************************************************************************************************/
+/*                         Function to create user payment (subscription)                           */
+/****************************************************************************************************/
 exports.createUserPayment = async (req, res) => {
+    const { userId } = req.userId;
+    const data = req.body;
+    
+    if (!userId) {
+        return responseHandler(res, 400, "Invalid request");
+    }
 
+    const user = await User.findById(userId);
+    if (!user) {
+        return responseHandler(res, 404, "User not found");
+    }
+
+    const { error } = UserPaymentSchema.validate(data, { abortEarly: true });
+    if (error) {
+        return responseHandler(res, 400, `Invalid input: ${error.message}`);
+    }
+
+    let invoice_url = '';
+    const bucketName = process.env.AWS_S3_BUCKET;
+    if (req.file) {
+        try {
+            invoice_url = await handleFileUpload(req.file, bucketName);
+        } catch (err) {
+            return responseHandler(res, 500, err.message);
+        }
+    }
+
+    const newPayment = new Payment({ ...data, invoice_url });
+
+    try {
+        await newPayment.save();
+        return responseHandler(res, 201, "Payment submitted successfully!", newPayment);
+    } catch (err) {
+        return responseHandler(res, 500, `Error saving payment: ${err.message}`);
+    }
 }

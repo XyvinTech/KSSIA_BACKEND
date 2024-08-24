@@ -10,7 +10,10 @@ const paymentSchema = new mongoose.Schema({
     amount: { type: Number },
     mode_of_payment: { type: String },
     invoice_id: { type: String },
-    category: { type: String },
+    category: { 
+        type: String,
+        enum: ["app","membership"]
+    },
     status: { 
         type: String,
         default: "pending",
