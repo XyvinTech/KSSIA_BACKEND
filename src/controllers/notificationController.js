@@ -354,12 +354,25 @@ exports.createAndSendEmailNotification = async (req, res) => {
         return responseHandler(res, 400, `Invalid input: ${error.message}`);
     }
 
+    
+    const mediaFile = req.files['media_url'] ? req.files['media_url'][0] : null;
+
+    const bucketName = process.env.AWS_S3_BUCKET;
+    
+    let mediaImage = "";
+
+    if (mediaFile) {
+        try {
+            mediaImage = await handleFileUpload(mediaFile, bucketName);
+        } catch (err) {
+            return responseHandler(res, 500, `Error uploading file: ${err.message}`);
+        }
+    }
+
     const {
         to,
         subject,
         content,
-        media_url,
-        file_url,
         link_url
     } = data;
 
@@ -369,8 +382,7 @@ exports.createAndSendEmailNotification = async (req, res) => {
             to,
             subject,
             content,
-            media_url,
-            file_url,
+            media_url: mediaImage ? mediaImage : null,
             link_url,
             type: 'email'
         });
@@ -381,31 +393,37 @@ exports.createAndSendEmailNotification = async (req, res) => {
 
         // Send email
         const transporter = nodemailer.createTransport({
-            service: 'Gmail',
+            service: 'gmail',
             auth: {
                 user: process.env.NODE_MAILER_USER,
                 pass: process.env.NODE_MAILER_PASS
             }
             
         });
-        console.log("Email User:", process.env.NODE_MAILER_USER);
-        console.log("Email Pass:", process.env.NODE_MAILER_PASS);
         const mailOptions = {
             from: process.env.NODE_MAILER_USER,
             to: formattedEmails,
             subject,
             text: content,
-            attachments: [
-                media_url ? {
-                    path: media_url
-                } : null,
-                file_url ? {
-                    path: file_url
-                } : null
-            ].filter(Boolean) // Filter out null values
+            attachments: []
         };
+        
+        // Add the mediaImage as an attachment if it exists
+        if (mediaImage) {
+            const encodedMediaImage = encodeURI(mediaImage);
+            mailOptions.attachments.push({
+                filename: mediaFile.originalname, 
+                path: encodedMediaImage, 
+                contentType: mediaFile.mimetype 
+            });
+        }
+        
 
-        await transporter.sendMail(mailOptions);
+        try {
+            await transporter.sendMail(mailOptions);
+        } catch (error) {
+            console.log("🚀 ~ exports.createAndSendEmailNotification= ~ error:", error)
+        }
 
         return responseHandler(res, 201, 'Email notification created and sent successfully!');
     } catch (err) {
