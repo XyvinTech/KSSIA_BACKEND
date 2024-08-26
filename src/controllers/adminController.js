@@ -304,10 +304,15 @@ exports.getUserById = async (req, res) => {
     return responseHandler(res, 404, "User not found");
   }
 
+  let products = await Product.find({ seller_id: userId }).exec();
+  if (!products.length) {
+    products = "Seller has no products";
+  }
+
   const mappedData = {
     ...user._doc,
     full_name: `${user.name.first_name} ${user.name.middle_name} ${user.name.last_name}`,
-    mobile: user.phone_numbers.personal,
+    mobile: user.phone_numbers.personal, products: products
   };
 
   // console.log(`User retrieved successfully`);                                      // Debug line
