@@ -235,7 +235,7 @@
 
 /**
  * @swagger
- * /events/rsvp/:eventId/mark/:userId:
+ * /events/rsvp/:eventId/mark:
  *   put:
  *     summary: Mark an rsvp to an event
  *     tags:
@@ -249,12 +249,6 @@
  *           type: string
  *         required: true
  *         description: The ID of the event to add rsvp to
- *       - in: path
- *         name: userId
- *         schema:
- *           type: string
- *         required: true
- *         description: The ID of the user marking the rsvp
  *     responses:
  *       200:
  *         description: RSVP marked successfully

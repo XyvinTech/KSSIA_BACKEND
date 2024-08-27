@@ -26,7 +26,7 @@ eventRoute
 
 // Route to mark a rsvp 
 eventRoute.put(
-  '/rsvp/:eventId/mark/:userId', 
+  '/rsvp/:eventId/mark', 
   asyncHandler(eventController.addRsvp)
 );
 

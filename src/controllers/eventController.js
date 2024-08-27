@@ -178,12 +178,8 @@ exports.deleteEvent = async (req, res) => {
 
 exports.addRsvp = async (req, res) => {
 
-    const {
-        eventId
-    } = req.params;
-    const {
-        userId
-    } = req.params;
+    const eventId = req.params.eventId;
+    const userId = req.userId;
 
     if (!eventId) {
         // If eventId is not provided, return a 400 status code with the error message
@@ -202,7 +198,7 @@ exports.addRsvp = async (req, res) => {
             return responseHandler(res, 404, 'Event not found.');
         }
 
-        await Event.markrsvp(userId);
+        await event.markrsvp(userId);
         return responseHandler(res, 200, 'RSVP updated successfully!', event);
     } catch (err) {
         return responseHandler(res, 500, `Server error: ${err.message}`);
