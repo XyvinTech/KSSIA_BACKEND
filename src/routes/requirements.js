@@ -27,4 +27,7 @@ requirementsRoute.patch('/:requirementID/status', asyncHandler(requirementsContr
 // Route to get the requirements of a user
 requirementsRoute.get('/:userId', asyncHandler(requirementsController.getUserRequirements));
 
+requirementsRoute.get('/single/:id', asyncHandler(requirementsController.getRequirements));
+
+
 module.exports = requirementsRoute;

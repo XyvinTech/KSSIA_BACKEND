@@ -181,3 +181,9 @@ exports.getUserRequirements = async (req, res) => {
 
     return responseHandler(res, 200, "Successfully retrieved requirements", requirements);
 };
+
+exports.getRequirements = async (req, res) => {
+    const { id } = req.params;
+    const requirements = await Requirements.findById(id);
+    return responseHandler(res, 200, "Successfully retrieved requirements", requirements);
+}
