@@ -36,6 +36,9 @@ app.use(express.json());
 // Set the base path for API routes
 const BASE_PATH = `/api/${API_VERSION}`;
 
+// Start the cron job
+require("./src/jobs"); 
+
 // Import database connection modules
 require("./src/helpers/connection");
 

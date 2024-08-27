@@ -13,10 +13,16 @@ const eventSchema = new mongoose.Schema({
     description: {
         type: String
     },
-    date: {
+    startDate: {
         type: Date
     },
-    time: {
+    endDate: {
+        type: Date
+    },
+    startTime: {
+        type: Date
+    },
+    endTime: {
         type: Date
     },
     platform: {
@@ -55,9 +61,9 @@ const eventSchema = new mongoose.Schema({
             type: String,
         }
     }],
-    status: { 
+    status: {
         type: String,
-        enum: ['upcoming', 'postponded', 'live', 'cancelled'],
+        enum: ['upcoming', 'postponded', 'live', 'cancelled', 'completed'],
         default: 'upcoming'
     },
     rsvp: [{
