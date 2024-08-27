@@ -203,6 +203,7 @@ exports.PaymentSchema = Joi.object({
     status: Joi.string().valid('pending', 'accepted', 'resubmit', 'rejected').default('pending'),
     invoice_url: Joi.string().uri().allow(''),
     remarks: Joi.string().allow(''),
+    year_count: Joi.number(),
 });
 
 exports.UserPaymentSchema = Joi.object({
