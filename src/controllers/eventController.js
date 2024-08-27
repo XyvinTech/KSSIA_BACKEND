@@ -35,6 +35,31 @@ exports.createEvent = async (req, res) => {
     });
     if (eventExist) return responseHandler(res, 400, "Event already exists");
 
+    try {
+        // Handle file uploads if present
+        const bucketName = process.env.AWS_S3_BUCKET;
+        if (req.files) {
+            if (req.files.image) {
+                data.image = await handleFileUpload(req.files.image[0], bucketName);
+            }
+            if (req.files.guest_image) {
+                data.guest_image = await handleFileUpload(req.files.guest_image[0], bucketName);
+            }
+
+            // Handle speaker images and assign them to the appropriate speaker
+            if (data.speakers && Array.isArray(data.speakers)) {
+                data.speakers = await Promise.all(data.speakers.map(async (speaker, index) => {
+                    if (req.files.speaker_images && req.files.speaker_images[index]) {
+                        speaker.speaker_image = await handleFileUpload(req.files.speaker_images[index], bucketName);
+                    }
+                    return speaker;
+                }));
+            }
+        }
+    } catch (err) {
+        return responseHandler(res, 500, `Error uploading file: ${err.message}`);
+    }
+
     // Validate the input data using Joi
     const {
         error
@@ -232,7 +257,7 @@ exports.postpondEvents = async (req, res) => {
 }
 
 /****************************************************************************************************/
-/*                                  Function to postpond the events                                 */
+/*                                  Function to cancel the events                                 */
 /****************************************************************************************************/
 
 exports.cancelEvent = async (req, res) => {

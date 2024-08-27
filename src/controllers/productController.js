@@ -106,7 +106,7 @@ exports.getAllProducts = async (req, res) => {
   const mappedProducts = products.map((product) => {
     return {
       ...product._doc,
-      full_name: `${product.seller_id.name.first_name} ${product.seller_id.name.middle_name} ${product.seller_id.name.last_name}`,
+      full_name: `${product.seller_id?.name.first_name} ${product.seller_id?.name.middle_name} ${product.seller_id?.name.last_name}`,
     };
   });
   return responseHandler(
