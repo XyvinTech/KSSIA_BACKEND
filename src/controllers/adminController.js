@@ -123,9 +123,11 @@ exports.editUser = async (req, res) => {
     return responseHandler(res, 400, `Invalid input: ${error.message}`);
   }
 
+  let updatedUser;
+
   if (userId) {
     // Find and update the user using userId
-    const updatedUser = await User.findByIdAndUpdate(userId, data, {
+    updatedUser = await User.findByIdAndUpdate(userId, data, {
       new: true,
       runValidators: true,
     });
@@ -137,7 +139,7 @@ exports.editUser = async (req, res) => {
     }
   } else if (membership_id) {
     // Find and update the user using membership_id
-    const updatedUser = await User.findOneAndUpdate(membership_id, data, {
+     updatedUser = await User.findOneAndUpdate(membership_id, data, {
       new: true,
       runValidators: true,
     });
