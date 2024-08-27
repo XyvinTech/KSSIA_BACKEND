@@ -4,10 +4,7 @@ const User = require("../models/user");
 const Product = require("../models/products");
 const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
-const {
-  CreateUserSchema,
-  EditUserSchema
-} = require("../validation");
+const { CreateUserSchema, EditUserSchema } = require("../validation");
 
 /****************************************************************************************************/
 /*                                 Function to create a new user                                    */
@@ -18,9 +15,7 @@ exports.createUser = async (req, res) => {
   // console.log(`Received data parameter: ${data}`);                                 // Debug line
 
   // Validate the input data
-  const {
-    error
-  } = CreateUserSchema.validate(data, {
+  const { error } = CreateUserSchema.validate(data, {
     abortEarly: true,
   });
 
@@ -66,13 +61,13 @@ exports.createUserBulk = async (req, res) => {
   const errors = [];
 
   for (const user of data) {
-    const {
-      error
-    } = CreateUserSchema.validate(user, {
-      abortEarly: true
+    const { error } = CreateUserSchema.validate(user, {
+      abortEarly: true,
     });
     if (error) {
-      errors.push(`Invalid user data: ${error.message} for user ${user.name?.first_name} ${user.name?.last_name} membership ID: ${user.membership_id}`);
+      errors.push(
+        `Invalid user data: ${error.message} for user ${user.name?.first_name} ${user.name?.last_name} membership ID: ${user.membership_id}`
+      );
     } else {
       // Check if the user already exists
       const existingUser = await User.findOne({
@@ -80,7 +75,9 @@ exports.createUserBulk = async (req, res) => {
       });
 
       if (existingUser) {
-        errors.push(`User with phone number ${user.phone_numbers.personal} already exists.`);
+        errors.push(
+          `User with phone number ${user.phone_numbers.personal} already exists.`
+        );
       } else {
         validUsers.push(user);
       }
@@ -88,15 +85,15 @@ exports.createUserBulk = async (req, res) => {
   }
 
   if (validUsers.length === 0) {
-    return responseHandler(res, 400, 'No valid users to create.', {
-      errors
+    return responseHandler(res, 400, "No valid users to create.", {
+      errors,
     });
   }
 
   // Insert valid users into the database
   const insertedUsers = await User.insertMany(validUsers);
 
-  return responseHandler(res, 201, 'Users created successfully.', {
+  return responseHandler(res, 201, "Users created successfully.", {
     insertedUsers,
     errors,
   });
@@ -107,22 +104,16 @@ exports.createUserBulk = async (req, res) => {
 /****************************************************************************************************/
 
 exports.editUser = async (req, res) => {
-  const {
-    userId
-  } = req.params;
-  const {
-    membership_id
-  } = req.params;
+  const { userId } = req.params;
+  const { membership_id } = req.params;
   const data = req.body;
   // console.log(`Received userId parameter: ${userId}`);                             // Debug line
   // console.log(`Received membership_id parameter: ${membership_id}`);               // Debug line
   // console.log(`Received data parameter: ${data}`);                                 // Debug line
 
   // Validate the input data
-  const {
-    error
-  } = EditUserSchema.validate(data, {
-    abortEarly: true
+  const { error } = EditUserSchema.validate(data, {
+    abortEarly: true,
   });
 
   // Check if an error exists in the validation
@@ -205,12 +196,8 @@ const deleteUserFiles = async (user) => {
 };
 
 exports.deleteUser = async (req, res) => {
-  const {
-    userId
-  } = req.params;
-  const {
-    membership_id
-  } = req.params;
+  const { userId } = req.params;
+  const { membership_id } = req.params;
   // console.log(`Received userId: ${userId}`);                                       // Debug line
   // console.log(`Received membership_id: ${membership_id}`);                         // Debug line
   let user;
@@ -228,7 +215,7 @@ exports.deleteUser = async (req, res) => {
   } else if (membership_id) {
     // Find and delete the user using membership_id
     const user = await User.findOneAndDelete({
-      membership_id: membership_id
+      membership_id: membership_id,
     });
     if (!user) {
       // If the user is not found, return a 404 status code with the error message
@@ -245,7 +232,7 @@ exports.deleteUser = async (req, res) => {
 
   // Delete product images
   const products = await Product.find({
-    seller_id: userId
+    seller_id: userId,
   });
   for (const product of products) {
     if (product.image_url) {
@@ -256,7 +243,7 @@ exports.deleteUser = async (req, res) => {
 
   // Delete products
   await Product.deleteMany({
-    seller_id: userId
+    seller_id: userId,
   });
 
   // console.log(`User deleted successfully`);                                        // Debug line
@@ -285,9 +272,7 @@ exports.getAllUsers = async (req, res) => {
 /****************************************************************************************************/
 
 exports.getUserById = async (req, res) => {
-  const {
-    userId
-  } = req.params;
+  const { userId } = req.params;
   // console.log(`Received userId: ${userId}`);                                       // Debug line
 
   if (!userId) {
@@ -312,9 +297,36 @@ exports.getUserById = async (req, res) => {
   const mappedData = {
     ...user._doc,
     full_name: `${user.name.first_name} ${user.name.middle_name} ${user.name.last_name}`,
-    mobile: user.phone_numbers.personal, products: products
+    mobile: user.phone_numbers.personal,
+    products: products,
   };
 
   // console.log(`User retrieved successfully`);                                      // Debug line
   return responseHandler(res, 200, "User retrieved successfully", mappedData);
+};
+
+exports.suspendUser = async (req, res) => {
+  try {
+    const userId = { req };
+
+    if (!userId) {
+      return responseHandler(res, 400, "User Id is required");
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        status: "suspended",
+      },
+      { new: true }
+    );
+
+    if (!user) {
+      return responseHandler(res, 404, "User not found");
+    }
+
+    return responseHandler(res, 200, "User suspended successfully");
+  } catch (error) {
+    return responseHandler(res, 500, `Internal Server Error ${error.message}`);
+  }
 };
