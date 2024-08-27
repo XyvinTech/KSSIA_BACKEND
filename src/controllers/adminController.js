@@ -309,7 +309,7 @@ exports.getUserById = async (req, res) => {
 
 exports.suspendUser = async (req, res) => {
   try {
-    const userId = { req };
+    const userId =  req.params.userId ;
 
     if (!userId) {
       return responseHandler(res, 400, "User Id is required");
