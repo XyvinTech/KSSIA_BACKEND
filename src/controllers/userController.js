@@ -68,7 +68,7 @@ exports.sendOtp = async (req, res) => {
   user.otp = otp;
   await user.save();
   // console.log(`OTP sent successfully`);                                            // Debug line
-  return responseHandler(res, 200, "OTP sent successfully");
+  return responseHandler(res, 200, "OTP sent successfully", otp);
 };
 
 /****************************************************************************************************/
