@@ -293,7 +293,7 @@ exports.getUserById = async (req, res) => {
 
   let products = await Product.find({ seller_id: userId }).exec();
   if (!products.length) {
-    products = "Seller has no products";
+    products = [];
   }
 
   const mappedData = {
