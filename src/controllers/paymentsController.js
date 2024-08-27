@@ -287,7 +287,8 @@ exports.createUserPayment = async (req, res) => {
 
     const newPayment = new Payment({
         ...data,
-        invoice_url
+        invoice_url,
+        member: userId
     });
 
     try {
