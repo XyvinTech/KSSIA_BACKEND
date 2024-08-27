@@ -13,6 +13,6 @@ adminRoute.route('/users/:userId').get(asyncHandler(adminController.getUserById)
 adminRoute.route('/users/:userId').put(asyncHandler(adminController.editUser));
 adminRoute.route('/users/:userId').delete(asyncHandler(adminController.deleteUser));
 adminRoute.route('/users/:membership_id').delete(asyncHandler(adminController.deleteUser));
-adminRoute.route('/users/supspend/:userId').put(asyncHandler(adminController.suspendUser));
+adminRoute.route('/users/suspend/:userId').put(asyncHandler(adminController.suspendUser));
 
 module.exports = adminRoute;
