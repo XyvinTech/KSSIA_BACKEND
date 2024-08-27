@@ -10,7 +10,11 @@ eventRoute.use(authVerify);
 // Get all events and add a new event
 eventRoute
   .route("/")
-  .post(asyncHandler(eventController.createEvent))
+  .post((upload.fields([
+    { name: 'image', maxCount: 1 },
+    { name: 'guest_image', maxCount: 1 },
+    { name: 'speaker_images', maxCount: 10 } // Adjust this based on the max number of speaker images you expect
+  ]), asyncHandler(eventController.createEvent)))
   .get(asyncHandler(eventController.getAllEvents));
 
 // Edit an existing event by ID
