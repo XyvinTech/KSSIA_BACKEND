@@ -129,7 +129,7 @@ exports.EditAdminSchema = Joi.object({
 const speakerSchema = Joi.object({
     speaker_name: Joi.string().required(),
     speaker_designation: Joi.string().required(),
-    // speaker_image: Joi.string().uri(),
+    speaker_image: Joi.string().uri(),
     speaker_role: Joi.string().required()
 });
 
