@@ -65,7 +65,7 @@ notificationRoute.post(
         [
             { name: 'file_url', maxCount: 10 },
             { name: 'media_url', maxCount: 1 }
-          ]
+        ]
     ),
     asyncHandler(notificationController.createAndSendEmailNotification)
 );

@@ -103,7 +103,7 @@ exports.verifyOtp = async (req, res) => {
   const token = generateToken(user._id);
 
   // console.log(`OTP verified successfully`);                                        // Debug line
-  return responseHandler(res, 200, "User OTP verified successfully", token);
+  return responseHandler(res, 200, "User OTP verified successfully", [{token: token, userId: user._id}] );
 };
 
 /****************************************************************************************************/
