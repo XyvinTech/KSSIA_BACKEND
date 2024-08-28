@@ -148,6 +148,7 @@ exports.updateSubs = async (req, res) => {
     const resultDate = new Date(payment.renewal);
     resultDate.setDate(resultDate.getDate() + (365 * year_count));
     payment.renewal = resultDate;
+    payment.dyas = (365 * year_count);
 
     Object.assign(payment);
 
