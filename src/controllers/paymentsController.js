@@ -126,6 +126,40 @@ exports.updatePayment = async (req, res) => {
 };
 
 /****************************************************************************************************/
+/*                               Function to edit subscription                                      */
+/****************************************************************************************************/
+exports.updateSubs = async (req, res) => {
+    const {
+        paymentID
+    } = req.params;
+    const year_count = req.body.year_count ? req.body.year_count : 1
+
+    let payment;
+    try {
+        payment = await Payment.findById(paymentID);
+    } catch (err) {
+        return responseHandler(res, 500, `Error finding payment: ${err.message}`);
+    }
+
+    if (!payment) {
+        return responseHandler(res, 404, "Payment details do not exist");
+    }
+
+    const resultDate = new Date(payment.renewal);
+    resultDate.setDate(resultDate.getDate() + (365 * year_count));
+    payment.renewal = resultDate;
+
+    Object.assign(payment);
+
+    try {
+        await payment.save();
+        return responseHandler(res, 200, "Payment updated successfully!", payment);
+    } catch (err) {
+        return responseHandler(res, 500, `Error saving payment: ${err.message}`);
+    }
+};
+
+/****************************************************************************************************/
 /*                                  Function to get all payments                                     */
 /****************************************************************************************************/
 exports.getAllPayments = async (req, res) => {

@@ -24,6 +24,9 @@ paymentRoute.get('/:paymentID', asyncHandler(paymentController.getPaymentById));
 // Route to update a payment
 paymentRoute.put('/:paymentID', upload.single('file'), asyncHandler(paymentController.updatePayment));
 
+// Route to update a payment
+paymentRoute.put('/:paymentID/subscription', asyncHandler(paymentController.updateSubs));
+
 // Route to delete a payment
 paymentRoute.delete('/:paymentID', asyncHandler(paymentController.deletePayment));
 
