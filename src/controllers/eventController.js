@@ -67,7 +67,7 @@ exports.createEvent = async (req, res) => {
         abortEarly: true
     });
 
-    if (error) return responseHandler(res, 400, `Invalid input: ${error.message} data recieved ${data}`);
+    if (error) return responseHandler(res, 400, `Invalid input: ${error.message} data recieved ${data}  data:name:${data.name?data.name:'no name sent'} data:type:${data.type?data.type:'no type recieved'}`);
     // Create and save the new event
     const newEvent = new Event(data);
 
