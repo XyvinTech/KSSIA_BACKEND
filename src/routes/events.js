@@ -21,7 +21,21 @@ eventRoute
 eventRoute
   .route("/:eventId")
   .get(asyncHandler(eventController.getEventById))
-  .put(asyncHandler(eventController.editEvent));
+  .put(upload.fields([{
+    name: 'image',
+    maxCount: 1
+  },
+  {
+    name: 'guest_image',
+    maxCount: 1
+  },
+  ...Array.from({
+    length: 10
+  }, (_, index) => ({
+    name: `speaker_image_${index}`,
+    maxCount: 1
+  }))
+]), asyncHandler(eventController.editEvent));
 
 // Delete an event by ID
 eventRoute
@@ -43,5 +57,10 @@ eventRoute
 eventRoute
   .route("/:eventId/postpond")
   .put(asyncHandler(eventController.postpondEvents));
+
+// get all past events
+eventRoute
+  .route("/history")
+  .put(asyncHandler(eventController.getEventHistory));
 
 module.exports = eventRoute;

@@ -325,3 +325,14 @@ exports.cancelEvent = async (req, res) => {
     await event.save();
     return responseHandler(res, 200, 'Event cancelled successfully!', event);
 }
+
+/****************************************************************************************************/
+/*                                Function to get the events history                               */
+/****************************************************************************************************/
+exports.getEventHistory = async (req, res) => {
+    const events = await Event.find({ status: { $in: ['completed', 'cancelled'] } });
+    if (!events) {
+        return responseHandler(res, 404, 'No events found.');
+    }
+    return responseHandler(res, 200, 'Event retrieved successfully!', events);
+}
