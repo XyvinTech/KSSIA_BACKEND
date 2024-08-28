@@ -1,6 +1,6 @@
 const cron = require("node-cron");
 const moment = require("moment-timezone");
-const Event = require("../models/eventModel");
+const Event = require("../models/events");
 require("dotenv").config();
 
 // Define the cron job to run every minute
