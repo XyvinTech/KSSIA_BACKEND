@@ -66,7 +66,8 @@ exports.createEvent = async (req, res) => {
     } = EditEventsSchema.validate(data, {
         abortEarly: true
     });
-    if (error) return responseHandler(res, 400, `Invalid input: ${error.message}`);
+
+    if (error) return responseHandler(res, 400, `Invalid input: ${error.message} data recieved ${data}`);
     // Create and save the new event
     const newEvent = new Event(data);
 
