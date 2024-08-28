@@ -105,6 +105,49 @@ exports.editEvent = async (req, res) => {
     if (!event) return responseHandler(res, 404, "Event not found");
 
     try {
+        // Handle file uploads if present
+        const bucketName = process.env.AWS_S3_BUCKET;
+        if (req.files) {
+            // Process main image
+            if (req.files.image) {
+                if (event.image) {
+                    // Delete old image from S3
+                    let oldImageKey = path.basename(event.image);
+                    await deleteFile(bucketName, oldImageKey);
+                }
+                data.image = await handleFileUpload(req.files.image[0], bucketName);
+            }
+
+            // Process guest image
+            if (req.files.guest_image) {
+                if (event.guest_image) {
+                    // Delete old guest image from S3
+                    let oldImageKey = path.basename(event.guest_image);
+                    await deleteFile(bucketName, oldImageKey);
+                }
+                data.guest_image = await handleFileUpload(req.files.guest_image[0], bucketName);
+            }
+
+            // Process speaker images
+            if (data.speakers && Array.isArray(data.speakers)) {
+                data.speakers = await Promise.all(data.speakers.map(async (speaker, index) => {
+                    if (req.files[`speaker_image_${index}`]) {
+                        if (event.speakers[index] && event.speakers[index].speaker_image) {
+                            // Delete old speaker image from S3
+                            let oldImageKey = path.basename(event.speakers[index].speaker_image);
+                            await deleteFile(bucketName, oldImageKey);
+                        }
+                        speaker.speaker_image = await handleFileUpload(req.files[`speaker_image_${index}`][0], bucketName);
+                    }
+                    return speaker;
+                }));
+            }
+        }
+    } catch (err) {
+        return responseHandler(res, 500, `Error updating file: ${err.message}`);
+    }
+
+    try {
         // Update the event with new data
         Object.assign(event, data);
         await event.save();
