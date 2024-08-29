@@ -182,7 +182,7 @@ exports.getAllPayments = async (req, res) => {
         const mappedPayments = payments.map((payments) => {
             return {
               ...payments._doc,
-              full_name: `${payments.seller_id?.name.first_name} ${payments.seller_id?.name.middle_name} ${payments.seller_id?.name.last_name}`,
+              full_name: `${payments.member?.name.first_name} ${payments.member?.name.middle_name} ${payments.member?.name.last_name}`,
             };
         });
         return responseHandler(res, 200, "Successfully retrieved all payments", mappedPayments);
