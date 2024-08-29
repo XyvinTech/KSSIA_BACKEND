@@ -25,9 +25,8 @@ exports.createPayment = async (req, res) => {
     // Check if a payment with the same details already exists
     const paymentExist = await Payment.findOne({
         member: data.member,
-        date: data.date,
-        time: data.time,
-        category: data.category
+        category: data.category,
+        status: { $in: ['pending','accepted'] }
     });
     if (paymentExist) {
         return responseHandler(res, 400, "Payment details already exist");
@@ -325,6 +324,18 @@ exports.createUserPayment = async (req, res) => {
     } = UserPaymentSchema.validate(data, {
         abortEarly: true
     });
+
+    const payment_exist = await Payment.findOne(
+        {
+            category: data.category,
+            member: userId,
+            status: { $in: ['pending','accepted'] }
+        }
+    )
+
+    if (payment_exist){
+        return responseHandler(res, 400, "Payment already exist");
+    }
 
     if (error) {
         return responseHandler(res, 400, `Invalid input: ${error.message}`);
