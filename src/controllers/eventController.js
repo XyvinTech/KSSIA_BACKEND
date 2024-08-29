@@ -82,25 +82,23 @@ exports.createEvent = async (req, res) => {
 
 // Edit an existing event
 exports.editEvent = async (req, res) => {
-
-    const {
-        eventId
-    } = req.params;
+    const { eventId } = req.params;
     const data = req.body;
 
     if (!eventId) return responseHandler(res, 400, "Invalid request");
 
     // Validate the input data
-    const {
-        error
-    } = EditEventsSchema.validate(data, {
-        abortEarly: true
-    });
+    const { error } = EditEventsSchema.validate(data, { abortEarly: true });
     if (error) return responseHandler(res, 400, `Invalid input: ${error.message}`);
 
     // Find the event to update
-    const event = await Event.findById(eventId);
-    if (!event) return responseHandler(res, 404, "Event not found");
+    let event;
+    try {
+        event = await Event.findById(eventId);
+        if (!event) return responseHandler(res, 404, "Event not found");
+    } catch (err) {
+        return responseHandler(res, 500, `Error finding event: ${err.message}`);
+    }
 
     try {
         // Handle file uploads if present
@@ -110,7 +108,7 @@ exports.editEvent = async (req, res) => {
             if (req.files.image) {
                 if (event.image) {
                     // Delete old image from S3
-                    let oldImageKey = path.basename(event.image);
+                    const oldImageKey = path.basename(event.image);
                     await deleteFile(bucketName, oldImageKey);
                 }
                 data.image = await handleFileUpload(req.files.image[0], bucketName);
@@ -120,22 +118,27 @@ exports.editEvent = async (req, res) => {
             if (req.files.guest_image) {
                 if (event.guest_image) {
                     // Delete old guest image from S3
-                    let oldImageKey = path.basename(event.guest_image);
+                    const oldImageKey = path.basename(event.guest_image);
                     await deleteFile(bucketName, oldImageKey);
                 }
                 data.guest_image = await handleFileUpload(req.files.guest_image[0], bucketName);
             }
 
-            // Process speaker images
+            // Handle speaker images and assign them to the appropriate speaker by ID
             if (data.speakers && Array.isArray(data.speakers)) {
+                const speakerImages = req.files.speaker_images || [];
                 data.speakers = await Promise.all(data.speakers.map(async (speaker, index) => {
-                    if (req.files[`speaker_image_${index}`]) {
-                        if (event.speakers[index] && event.speakers[index].speaker_image) {
-                            // Delete old speaker image from S3
-                            let oldImageKey = path.basename(event.speakers[index].speaker_image);
-                            await deleteFile(bucketName, oldImageKey);
+                    const speakerToUpdate = event.speakers.find(s => s._id.toString() === speaker._id);
+                    if (speakerToUpdate) {
+                        if (speakerImages[index]) {
+                            if (speakerToUpdate.speaker_image) {
+                                // Delete the old speaker image from S3
+                                const oldImageKey = path.basename(speakerToUpdate.speaker_image);
+                                await deleteFile(bucketName, oldImageKey);
+                            }
+                            // Upload the new speaker image to S3
+                            speaker.speaker_image = await handleFileUpload(speakerImages[index], bucketName);
                         }
-                        speaker.speaker_image = await handleFileUpload(req.files[`speaker_image_${index}`][0], bucketName);
                     }
                     return speaker;
                 }));
@@ -146,15 +149,23 @@ exports.editEvent = async (req, res) => {
     }
 
     try {
-        // Update the event with new data
+        // Update the event with new data (only overwrite fields provided in request)
         Object.assign(event, data);
-        await event.save();
+        
+        // Optionally use optimistic concurrency control
+        const updatedEvent = await Event.findByIdAndUpdate(eventId, data, {
+            new: true,
+            runValidators: true
+        });
+
+        if (!updatedEvent) {
+            return responseHandler(res, 404, "Event not found or already updated");
+        }
+
+        return responseHandler(res, 200, "Event updated successfully!", updatedEvent);
     } catch (err) {
         return responseHandler(res, 500, `Error saving event: ${err.message}`);
     }
-
-    return responseHandler(res, 200, "Event updated successfully!", event);
-
 };
 
 /****************************************************************************************************/
