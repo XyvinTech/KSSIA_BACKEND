@@ -36,4 +36,7 @@ paymentRoute.patch('/:paymentID/status', asyncHandler(paymentController.updatePa
 // Route to get the payments of a user
 paymentRoute.get('/user/:userId', asyncHandler(paymentController.getUserPayments));
 
+// Route to get the active subscription of a user
+paymentRoute.get('/user/:userId/subscriptions', asyncHandler(paymentController.getUserSubscriptionActive));
+
 module.exports = paymentRoute;

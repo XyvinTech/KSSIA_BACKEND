@@ -364,3 +364,27 @@ exports.createUserPayment = async (req, res) => {
         return responseHandler(res, 500, `Error saving payment: ${err.message}`);
     }
 }
+
+/****************************************************************************************************/
+/*                       Function to get users Subscription Active                                  */
+/****************************************************************************************************/
+exports.getUserSubscriptionActive = async (req, res) => {
+
+    const {
+        userId
+    } = req.params;
+
+    if (!userId) {
+        return responseHandler(res, 400, "Invalid request");
+    }
+
+    const subscriptionsActive = await Payment.find(
+        {
+            member:userId,
+            status: { $in: ['pending','accepted']}
+        });
+    if (!subscriptionsActive) {
+        return responseHandler(res, 404, "No pending or active subscriptions found");
+    }
+    return responseHandler(res, 200, "Subscriptions found", subscriptionsActive);
+};
