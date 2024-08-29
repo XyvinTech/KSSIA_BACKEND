@@ -14,7 +14,6 @@ const {
 
 // Create a new event
 exports.createEvent = async (req, res) => {
-
     const data = req.body;
 
     // Parse the speakers field, which is coming as a JSON string in form-data
@@ -26,12 +25,8 @@ exports.createEvent = async (req, res) => {
         }
     }
 
-        // Validate the input data using Joi
-        const {
-            error
-        } = EditEventsSchema.validate(data, {
-            abortEarly: true
-        });
+    // Validate the input data using Joi
+    const { error } = EditEventsSchema.validate(data, { abortEarly: true });
 
     // Check if an event with the same details already exists
     const eventExist = await Event.findOne({
@@ -55,9 +50,10 @@ exports.createEvent = async (req, res) => {
 
             // Handle speaker images and assign them to the appropriate speaker
             if (data.speakers && Array.isArray(data.speakers)) {
+                const speakerImages = req.files.speaker_images || [];
                 data.speakers = await Promise.all(data.speakers.map(async (speaker, index) => {
-                    if (req.files.speaker_images && req.files.speaker_images[index]) {
-                        speaker.speaker_image = await handleFileUpload(req.files.speaker_images[index], bucketName);
+                    if (speakerImages[index]) {
+                        speaker.speaker_image = await handleFileUpload(speakerImages[index], bucketName);
                     }
                     return speaker;
                 }));
@@ -67,9 +63,8 @@ exports.createEvent = async (req, res) => {
         return responseHandler(res, 500, `Error uploading file: ${err.message}`);
     }
 
+    if (error) return responseHandler(res, 400, `Invalid input: ${error.message}`);
 
-
-    if (error) return responseHandler(res, 400, `Invalid input: ${error.message} data recieved ${data}  data:name:${data.name?data.name:'no name sent'} data:type:${data.type?data.type:'no type recieved'}`);
     // Create and save the new event
     const newEvent = new Event(data);
 
@@ -273,50 +268,6 @@ exports.addRsvp = async (req, res) => {
         return responseHandler(res, 200, 'RSVP updated successfully!', event);
     } catch (err) {
         return responseHandler(res, 500, `Server error: ${err.message}`);
-    }
-};
-
-/****************************************************************************************************/
-/*                                  Function to get rsvp'd users                                    */
-/****************************************************************************************************/
-exports.getRsvpUsers = async (req, res) => {
-    const { eventId } = req.params;
-
-    if (!eventId) {
-        return responseHandler(res, 400, 'Invalid request: Event ID is required.');
-    }
-
-    try {
-        const event = await Event.findById(eventId).populate('rsvp', 'name'); // Populate names
-
-        if (!event) {
-            return responseHandler(res, 404, 'Event not found.');
-        }
-
-        const rsvpUsers = event.rsvp; // This will contain user objects with names populated
-        return responseHandler(res, 200, 'RSVP users retrieved successfully!', rsvpUsers);
-    } catch (err) {
-        return responseHandler(res, 500, `Error retrieving RSVP users: ${err.message}`);
-    }
-};
-
-/****************************************************************************************************/
-/*                                  Function to get events users rsvp'd to                          */
-/****************************************************************************************************/
-exports.getUserRsvpdEvents = async (req, res) => {
-    const userId = req.userId; // Assuming the user ID is available in the request after authentication
-
-    try {
-        // Find all events where the user ID is included in the rsvp array
-        const events = await Event.find({ rsvp: userId });
-
-        if (!events.length) {
-            return responseHandler(res, 404, 'No events found for this user.');
-        }
-
-        return responseHandler(res, 200, 'RSVP\'d events retrieved successfully!', events);
-    } catch (err) {
-        return responseHandler(res, 500, `Error retrieving RSVP'd events: ${err.message}`);
     }
 };
 

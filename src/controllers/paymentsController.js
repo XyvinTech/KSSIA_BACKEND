@@ -165,11 +165,19 @@ exports.updateSubs = async (req, res) => {
 /****************************************************************************************************/
 exports.getAllPayments = async (req, res) => {
     try {
-        const payments = await Payment.find();
+        const payments = await Payment.find()
+        .populate({ path: "member", select: "name membership_id" })
+        .exec();
         if (payments.length === 0) {
             return responseHandler(res, 404, "No payments found");
         }
-        return responseHandler(res, 200, "Successfully retrieved all payments", payments);
+        const mappedPayments = payments.map((payments) => {
+            return {
+              ...payments._doc,
+              full_name: `${payments.seller_id?.name.first_name} ${payments.seller_id?.name.middle_name} ${payments.seller_id?.name.last_name}`,
+            };
+        });
+        return responseHandler(res, 200, "Successfully retrieved all payments", mappedPayments);
     } catch (err) {
         return responseHandler(res, 500, `Error retrieving payments: ${err.message}`);
     }
@@ -184,7 +192,9 @@ exports.getPaymentById = async (req, res) => {
     } = req.params;
 
     try {
-        const payment = await Payment.findById(paymentID);
+        const payment = await Payment.findById(paymentID)
+        .populate({ path: "member", select: "name membership_id" })
+        .exec();
         if (!payment) {
             return responseHandler(res, 404, "Payment not found");
         }
