@@ -16,15 +16,13 @@ const handleFileUpload = require("../utils/fileHandler");
 exports.createPayment = async (req, res) => {
     const data = req.body;
 
-    const {
-        error
-    } = PaymentSchema.validate(data, {
-        abortEarly: true
-    });
+    // Validate the input data using Joi
+    const { error } = PaymentSchema.validate(data, { abortEarly: true });
     if (error) {
         return responseHandler(res, 400, `Invalid input: ${error.message}`);
     }
 
+    // Check if a payment with the same details already exists
     const paymentExist = await Payment.findOne({
         member: data.member,
         date: data.date,
@@ -38,24 +36,32 @@ exports.createPayment = async (req, res) => {
     let invoice_url = '';
     let renewal = '';
     const bucketName = process.env.AWS_S3_BUCKET;
+
+    // Handle file upload if a file is present
     if (req.file) {
         try {
             invoice_url = await handleFileUpload(req.file, bucketName);
         } catch (err) {
-            return responseHandler(res, 500, err.message);
+            return responseHandler(res, 500, `File upload failed: ${err.message}`);
         }
     }
 
+    // Calculate the renewal date
     const resultDate = new Date(data.date);
-    resultDate.setDate(resultDate.getDate() + (365));
+    if (isNaN(resultDate.getTime())) {
+        return responseHandler(res, 400, "Invalid date provided for payment");
+    }
+    resultDate.setDate(resultDate.getDate() + 365); // Adding 365 days for renewal
     renewal = resultDate;
 
+    // Create a new payment instance
     const newPayment = new Payment({
         ...data,
         invoice_url,
         renewal
     });
 
+    // Save the new payment to the database
     try {
         await newPayment.save();
         return responseHandler(res, 201, "Payment submitted successfully!", newPayment);
@@ -63,6 +69,7 @@ exports.createPayment = async (req, res) => {
         return responseHandler(res, 500, `Error saving payment: ${err.message}`);
     }
 };
+
 
 /****************************************************************************************************/
 /*                                   Function to edit payments                                      */
