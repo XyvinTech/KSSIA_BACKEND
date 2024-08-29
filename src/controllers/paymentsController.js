@@ -129,10 +129,8 @@ exports.updatePayment = async (req, res) => {
 /*                               Function to edit subscription                                      */
 /****************************************************************************************************/
 exports.updateSubs = async (req, res) => {
-    const {
-        paymentID
-    } = req.params;
-    const year_count = req.body.year_count ? req.body.year_count : 1
+    const { paymentID } = req.params;
+    const year_count = req.body.year_count ? req.body.year_count : 1;
 
     let payment;
     try {
@@ -145,12 +143,16 @@ exports.updateSubs = async (req, res) => {
         return responseHandler(res, 404, "Payment details do not exist");
     }
 
-    const resultDate = new Date(payment.renewal);
-    resultDate.setDate(resultDate.getDate() + (365 * year_count));
-    payment.renewal = resultDate;
-    payment.dyas = (365 * year_count);
+    // Validate the current renewal date
+    const renewalDate = new Date(payment.renewal);
+    if (isNaN(renewalDate.getTime())) {
+        return responseHandler(res, 400, "Invalid renewal date");
+    }
 
-    Object.assign(payment);
+    // Calculate the new renewal date
+    renewalDate.setDate(renewalDate.getDate() + (365 * year_count));
+    payment.renewal = renewalDate;
+    payment.dyas = (365 * year_count); // Ensure this field is correctly spelled (days instead of dyas)
 
     try {
         await payment.save();
@@ -316,6 +318,7 @@ exports.createUserPayment = async (req, res) => {
     } = UserPaymentSchema.validate(data, {
         abortEarly: true
     });
+
     if (error) {
         return responseHandler(res, 400, `Invalid input: ${error.message}`);
     }
