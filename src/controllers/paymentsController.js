@@ -152,7 +152,7 @@ exports.updateSubs = async (req, res) => {
     // Calculate the new renewal date
     renewalDate.setDate(renewalDate.getDate() + (365 * year_count));
     payment.renewal = renewalDate;
-    payment.dyas = (365 * year_count); // Ensure this field is correctly spelled (days instead of dyas)
+    payment.days = (365 * year_count);
 
     try {
         await payment.save();
