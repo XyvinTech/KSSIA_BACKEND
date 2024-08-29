@@ -308,7 +308,7 @@ exports.getUserById = async (req, res) => {
 };
 
 exports.suspendUser = async (req, res) => {
-  try {
+
     const userId =  req.params.userId ;
 
     if (!userId) {
@@ -328,7 +328,4 @@ exports.suspendUser = async (req, res) => {
     }
 
     return responseHandler(res, 200, "User suspended successfully");
-  } catch (error) {
-    return responseHandler(res, 500, `Internal Server Error ${error.message}`);
-  }
 };
