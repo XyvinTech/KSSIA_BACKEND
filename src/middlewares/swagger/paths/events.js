@@ -32,10 +32,16 @@
  *               image:
  *                 type: string
  *                 format: binary
- *               date:
+ *               startDate:
  *                 type: string
  *                 format: date-time
- *               time:
+ *               endDate:
+ *                 type: string
+ *                 format: date-time
+ *               startTime:
+ *                 type: string
+ *                 format: date-time
+ *               endTime:
  *                 type: string
  *                 format: date-time
  *               platform:
@@ -44,13 +50,16 @@
  *                 type: string
  *               organiser_name:
  *                 type: string
+ *                 required: true
  *               organiser_company_name:
  *                 type: string
+ *                 required: true
  *               guest_image:
  *                 type: string
  *                 format: binary
  *               organiser_role:
  *                 type: string
+ *                 required: true
  *               speakers:
  *                 type: string
  *                 description: "JSON array of speakers, sent as a string."
@@ -73,6 +82,7 @@
  *       500:
  *         description: Internal server error
  */
+
 
 /**
  * @swagger
