@@ -48,6 +48,12 @@ eventRoute.put(
   asyncHandler(eventController.addRsvp)
 );
 
+// Route to get users rsvp'd to an event
+eventRoute.get('/:eventId/rsvp', eventController.getRsvpUsers);
+
+// Route to get events rsvp'd by a user 
+eventRoute.get('/user/rsvpd', asyncHandler(eventController.getUserRsvpdEvents));
+
 // Cancel an event by ID
 eventRoute
   .route("/:eventId/cancel")

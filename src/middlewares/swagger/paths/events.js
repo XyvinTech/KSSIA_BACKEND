@@ -245,7 +245,7 @@
 
 /**
  * @swagger
- * /events/rsvp/:eventId/mark:
+ * /events/rsvp/{eventId}/mark:
  *   put:
  *     summary: Mark an rsvp to an event
  *     tags:
@@ -270,6 +270,75 @@
  *         description: Invalid request
  *       404:
  *         description: Notification not found
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /events/{eventId}/rsvp:
+ *   get:
+ *     summary: Retrieve users who RSVPed to an event
+ *     tags: 
+ *       - Events
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: eventId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the event to retrieve RSVPed users for
+ *     responses:
+ *       200:
+ *         description: List of users who RSVPed to the event
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   userId:
+ *                     type: string
+ *                     description: The unique identifier for the user
+ *                   name:
+ *                     type: string
+ *                     description: The name of the user
+ *                   email:
+ *                     type: string
+ *                     description: The email address of the user
+ *                   rsvpStatus:
+ *                     type: string
+ *                     enum: [accepted, declined, maybe]
+ *                     description: The RSVP status of the user
+ *       404:
+ *         description: Event not found
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /events/user/rsvpd:
+ *   get:
+ *     summary: Retrieve all events to which a user has RSVP'd
+ *     tags: 
+ *       - Events
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: RSVP'd events retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Event'
+ *       404:
+ *         description: No events found for this user
  *       500:
  *         description: Internal server error
  */
