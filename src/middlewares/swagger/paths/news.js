@@ -31,6 +31,9 @@
  *                 format: binary
  *               content:
  *                 type: string
+ *               published:
+ *                 type: boolean
+ *                 default: false
  *     responses:
  *       201:
  *         description: News article created successfully
@@ -128,6 +131,8 @@
  *                 format: binary
  *               content:
  *                 type: string
+ *               published:
+ *                 type: boolean
  *     responses:
  *       200:
  *         description: News article updated successfully

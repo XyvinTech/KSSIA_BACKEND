@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 
 const newsSchema = new mongoose.Schema({
-
     category: {
         type: String,
         required: true
@@ -16,6 +15,10 @@ const newsSchema = new mongoose.Schema({
     },
     content: {
         type: String
+    },
+    published: {
+        type: Boolean,
+        default: false // Set default to false, indicating not published
     },
 }, {
     timestamps: true,
