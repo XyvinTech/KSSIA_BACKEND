@@ -272,6 +272,50 @@ exports.addRsvp = async (req, res) => {
 };
 
 /****************************************************************************************************/
+/*                                  Function to get rsvp'd users                                    */
+/****************************************************************************************************/
+exports.getRsvpUsers = async (req, res) => {
+    const { eventId } = req.params;
+
+    if (!eventId) {
+        return responseHandler(res, 400, 'Invalid request: Event ID is required.');
+    }
+
+    try {
+        const event = await Event.findById(eventId).populate('rsvp', 'name'); // Populate names
+
+        if (!event) {
+            return responseHandler(res, 404, 'Event not found.');
+        }
+
+        const rsvpUsers = event.rsvp; // This will contain user objects with names populated
+        return responseHandler(res, 200, 'RSVP users retrieved successfully!', rsvpUsers);
+    } catch (err) {
+        return responseHandler(res, 500, `Error retrieving RSVP users: ${err.message}`);
+    }
+};
+
+/****************************************************************************************************/
+/*                                  Function to get events users rsvp'd to                          */
+/****************************************************************************************************/
+exports.getUserRsvpdEvents = async (req, res) => {
+    const userId = req.userId; // Assuming the user ID is available in the request after authentication
+
+    try {
+        // Find all events where the user ID is included in the rsvp array
+        const events = await Event.find({ rsvp: userId });
+
+        if (!events.length) {
+            return responseHandler(res, 404, 'No events found for this user.');
+        }
+
+        return responseHandler(res, 200, 'RSVP\'d events retrieved successfully!', events);
+    } catch (err) {
+        return responseHandler(res, 500, `Error retrieving RSVP'd events: ${err.message}`);
+    }
+};
+
+/****************************************************************************************************/
 /*                                  Function to postpond the events                                 */
 /****************************************************************************************************/
 
