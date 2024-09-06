@@ -89,8 +89,16 @@ exports.editEvent = async (req, res) => {
 
     // Validate the input data
     const { error } = EditEventsSchema.validate(data, { abortEarly: true });
-    if (error) return responseHandler(res, 400, `Invalid input: ${error.message}`);
+    // if (error) return responseHandler(res, 400, `Invalid input: ${error.message}`);
 
+    // Parse the speakers field, which is coming as a JSON string in form-data
+    if (typeof req.body.speakers === 'string') {
+        try {
+            req.body.speakers = JSON.parse(req.body.speakers);
+        } catch (err) {
+            return responseHandler(res, 400, 'Invalid input: "speakers" must be a valid JSON array');
+        }
+    }
     // Find the event to update
     let event;
     try {

@@ -188,19 +188,13 @@
  *               organiser_role:
  *                 type: string
  *               speakers:
+ *                 type: string
+ *                 description: "JSON array of speakers, sent as a string."
+ *               speaker_images:
  *                 type: array
  *                 items:
- *                   type: object
- *                   properties:
- *                     speaker_name:
- *                       type: string
- *                     speaker_designation:
- *                       type: string
- *                     speaker_image:
- *                       type: string
- *                       format: binary
- *                     speaker_role:
- *                       type: string
+ *                   type: string
+ *                   format: binary
  *               activate:
  *                 type: boolean
  *     responses:
