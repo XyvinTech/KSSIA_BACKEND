@@ -423,3 +423,94 @@ exports.deleteReview = async (req, res) => {
     return responseHandler(res, 500, `Server error: ${error.message}`);
   }
 };
+
+/****************************************************************************************************/
+/*                                    function to block a user                                      */
+/****************************************************************************************************/
+
+exports.blockUser = async (req, res) => {
+  const userId = req.userId;
+  const { blockUserId } = req.params;
+  const { reason } = req.body;
+
+  // Validate input
+  if (!blockUserId || !reason || reason.trim() === "") {
+    return responseHandler(res, 400, "Invalid request. Please provide a valid user to block and a reason.");
+  }
+
+  // Prevent a user from blocking themselves
+  if (userId === blockUserId) {
+    return responseHandler(res, 400, "You cannot block yourself.");
+  }
+
+  try {
+    // Check if the user to block exists
+    const userToBlock = await User.findById(blockUserId);
+    if (!userToBlock) {
+      return responseHandler(res, 404, "User to be blocked not found.");
+    }
+
+    // Check if the current user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return responseHandler(res, 404, "User not found.");
+    }
+
+    // Block the user with the provided reason
+    await user.blockUser(blockUserId, reason);
+
+    return responseHandler(res, 200, "User blocked successfully.", user);
+  } catch (error) {
+    console.error(error);
+    return responseHandler(res, 500, "An error occurred while blocking the user.");
+  }
+};
+
+/****************************************************************************************************/
+/*                                    function to unblock a user                                    */
+/****************************************************************************************************/
+
+exports.unblockUser = async (req, res) => {
+  const userId = req.userId;
+  const { blockedUserId } = req.params;
+
+  // Validate input
+  if (!blockedUserId) {
+    return responseHandler(res, 400, "Invalid request. Please provide a valid user to unblock.");
+  }
+
+  // Prevent a user from unblocking themselves
+  if (userId === blockedUserId) {
+    return responseHandler(res, 400, "You cannot unblock yourself.");
+  }
+
+  try {
+    // Check if the user to unblock exists
+    const userToUnblock = await User.findById(blockedUserId);
+    if (!userToUnblock) {
+      return responseHandler(res, 404, "User to be unblocked not found.");
+    }
+
+    // Check if the current user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return responseHandler(res, 404, "User not found.");
+    }
+
+    // Unblock the user if they are in the blocked list
+    const isBlocked = user.blocked.some(blockedUser => blockedUser.userId.toString() === blockedUserId.toString());
+
+    if (!isBlocked) {
+      return responseHandler(res, 400, "User is not currently blocked.");
+    }
+
+    // Unblock the user
+    await user.unblockUser(blockedUserId);
+
+    return responseHandler(res, 200, "User unblocked successfully.", user);
+  } catch (error) {
+    // Handle any errors
+    console.error(error);
+    return responseHandler(res, 500, "An error occurred while unblocking the user.");
+  }
+};

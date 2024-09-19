@@ -39,4 +39,12 @@ userRoute
   .route('/:userId/reviews/:reviewId')
   .delete(asyncHandler(userController.deleteReview));
 
+userRoute
+  .route('/block/:blockUserId')
+  .post(asyncHandler(userController.blockUser)); // Block a user
+
+userRoute
+  .route('/unblock/:blockedUserId')
+  .post(asyncHandler(userController.unblockUser)); // Unblock a user
+
 module.exports = userRoute;

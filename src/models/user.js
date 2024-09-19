@@ -64,7 +64,11 @@ const userSchema = new mongoose.Schema(
         is_active: { type: Boolean, default: true },
         is_deleted: { type: Boolean, default: false },
         selectedTheme: { type: String, default:'white'},
-        reviews: [reviewSchema]
+        reviews: [reviewSchema],
+        blocked: [{
+            userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+            reason: { type: String, required: true } // Reason for blocking
+        }],
     },
     {
         timestamps: true,
@@ -84,6 +88,25 @@ userSchema.statics.addReview = function (userId, reviewData) {
 userSchema.methods.deleteReview = function (reviewerId) {
     this.reviews = this.reviews.filter(review => review.reviewer.toString() !== reviewerId.toString());
     return this.save(); // Save the updated document
+};
+
+// Block a user instance method
+userSchema.methods.blockUser = function (userId, reason) {
+    // Check if the user is already blocked
+    const isBlocked = this.blocked.some(blockedUser => blockedUser.userId.toString() === userId.toString());
+
+    if (!isBlocked) {
+        // Push the userId and reason for blocking into the blocked array
+        this.blocked.push({ userId, reason });
+        return this.save();
+    }
+    return Promise.resolve(this); // No change if the user is already blocked
+};
+
+// Unblock a user instance method
+userSchema.methods.unblockUser = function (userId) {
+    this.blocked = this.blocked.filter(id => id.toString() !== userId.toString());
+    return this.save();
 };
 
 const User = mongoose.model('User', userSchema);
