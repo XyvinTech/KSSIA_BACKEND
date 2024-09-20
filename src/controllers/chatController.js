@@ -95,7 +95,10 @@ exports.getMessagesBetweenUsers = async (req, res) => {
         { from: userId1, to: userId2 },
         { from: userId2, to: userId1 },
       ],
-    }).sort({ timestamp: 1 });
+    })
+      .sort({ timestamp: 1 })
+      .populate("product", "name price offer_price image") // Populating product
+      .populate("requirement", "content image"); // Populating requirement
 
     // Mark messages as seen
     await Message.updateMany(
@@ -120,6 +123,7 @@ exports.getMessagesBetweenUsers = async (req, res) => {
     return responseHandler(res, 500, "Internal Server Error");
   }
 };
+
 /****************************************************************************************************/
 /*                                   Function to get chat threads                                   */
 /****************************************************************************************************/
