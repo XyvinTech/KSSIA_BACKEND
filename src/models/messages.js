@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Requirements = require('./requirements');
 
 const MessageSchema = new mongoose.Schema({
     from: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -10,6 +11,8 @@ const MessageSchema = new mongoose.Schema({
             url: { type: String, required: false },
         }
     ],
+    product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: false },
+    requirement: { type: mongoose.Schema.Types.ObjectId, ref: 'Requirements', required: false },
     status: { type: String, enum: ['sent', 'delivered', 'seen'], default: 'sent' },
     timestamp: { type: Date, default: Date.now }
 });

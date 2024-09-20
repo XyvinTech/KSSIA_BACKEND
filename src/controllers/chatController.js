@@ -15,7 +15,7 @@ const {
 /*                                   Function to send a message                                     */
 /****************************************************************************************************/
 exports.sendMessage = async (req, res) => {
-  const { content } = req.body;
+  const { content, requirement, product } = req.body;
   const to = req.params.id;
   const from = req.userId;
   console.log("🚀 ~ exports.sendMessage= ~ from:", from)
@@ -46,6 +46,14 @@ exports.sendMessage = async (req, res) => {
       attachments,
       status: "sent",
     });
+
+    if(product){
+      newMessage.product = product;
+    }
+
+    if(requirement){
+      newMessage.requirement = requirement;
+    }
 
     if (!chatThread) {
       chatThread = new ChatThread({
