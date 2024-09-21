@@ -173,8 +173,17 @@ exports.editPromotion = async (req, res) => {
 /****************************************************************************************************/
 
 exports.getAllPromotions = async (req, res) => {
-    const promotions = await Promotion.find();
-    return responseHandler(res, 200, "Promotions retrieved successfully", promotions);
+
+    const { pageNo = 1, limit = 10 } = req.query;
+    const skipCount = limit * (pageNo - 1);
+
+    const totalCount = await Promotion.countDocuments();
+    const promotions = await Promotion.find()
+    .skip(skipCount)
+    .limit(limit)
+    .sort({ createdAt: -1 })
+    .lean()
+    return responseHandler(res, 200, "Promotions retrieved successfully", promotions, totalCount);
 };
 
 /****************************************************************************************************/

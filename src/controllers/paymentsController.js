@@ -172,9 +172,18 @@ exports.updateSubs = async (req, res) => {
 /*                                  Function to get all payments                                     */
 /****************************************************************************************************/
 exports.getAllPayments = async (req, res) => {
+
+    const { pageNo = 1, limit = 10 } = req.query;
+    const skipCount = limit * (pageNo - 1);
+
     try {
+        const totalCount = await Payment.countDocuments();
         const payments = await Payment.find()
         .populate({ path: "member", select: "name membership_id" })
+        .skip(skipCount)
+        .limit(limit)
+        .sort({ createdAt: -1 })
+        .lean()
         .exec();
         if (payments.length === 0) {
             return responseHandler(res, 404, "No payments found");
@@ -185,7 +194,7 @@ exports.getAllPayments = async (req, res) => {
               full_name: `${payments.member?.name.first_name} ${payments.member?.name.middle_name} ${payments.member?.name.last_name}`,
             };
         });
-        return responseHandler(res, 200, "Successfully retrieved all payments", mappedPayments);
+        return responseHandler(res, 200, "Successfully retrieved all payments", mappedPayments, totalCount);
     } catch (err) {
         return responseHandler(res, 500, `Error retrieving payments: ${err.message}`);
     }

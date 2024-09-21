@@ -108,8 +108,18 @@ exports.editNews = async (req, res) => {
 /*                                  Function to get all news articles                               */
 /****************************************************************************************************/
 exports.getAllNews = async (req, res) => {
-    const news = await News.find();
-    return responseHandler(res, 200, "News articles retrieved successfully", news);
+
+    const { pageNo = 1, limit = 10 } = req.query;
+    const skipCount = limit * (pageNo - 1);
+
+    const totalCount = await News.countDocuments();
+    const news = await News.find()
+    .skip(skipCount)
+    .limit(limit)
+    .sort({ createdAt: -1 })
+    .lean();
+
+    return responseHandler(res, 200, "News articles retrieved successfully", news, totalCount);
 };
 
 /****************************************************************************************************/

@@ -100,8 +100,17 @@ exports.editProduct = async (req, res) => {
 /*                                  Function to get all products                                    */
 /****************************************************************************************************/
 exports.getAllProducts = async (req, res) => {
+
+  const { pageNo = 1, limit = 10 } = req.query;
+  const skipCount = limit * (pageNo - 1);
+
+  const totalCount = await Product.countDocuments();
   const products = await Product.find()
     .populate({ path: "seller_id", select: "name membership_id" })
+    .skip(skipCount)
+    .limit(limit)
+    .sort({ createdAt: -1 })
+    .lean()
     .exec();
   const mappedProducts = products.map((product) => {
     return {
@@ -113,7 +122,8 @@ exports.getAllProducts = async (req, res) => {
     res,
     200,
     "Products retrieved successfully!",
-    mappedProducts
+    mappedProducts,
+    totalCount
   );
 };
 

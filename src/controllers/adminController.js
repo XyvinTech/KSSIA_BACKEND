@@ -4,7 +4,10 @@ const User = require("../models/user");
 const Product = require("../models/products");
 const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
-const { CreateUserSchema, EditUserSchema } = require("../validation");
+const {
+  CreateUserSchema,
+  EditUserSchema
+} = require("../validation");
 
 /****************************************************************************************************/
 /*                                 Function to create a new user                                    */
@@ -15,7 +18,9 @@ exports.createUser = async (req, res) => {
   // console.log(`Received data parameter: ${data}`);                                 // Debug line
 
   // Validate the input data
-  const { error } = CreateUserSchema.validate(data, {
+  const {
+    error
+  } = CreateUserSchema.validate(data, {
     abortEarly: true,
   });
 
@@ -61,7 +66,9 @@ exports.createUserBulk = async (req, res) => {
   const errors = [];
 
   for (const user of data) {
-    const { error } = CreateUserSchema.validate(user, {
+    const {
+      error
+    } = CreateUserSchema.validate(user, {
       abortEarly: true,
     });
     if (error) {
@@ -104,15 +111,21 @@ exports.createUserBulk = async (req, res) => {
 /****************************************************************************************************/
 
 exports.editUser = async (req, res) => {
-  const { userId } = req.params;
-  const { membership_id } = req.params;
+  const {
+    userId
+  } = req.params;
+  const {
+    membership_id
+  } = req.params;
   const data = req.body;
   // console.log(`Received userId parameter: ${userId}`);                             // Debug line
   // console.log(`Received membership_id parameter: ${membership_id}`);               // Debug line
   // console.log(`Received data parameter: ${data}`);                                 // Debug line
 
   // Validate the input data
-  const { error } = EditUserSchema.validate(data, {
+  const {
+    error
+  } = EditUserSchema.validate(data, {
     abortEarly: true,
   });
 
@@ -139,7 +152,7 @@ exports.editUser = async (req, res) => {
     }
   } else if (membership_id) {
     // Find and update the user using membership_id
-     updatedUser = await User.findOneAndUpdate(membership_id, data, {
+    updatedUser = await User.findOneAndUpdate(membership_id, data, {
       new: true,
       runValidators: true,
     });
@@ -198,8 +211,12 @@ const deleteUserFiles = async (user) => {
 };
 
 exports.deleteUser = async (req, res) => {
-  const { userId } = req.params;
-  const { membership_id } = req.params;
+  const {
+    userId
+  } = req.params;
+  const {
+    membership_id
+  } = req.params;
   // console.log(`Received userId: ${userId}`);                                       // Debug line
   // console.log(`Received membership_id: ${membership_id}`);                         // Debug line
   let user;
@@ -257,7 +274,22 @@ exports.deleteUser = async (req, res) => {
 /****************************************************************************************************/
 
 exports.getAllUsers = async (req, res) => {
-  const users = await User.find();
+
+  const {
+    pageNo = 1, limit = 10
+  } = req.query;
+  const skipCount = limit * (pageNo - 1);
+  const filter = {};
+
+  const totalCount = await User.countDocuments(filter);
+  const users = await User.find(filter)
+    .skip(skipCount)
+    .limit(limit)
+    .sort({
+      createdAt: -1
+    })
+    .lean();
+
   const mappedData = users.map((user) => {
     return {
       ...user._doc,
@@ -266,7 +298,7 @@ exports.getAllUsers = async (req, res) => {
     };
   });
   // console.log(users);                                                              // Debug line
-  return responseHandler(res, 200, "Users retrieved successfully", mappedData);
+  return responseHandler(res, 200, "Users retrieved successfully", mappedData, totalCount);
 };
 
 /****************************************************************************************************/
@@ -274,7 +306,9 @@ exports.getAllUsers = async (req, res) => {
 /****************************************************************************************************/
 
 exports.getUserById = async (req, res) => {
-  const { userId } = req.params;
+  const {
+    userId
+  } = req.params;
   // console.log(`Received userId: ${userId}`);                                       // Debug line
 
   if (!userId) {
@@ -291,7 +325,9 @@ exports.getUserById = async (req, res) => {
     return responseHandler(res, 404, "User not found");
   }
 
-  let products = await Product.find({ seller_id: userId }).exec();
+  let products = await Product.find({
+    seller_id: userId
+  }).exec();
   if (!products.length) {
     products = [];
   }
@@ -309,23 +345,23 @@ exports.getUserById = async (req, res) => {
 
 exports.suspendUser = async (req, res) => {
 
-    const userId =  req.params.userId ;
+  const userId = req.params.userId;
 
-    if (!userId) {
-      return responseHandler(res, 400, "User Id is required");
+  if (!userId) {
+    return responseHandler(res, 400, "User Id is required");
+  }
+
+  const user = await User.findByIdAndUpdate(
+    userId, {
+      status: "suspended",
+    }, {
+      new: true
     }
+  );
 
-    const user = await User.findByIdAndUpdate(
-      userId,
-      {
-        status: "suspended",
-      },
-      { new: true }
-    );
+  if (!user) {
+    return responseHandler(res, 404, "User not found");
+  }
 
-    if (!user) {
-      return responseHandler(res, 404, "User not found");
-    }
-
-    return responseHandler(res, 200, "User suspended successfully");
+  return responseHandler(res, 200, "User suspended successfully");
 };

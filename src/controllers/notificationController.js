@@ -9,6 +9,8 @@ const {
 } = require("../validation");
 const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
+const sendInAppNotification = require("../utils/sendInAppNotification");
+
 
 /****************************************************************************************************/
 /*                             Function to create in app notification                             */
@@ -28,8 +30,8 @@ exports.createInAppNotification = async (req, res) => {
         }
     }
 
-     // Ensure the `to` field is an array
-     if (!Array.isArray(data.to)) {
+    // Ensure the `to` field is an array
+    if (!Array.isArray(data.to)) {
         data.to = [data.to];
     }
 
@@ -45,7 +47,26 @@ exports.createInAppNotification = async (req, res) => {
         return responseHandler(res, 400, `Invalid input: ${error.message}`);
     }
 
+    let userFCM = [];
+    if (data.to.length > 0) {
+        for (let i = 0; i < data.to.length; i++) {
+            const id = data.to[i];
+            const findUser = await User.findById(id);
+            if (findUser) {
+                userFCM.push(findUser.fcm);
+            }
+        }
+    }
+
     try {
+
+        await sendInAppNotification(
+            userFCM,
+            data.subject,
+            data.content,
+            data.file_url
+          );
+
         // Create a new in-app notification
         const newNotification = new Notification({
             ...data,
@@ -64,8 +85,10 @@ exports.createInAppNotification = async (req, res) => {
 
 exports.getallInAppNotifications = async (req, res) => {
 
-    const notifications = await Notification.find({type: 'in-app'});
-    if (!notifications){
+    const notifications = await Notification.find({
+        type: 'in-app'
+    });
+    if (!notifications) {
         return responseHandler(res, 404, 'No notifications found');
     }
     return responseHandler(res, 200, 'Notifications retrieved successfully!', notifications);
@@ -95,7 +118,7 @@ exports.getUnreadInAppNotifications = async (req, res) => {
             },
             type: 'in-app'
         });
-        for (const notification of notifications){
+        for (const notification of notifications) {
             await notification.markAsRead(userId);
         }
         return responseHandler(res, 200, 'Unread notifications retrieved successfully!', notifications);
@@ -186,11 +209,28 @@ exports.updateInAppNotification = async (req, res) => {
         }
     }
 
+    let userFCM = [];
+    if (data.to.length > 0) {
+        for (let i = 0; i < data.to.length; i++) {
+            const id = data.to[i];
+            const findUser = await User.findById(id);
+            if (findUser) {
+                userFCM.push(findUser.fcm);
+            }
+        }
+    }
+
     Object.assign(notification, data, {
         media_url
     });
 
     try {
+        await sendInAppNotification(
+            userFCM,
+            data.subject,
+            data.content,
+            data.file_url
+        );
         await notification.save();
         return responseHandler(res, 200, "News article updated successfully!", notification);
     } catch (err) {
@@ -289,7 +329,7 @@ exports.deleteInAppNotification = async (req, res) => {
         if (!result) {
             return responseHandler(res, 404, 'Notification not found.');
         }
-        
+
         if (notification.media_url) {
             try {
                 const bucketName = process.env.AWS_S3_BUCKET;
@@ -330,7 +370,7 @@ const formatNotificationEmails = async (notification) => {
 };
 
 exports.createAndSendEmailNotification = async (req, res) => {
-    
+
     const data = req.body;
 
     console.log(data);
@@ -354,11 +394,11 @@ exports.createAndSendEmailNotification = async (req, res) => {
         return responseHandler(res, 400, `Invalid input: ${error.message}`);
     }
 
-    
+
     const mediaFile = req.files['media_url'] ? req.files['media_url'][0] : null;
 
     const bucketName = process.env.AWS_S3_BUCKET;
-    
+
     let mediaImage = "";
 
     if (mediaFile) {
@@ -398,7 +438,7 @@ exports.createAndSendEmailNotification = async (req, res) => {
                 user: process.env.NODE_MAILER_USER,
                 pass: process.env.NODE_MAILER_PASS
             }
-            
+
         });
         const mailOptions = {
             from: process.env.NODE_MAILER_USER,
@@ -407,17 +447,16 @@ exports.createAndSendEmailNotification = async (req, res) => {
             text: content,
             attachments: []
         };
-        
+
         // Add the mediaImage as an attachment if it exists
         if (mediaImage) {
             const encodedMediaImage = encodeURI(mediaImage);
             mailOptions.attachments.push({
-                filename: mediaFile.originalname, 
-                path: encodedMediaImage, 
-                contentType: mediaFile.mimetype 
+                filename: mediaFile.originalname,
+                path: encodedMediaImage,
+                contentType: mediaFile.mimetype
             });
         }
-        
 
         try {
             await transporter.sendMail(mailOptions);

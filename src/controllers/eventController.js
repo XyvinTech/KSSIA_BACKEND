@@ -183,8 +183,18 @@ exports.editEvent = async (req, res) => {
 // Get all events
 exports.getAllEvents = async (req, res) => {
 
-    const events = await Event.find();
-    return responseHandler(res, 200, "Events retrieved successfully", events);
+    const { pageNo = 1, limit = 10 } = req.query;
+    const skipCount = limit * (pageNo - 1);
+    const filter = {};
+
+    const totalCount = await Event.countDocuments(filter);
+    const events = await Event.find(filter)
+    .skip(skipCount)
+    .limit(limit)
+    .sort({ startDate: -1 }) // Customize sorting as needed
+    .lean();
+
+    return responseHandler(res, 200, "Events retrieved successfully", events, totalCount);
 
 };
 
@@ -319,16 +329,23 @@ exports.getRsvpUsers = async (req, res) => {
 /****************************************************************************************************/
 exports.getUserRsvpdEvents = async (req, res) => {
     const userId = req.userId; // Assuming the user ID is available in the request after authentication
+    const { pageNo = 1, limit = 10 } = req.query;
+    const skipCount = limit * (pageNo - 1);
 
     try {
+        const totalCount = await Event.countDocuments({ rsvp: userId });
         // Find all events where the user ID is included in the rsvp array
-        const events = await Event.find({ rsvp: userId });
+        const events = await Event.find({ rsvp: userId })
+        .skip(skipCount)
+        .limit(limit)
+        .sort({ startDate: -1 }) // Customize sorting as needed
+        .lean();
 
         if (!events.length) {
             return responseHandler(res, 404, 'No events found for this user.');
         }
 
-        return responseHandler(res, 200, 'RSVP\'d events retrieved successfully!', events);
+        return responseHandler(res, 200, 'RSVP\'d events retrieved successfully!', events, totalCount);
     } catch (err) {
         return responseHandler(res, 500, `Error retrieving RSVP'd events: ${err.message}`);
     }
@@ -391,9 +408,19 @@ exports.cancelEvent = async (req, res) => {
 /*                                Function to get the events history                               */
 /****************************************************************************************************/
 exports.getEventHistory = async (req, res) => {
-    const events = await Event.find({ status: { $in: ['completed', 'cancelled'] } });
+
+    const { pageNo = 1, limit = 10 } = req.query;
+    const skipCount = limit * (pageNo - 1);
+
+    const totalCount = await Event.countDocuments({ status: { $in: ['completed', 'cancelled'] } });
+    const events = await Event.find({ status: { $in: ['completed', 'cancelled'] } })
+    .skip(skipCount)
+    .limit(limit)
+    .sort({ startDate: -1 }) // Customize sorting as needed
+    .lean();
+
     if (!events) {
         return responseHandler(res, 404, 'No events found.');
     }
-    return responseHandler(res, 200, 'Event retrieved successfully!', events);
+    return responseHandler(res, 200, 'Event retrieved successfully!', events, totalCount);
 }

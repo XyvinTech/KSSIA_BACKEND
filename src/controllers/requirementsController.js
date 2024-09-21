@@ -91,12 +91,24 @@ exports.updateRequirement = async (req, res) => {
 /*                                Function to get all requirements                                  */
 /****************************************************************************************************/
 exports.getAllRequirements = async (req, res) => {
+
+    const { pageNo = 1, limit = 10 } = req.query;
+    const skipCount = limit * (pageNo - 1);
+
     try {
-        const requirements = await Requirements.find().populate('author', 'name email');
+        const totalCount = await Requirements.countDocuments();
+        const requirements = await Requirements.find()
+        .populate('author', 'name email')
+        .skip(skipCount)
+        .limit(limit)
+        .sort({ createdAt: -1 })
+        .lean()
+        .exec();
+
         if (requirements.length === 0) {
             return responseHandler(res, 404, "No requirements found");
         }
-        return responseHandler(res, 200, "Successfully retrieved all requirements", requirements);
+        return responseHandler(res, 200, "Successfully retrieved all requirements", requirements, totalCount);
     } catch (err) {
         return responseHandler(res, 500, `Error retrieving requirements: ${err.message}`);
     }
@@ -163,6 +175,8 @@ exports.updateRequirementStatus = async (req, res) => {
 exports.getUserRequirements = async (req, res) => {
 
     const { userId } = req.params;
+    const { pageNo = 1, limit = 10 } = req.query;
+    const skipCount = limit * (pageNo - 1);
 
     if (!userId) {
         return responseHandler(res, 400, "Invalid request");
@@ -173,13 +187,18 @@ exports.getUserRequirements = async (req, res) => {
         return responseHandler(res, 404, "User not found");
     }
 
-    const requirements = await Requirements.find({ author: userId });
+    const totalCount = await Requirements.countDocuments({ author: userId });
+    const requirements = await Requirements.find({ author: userId })
+    .skip(skipCount)
+    .limit(limit)
+    .sort({ createdAt: -1 })
+    .lean();
 
     if (requirements.length === 0) {
         return responseHandler(res, 404, "User hasn't posted any requirements");
     }
 
-    return responseHandler(res, 200, "Successfully retrieved requirements", requirements);
+    return responseHandler(res, 200, "Successfully retrieved requirements", requirements, totalCount);
 };
 
 exports.getRequirements = async (req, res) => {
