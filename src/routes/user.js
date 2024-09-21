@@ -13,6 +13,10 @@ userRoute
   .route("/login/:mobile")
   .get(asyncHandler(userController.sendOtp));
 
+userRoute  
+  .route("/qr/:userId")
+  .get(asyncHandler(userController.getUserById));
+
 userRoute.use(authVerify);
 
 userRoute  

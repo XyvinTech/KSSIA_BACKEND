@@ -31,6 +31,7 @@ const userSchema = new mongoose.Schema(
         },
         // password: { type: String, },
         otp: { type: Number },
+        fcm: { type: String },
         designation: { type: String },
         company_name: { type: String },
         company_address: { type: String },
@@ -65,10 +66,18 @@ const userSchema = new mongoose.Schema(
         is_deleted: { type: Boolean, default: false },
         selectedTheme: { type: String, default:'white'},
         reviews: [reviewSchema],
-        blocked: [{
+        blocked_users: [{
             userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
             reason: { type: String, required: true } // Reason for blocking
         }],
+        blocked_products:[{
+            productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+            reason: { type: String, required: true } // Reason for blocking
+        }],
+        blocked_requirements: [{
+            requirementId: { type: mongoose.Schema.Types.ObjectId, ref: 'Requirements' },
+            reason: { type: String, required: true } // Reason for blocking
+        }]
     },
     {
         timestamps: true,
@@ -93,11 +102,11 @@ userSchema.methods.deleteReview = function (reviewerId) {
 // Block a user instance method
 userSchema.methods.blockUser = function (userId, reason) {
     // Check if the user is already blocked
-    const isBlocked = this.blocked.some(blockedUser => blockedUser.userId.toString() === userId.toString());
+    const isBlocked = this.blocked_users.some(blockedUser => blockedUser.userId.toString() === userId.toString());
 
     if (!isBlocked) {
         // Push the userId and reason for blocking into the blocked array
-        this.blocked.push({ userId, reason });
+        this.blocked_users.push({ userId, reason });
         return this.save();
     }
     return Promise.resolve(this); // No change if the user is already blocked
@@ -105,7 +114,41 @@ userSchema.methods.blockUser = function (userId, reason) {
 
 // Unblock a user instance method
 userSchema.methods.unblockUser = function (userId) {
-    this.blocked = this.blocked.filter(blockedUser => blockedUser.userId.toString() !== userId.toString());
+    this.blocked_users = this.blocked_users.filter(blockedUser => blockedUser.userId.toString() !== userId.toString());
+    return this.save();
+};
+
+// Block a product instance method
+userSchema.methods.blockProduct = function (productId, reason) {
+    const isBlocked = this.blocked_products.some(blockedProduct => blockedProduct.productId.toString() === productId.toString());
+
+    if (!isBlocked) {
+        this.blocked_products.push({ productId, reason });
+        return this.save();
+    }
+    return Promise.resolve(this);
+};
+
+// Unblock a product instance method
+userSchema.methods.unblockProduct = function (productId) {
+    this.blocked_products = this.blocked_products.filter(blockedProduct => blockedProduct.productId.toString() !== productId.toString());
+    return this.save();
+};
+
+// Block a requirement instance method
+userSchema.methods.blockRequirement = function (requirementId, reason) {
+    const isBlocked = this.blocked_requirements.some(blockedRequirement => blockedRequirement.requirementId.toString() === requirementId.toString());
+
+    if (!isBlocked) {
+        this.blocked_requirements.push({ requirementId, reason });
+        return this.save();
+    }
+    return Promise.resolve(this);
+};
+
+// Unblock a requirement instance method
+userSchema.methods.unblockRequirement = function (requirementId) {
+    this.blocked_requirements = this.blocked_requirements.filter(blockedRequirement => blockedRequirement.requirementId.toString() !== requirementId.toString());
     return this.save();
 };
 
