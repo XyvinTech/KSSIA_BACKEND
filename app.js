@@ -3,6 +3,8 @@ const express = require("express");
 const cors = require("cors");
 const volleyball = require("volleyball");
 const clc = require("cli-color");
+const admin = require("firebase-admin");
+const { serviceAccount } = require("./src/config/firebase");
 
 const responseHandler = require("./src/helpers/responseHandler");
 const userRoute = require("./src/routes/user");
@@ -42,6 +44,12 @@ require("./src/jobs");
 
 // Import database connection modules
 require("./src/helpers/connection");
+
+//* Initialize Firebase
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  storageBucket: process.env.BUCKET_URL,
+});
 
 // Configure routes for the API
 app.use(`${BASE_PATH}/user`, userRoute);

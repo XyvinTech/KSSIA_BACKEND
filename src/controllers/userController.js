@@ -1,5 +1,6 @@
 require("dotenv").config();
 const Fuse = require("fuse.js");
+const admin = require("firebase-admin");
 const path = require("path");
 const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
@@ -11,7 +12,9 @@ const {
   ReviewSchema,
   EditUserSchema,
 } = require("../validation");
-const { generateToken } = require("../utils/generateToken");
+const {
+  generateToken
+} = require("../utils/generateToken");
 
 /****************************************************************************************************/
 /*                               Function to generate a 6-digit OTP                                 */
@@ -29,7 +32,9 @@ const generateOTP = (length = 6) => {
 const sendOtp = async (mobile, otp) => {
   console.log(`Sending OTP ${otp} to mobile number ${mobile}`);
   // Simulate sending OTP
-  return { status: "success" }; // Replace with actual status from your SMS service
+  return {
+    status: "success"
+  }; // Replace with actual status from your SMS service
 };
 
 /****************************************************************************************************/
@@ -37,7 +42,9 @@ const sendOtp = async (mobile, otp) => {
 /****************************************************************************************************/
 
 exports.sendOtp = async (req, res) => {
-  const { mobile } = req.params;
+  const {
+    mobile
+  } = req.params;
   // console.log(`Received mobile parameter: ${mobile}`);                             // Debug line
 
   // Validate the presence of the mobile field in the request body
@@ -47,7 +54,9 @@ exports.sendOtp = async (req, res) => {
   }
 
   // Check if the user exists in the database
-  const user = await User.findOne({ "phone_numbers.personal": mobile });
+  const user = await User.findOne({
+    "phone_numbers.personal": mobile
+  });
   if (!user) {
     // console.log(`User not found`);                                               // Debug line
     return responseHandler(res, 404, "User not found");
@@ -76,7 +85,10 @@ exports.sendOtp = async (req, res) => {
 /****************************************************************************************************/
 
 exports.verifyOtp = async (req, res) => {
-  const { mobile, otp } = req.body;
+  const {
+    mobile,
+    otp
+  } = req.body;
   // console.log(`Received mobile and OTP parameters: ${mobile} ${otp}`);             // Debug line
 
   // Validate the presence of the mobile and otp fields in the request body
@@ -86,7 +98,9 @@ exports.verifyOtp = async (req, res) => {
   }
 
   // Check if the user exists in the database
-  const user = await User.findOne({ "phone_numbers.personal": mobile });
+  const user = await User.findOne({
+    "phone_numbers.personal": mobile
+  });
   if (!user) {
     // console.log(`User not found`);                                               // Debug line
     return responseHandler(res, 404, "User not found");
@@ -103,7 +117,10 @@ exports.verifyOtp = async (req, res) => {
   const token = generateToken(user._id);
 
   // console.log(`OTP verified successfully`);                                        // Debug line
-  return responseHandler(res, 200, "User OTP verified successfully", [{token: token, userId: user._id}] );
+  return responseHandler(res, 200, "User OTP verified successfully", [{
+    token: token,
+    userId: user._id
+  }]);
 };
 
 /****************************************************************************************************/
@@ -111,7 +128,9 @@ exports.verifyOtp = async (req, res) => {
 /****************************************************************************************************/
 
 exports.getUserById = async (req, res) => {
-  const { userId } = req.params;
+  const {
+    userId
+  } = req.params;
   // console.log(`Received userId: ${userId}`);                                       // Debug line
 
   if (!userId) {
@@ -128,13 +147,18 @@ exports.getUserById = async (req, res) => {
     return responseHandler(res, 404, "User not found");
   }
 
-  let products = await Product.find({ seller_id: userId }).exec();
+  let products = await Product.find({
+    seller_id: userId
+  }).exec();
   if (!products.length) {
     products = "Seller has no products";
   }
 
   // Prepare response with user data and products
-  const userData = { ...user._doc, products: products };
+  const userData = {
+    ...user._doc,
+    products: products
+  };
 
   // console.log(`User retrieved successfully`);                                      // Debug line
   return responseHandler(res, 200, "User retrieved successfully", userData);
@@ -145,7 +169,9 @@ exports.getUserById = async (req, res) => {
 /****************************************************************************************************/
 
 exports.editProfile = async (req, res) => {
-  const { userId } = req.params;
+  const {
+    userId
+  } = req.params;
   const data = req.body;
 
   // Validate the presence of the userId in the request body
@@ -154,7 +180,11 @@ exports.editProfile = async (req, res) => {
   }
 
   // Validate the input data
-  const { error } = EditUserSchema.validate(data, { abortEarly: true });
+  const {
+    error
+  } = EditUserSchema.validate(data, {
+    abortEarly: true
+  });
 
   // Check if an error exists in the validation
   if (error) {
@@ -223,7 +253,9 @@ exports.editProfile = async (req, res) => {
 
   // Update products if any changes exist in the data
   if (data.products) {
-    const currentProducts = await Product.find({ seller_id: userId });
+    const currentProducts = await Product.find({
+      seller_id: userId
+    });
     const currentProductsMap = new Map(
       currentProducts.map((product) => [product._id.toString(), product])
     );
@@ -238,7 +270,10 @@ exports.editProfile = async (req, res) => {
           });
           currentProductsMap.delete(productData._id);
         } else {
-          const newProduct = new Product({ ...productData, seller_id: userId });
+          const newProduct = new Product({
+            ...productData,
+            seller_id: userId
+          });
           await newProduct.save();
         }
       } else {
@@ -269,7 +304,9 @@ exports.editProfile = async (req, res) => {
 /****************************************************************************************************/
 
 exports.findUserByName = async (req, res) => {
-  const { name } = req.params;
+  const {
+    name
+  } = req.params;
   // console.log(`Received name parameter: ${name}`);                                 // Debug line
 
   // Validate the presence of the name in the request parameter
@@ -290,8 +327,12 @@ exports.findUserByName = async (req, res) => {
   let matchQuery = {};
   if (nameParts.length > 0) {
     matchQuery = {
-      $or: [
-        { "name.first_name": { $regex: nameParts[0], $options: "i" } },
+      $or: [{
+          "name.first_name": {
+            $regex: nameParts[0],
+            $options: "i"
+          }
+        },
         {
           "name.middle_name": {
             $regex: nameParts.slice(1, -1).join(" "),
@@ -310,7 +351,9 @@ exports.findUserByName = async (req, res) => {
   // console.log(`Match Query: ${JSON.stringify(matchQuery)}`);                       // Debug line
 
   // Find users using aggregation
-  const initialResults = await User.aggregate([{ $match: matchQuery }]);
+  const initialResults = await User.aggregate([{
+    $match: matchQuery
+  }]);
   // console.log(`Initial Results: ${JSON.stringify(initialResults)}`);               // Debug line
 
   // Check if initial results are empty
@@ -348,7 +391,9 @@ exports.findUserByName = async (req, res) => {
 /****************************************************************************************************/
 
 exports.findUserByMembershipId = async (req, res) => {
-  const { membershipId } = req.params;
+  const {
+    membershipId
+  } = req.params;
   // console.log(`Received membershipId parameter: ${membershipId}`);                 // Debug line
 
   // Check if the membership id is present in the request
@@ -358,7 +403,9 @@ exports.findUserByMembershipId = async (req, res) => {
   }
 
   // Check if the membership id exist in the database
-  const user = await User.findOne({ membership_id: membershipId });
+  const user = await User.findOne({
+    membership_id: membershipId
+  });
   if (!user) {
     // console.log('User not found in database');                                   // Debug line
     return responseHandler(res, 404, "User not found");
@@ -372,7 +419,9 @@ exports.findUserByMembershipId = async (req, res) => {
 /****************************************************************************************************/
 
 exports.addReview = async (req, res) => {
-  const { userId } = req.params;
+  const {
+    userId
+  } = req.params;
   const reviewData = req.body;
 
   if (!userId || !reviewData) {
@@ -385,7 +434,11 @@ exports.addReview = async (req, res) => {
   }
 
   // Validate the input data
-  const { error } = ReviewSchema.validate(reviewData, { abortEarly: true });
+  const {
+    error
+  } = ReviewSchema.validate(reviewData, {
+    abortEarly: true
+  });
 
   // Check if an error exists in the validation
   if (error) {
@@ -405,7 +458,10 @@ exports.addReview = async (req, res) => {
 /****************************************************************************************************/
 
 exports.deleteReview = async (req, res) => {
-  const { userId, reviewId } = req.params;
+  const {
+    userId,
+    reviewId
+  } = req.params;
 
   if (!userId || !reviewId) {
     return responseHandler(res, 400, "Invalid request");
@@ -430,8 +486,12 @@ exports.deleteReview = async (req, res) => {
 
 exports.blockUser = async (req, res) => {
   const userId = req.userId;
-  const { blockUserId } = req.params;
-  const { reason } = req.body;
+  const {
+    blockUserId
+  } = req.params;
+  const {
+    reason
+  } = req.body;
 
   // Validate input
   if (!blockUserId || !reason || reason.trim() === "") {
@@ -472,7 +532,9 @@ exports.blockUser = async (req, res) => {
 
 exports.unblockUser = async (req, res) => {
   const userId = req.userId;
-  const { blockedUserId } = req.params;
+  const {
+    blockedUserId
+  } = req.params;
 
   // Validate input
   if (!blockedUserId) {
@@ -513,4 +575,52 @@ exports.unblockUser = async (req, res) => {
     console.error(error);
     return responseHandler(res, 500, "An error occurred while unblocking the user.");
   }
+};
+
+/****************************************************************************************************/
+/*                                     function to login a user                                     */
+/****************************************************************************************************/
+
+exports.loginUser = async (req, res) => {
+
+  const id = req.body.clientToken;
+  const {
+    fcm
+  } = req.body;
+  if (!id) {
+    return responseHandler(res, 400, "Client Token is required");
+  }
+  let user;
+  admin
+    .auth()
+    .verifyIdToken(id)
+    .then(async (decodedToken) => {
+      user = await User.findOne({
+        phone: decodedToken.phone_number
+      });
+      if (!user) {
+        return responseHandler(res, 404, "User not found");
+      } else if (user.uid !== null) {
+        user.fcm = fcm;
+        user.save();
+        const token = generateToken(user._id);
+        return responseHandler(
+          res,
+          200,
+          "User logged in successfully",
+          token
+        );
+      } else {
+        user.uid = decodedToken.uid;
+        user.fcm = fcm;
+        user.save();
+        const token = generateToken(user._id);
+        return responseHandler(
+          res,
+          200,
+          "User logged in successfully",
+          token
+        );
+      }
+    });
 };

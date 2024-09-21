@@ -31,6 +31,7 @@ const userSchema = new mongoose.Schema(
         },
         // password: { type: String, },
         otp: { type: Number },
+        uid: { type: String },
         fcm: { type: String },
         designation: { type: String },
         company_name: { type: String },
