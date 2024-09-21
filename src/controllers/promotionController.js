@@ -182,7 +182,7 @@ exports.getAllPromotions = async (req, res) => {
     .skip(skipCount)
     .limit(limit)
     .sort({ createdAt: -1 })
-    .lean()
+    .lean();
     return responseHandler(res, 200, "Promotions retrieved successfully", promotions, totalCount);
 };
 
@@ -192,6 +192,8 @@ exports.getAllPromotions = async (req, res) => {
 
 exports.getPromotionsByType = async (req, res) => {
     const { type } = req.params;
+    const { pageNo = 1, limit = 10 } = req.query;
+    const skipCount = limit * (pageNo - 1);
     const types = ['banner', 'video', 'poster', 'notice'];
 
     // Validate the `type` parameter
@@ -201,7 +203,12 @@ exports.getPromotionsByType = async (req, res) => {
 
     try {
         // Retrieve promotions by type
-        const promotions = await Promotion.find({ type: type });
+        const totalCount = await Promotion.countDocuments({ type: type });
+        const promotions = await Promotion.find({ type: type })
+        .skip(skipCount)
+        .limit(limit)
+        .sort({ createdAt: -1 })
+        .lean();
         return responseHandler(res, 200, "Promotions retrieved successfully", promotions);
     } catch (err) {
         return responseHandler(res, 500, `Server error: ${err.message}`);
