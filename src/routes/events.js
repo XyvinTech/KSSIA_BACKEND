@@ -56,7 +56,7 @@ eventRoute
 
 // get all past events
 eventRoute
-  .route("/history")
-  .put(asyncHandler(eventController.getEventHistory));
+  .route("/get/history")
+  .get(asyncHandler(eventController.getEventHistory));
 
 module.exports = eventRoute;
