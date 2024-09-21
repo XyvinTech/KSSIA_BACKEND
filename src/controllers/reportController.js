@@ -1,5 +1,5 @@
 const responseHandler = require("../helpers/responseHandler");
-const Report = require("../models/reportModel");
+const Report = require("../models/report");
 
 exports.createReport = async (req, res) => {
     req.body.reportBy = req.userId;

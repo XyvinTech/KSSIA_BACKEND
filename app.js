@@ -19,6 +19,7 @@ const requirementsRoute = require('./src/routes/requirements');
 const authRoute = require('./src/routes/auth');
 const { specs, swaggerUi } = require('./src/middlewares/swagger/swagger');
 const { app, server } = require("./src/socket/socket.js"); // Import server and io from socket file
+const reportRoute = require("./src/routes/report");
 
 
 app.use(volleyball);
@@ -56,6 +57,8 @@ app.use(`${BASE_PATH}/files`, filesRoute);
 app.use(`${BASE_PATH}/chats`, chatRoute);
 app.use(`${BASE_PATH}/requirements`, requirementsRoute);
 app.use(`${BASE_PATH}/api-docs`, swaggerUi.serve, swaggerUi.setup(specs));
+app.use(`${BASE_PATH}/report`, reportRoute);
+
 
 // Define a route for the API root
 app.get(BASE_PATH, (req, res) => {
