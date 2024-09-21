@@ -7,7 +7,7 @@ const userRoute = express.Router();
 
 userRoute
   .route("/login")
-  .post(asyncHandler(userController.verifyOtp));
+  .post(asyncHandler(userController.loginUser));
 
 userRoute  
   .route("/login/:mobile")
