@@ -105,7 +105,7 @@ userSchema.methods.blockUser = function (userId, reason) {
 
 // Unblock a user instance method
 userSchema.methods.unblockUser = function (userId) {
-    this.blocked = this.blocked.filter(id => id.toString() !== userId.toString());
+    this.blocked = this.blocked.filter(blockedUser => blockedUser.userId.toString() !== userId.toString());
     return this.save();
 };
 
