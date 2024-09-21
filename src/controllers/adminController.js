@@ -274,31 +274,35 @@ exports.deleteUser = async (req, res) => {
 /****************************************************************************************************/
 
 exports.getAllUsers = async (req, res) => {
+  try {
+    const { pageNo = 1, limit = 10 } = req.query;
+    const skipCount = limit * (pageNo - 1);
+    const filter = {}; // Add any necessary filters here
 
-  const {
-    pageNo = 1, limit = 10
-  } = req.query;
-  const skipCount = limit * (pageNo - 1);
-  const filter = {};
+    // Get total count of users
+    const totalCount = await User.countDocuments(filter);
 
-  const totalCount = await User.countDocuments(filter);
-  const users = await User.find(filter)
-    .skip(skipCount)
-    .limit(limit)
-    .sort({
-      createdAt: -1
-    })
-    .lean();
+    // Fetch users with pagination and sorting
+    const users = await User.find(filter)
+      .skip(skipCount)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .lean();
 
-  const mappedData = users.map((user) => {
-    return {
-      ...user._doc,
-      full_name: `${user.name.first_name} ${user.name.middle_name} ${user.name.last_name}`,
-      mobile: user.phone_numbers.personal,
-    };
-  });
-  // console.log(users);                                                              // Debug line
-  return responseHandler(res, 200, "Users retrieved successfully", mappedData, totalCount);
+    // Map the data to include the required fields (full name and mobile)
+    const mappedData = users.map((user) => {
+      return {
+        ...user, // Spread the original user data
+        full_name: `${user.name.first_name} ${user.name.middle_name || ''} ${user.name.last_name}`, // Concatenate names
+        mobile: user.phone_numbers?.personal || 'N/A', // Handle phone number or return 'N/A'
+      };
+    });
+
+    // Return the paginated and mapped data
+    return responseHandler(res, 200, "Users retrieved successfully", mappedData, totalCount);
+  } catch (error) {
+    return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
+  }
 };
 
 /****************************************************************************************************/

@@ -2,7 +2,9 @@ require("dotenv").config();
 const path = require("path");
 const responseHandler = require("../helpers/responseHandler");
 const Product = require("../models/products");
-const { productsSchemaval } = require("../validation");
+const {
+  productsSchemaval
+} = require("../validation");
 const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
 
@@ -13,7 +15,9 @@ exports.addProduct = async (req, res) => {
   const data = req.body;
 
   // Validate the input data
-  const { error } = productsSchemaval.validate(data, {
+  const {
+    error
+  } = productsSchemaval.validate(data, {
     abortEarly: true,
   });
 
@@ -42,7 +46,10 @@ exports.addProduct = async (req, res) => {
   }
 
   // Create a new product
-  const newProduct = new Product({ ...data, image });
+  const newProduct = new Product({
+    ...data,
+    image
+  });
   await newProduct.save();
 
   return responseHandler(res, 201, "Product added successfully!", newProduct);
@@ -52,7 +59,9 @@ exports.addProduct = async (req, res) => {
 /*                                    Function to edit product                                      */
 /****************************************************************************************************/
 exports.editProduct = async (req, res) => {
-  const { productId } = req.params;
+  const {
+    productId
+  } = req.params;
   const data = req.body;
 
   // Validate the presence of the productId in the request
@@ -61,7 +70,9 @@ exports.editProduct = async (req, res) => {
   }
 
   // Validate the input data
-  const { error } = productsSchemaval.validate(data, {
+  const {
+    error
+  } = productsSchemaval.validate(data, {
     abortEarly: true,
   });
 
@@ -90,7 +101,9 @@ exports.editProduct = async (req, res) => {
   }
 
   // Update the product
-  Object.assign(product, data, { image });
+  Object.assign(product, data, {
+    image
+  });
   await product.save();
 
   return responseHandler(res, 200, "Product updated successfully!", product);
@@ -101,23 +114,37 @@ exports.editProduct = async (req, res) => {
 /****************************************************************************************************/
 exports.getAllProducts = async (req, res) => {
 
-  const { pageNo = 1, limit = 10 } = req.query;
+  const {
+    pageNo = 1, limit = 10
+  } = req.query;
   const skipCount = limit * (pageNo - 1);
 
+  // Get total count of products
   const totalCount = await Product.countDocuments();
+
+  // Fetch products with pagination, populate seller information, and sort
   const products = await Product.find()
-    .populate({ path: "seller_id", select: "name membership_id" })
+    .populate({
+      path: "seller_id",
+      select: "name membership_id"
+    })
     .skip(skipCount)
     .limit(limit)
-    .sort({ createdAt: -1 })
-    .lean()
+    .sort({
+      createdAt: -1
+    })
+    .lean() // Convert to plain JS objects
     .exec();
+
+  // Map the products to include the required seller's full name
   const mappedProducts = products.map((product) => {
     return {
-      ...product._doc,
-      full_name: `${product.seller_id?.name.first_name} ${product.seller_id?.name.middle_name} ${product.seller_id?.name.last_name}`,
+      ...product, // Spread the original product data
+      full_name: `${product.seller_id?.name.first_name || ''} ${product.seller_id?.name.middle_name || ''} ${product.seller_id?.name.last_name || ''}`.trim(), // Concatenate seller's full name
     };
   });
+
+  // Return the paginated and mapped product data
   return responseHandler(
     res,
     200,
@@ -131,14 +158,19 @@ exports.getAllProducts = async (req, res) => {
 /*                                 Function to get product by id                                    */
 /****************************************************************************************************/
 exports.getProductsById = async (req, res) => {
-  const { productId } = req.params;
+  const {
+    productId
+  } = req.params;
 
   if (!productId) {
     return responseHandler(res, 400, "Invalid request");
   }
 
   const product = await Product.findById(productId)
-    .populate({ path: "seller_id", select: "name membership_id" })
+    .populate({
+      path: "seller_id",
+      select: "name membership_id"
+    })
     .exec();
   if (!product) {
     return responseHandler(res, 404, "Product not found");
@@ -151,14 +183,21 @@ exports.getProductsById = async (req, res) => {
 /*                          Function to get products by a single seller                             */
 /****************************************************************************************************/
 exports.getProductsBySeller = async (req, res) => {
-  const { sellerId } = req.params;
+  const {
+    sellerId
+  } = req.params;
 
   if (!sellerId) {
     return responseHandler(res, 400, "Invalid request");
   }
 
-  const products = await Product.find({ seller_id: sellerId })
-    .populate({ path: "seller_id", select: "name membership_id" })
+  const products = await Product.find({
+      seller_id: sellerId
+    })
+    .populate({
+      path: "seller_id",
+      select: "name membership_id"
+    })
     .exec();
   if (!products.length) {
     return responseHandler(res, 404, "Seller has no products");
@@ -176,7 +215,9 @@ exports.getProductsBySeller = async (req, res) => {
 /*                                   Function to delete product                                     */
 /****************************************************************************************************/
 exports.deleteProduct = async (req, res) => {
-  const { productId } = req.params;
+  const {
+    productId
+  } = req.params;
 
   if (!productId) {
     return responseHandler(res, 400, "Invalid request");
