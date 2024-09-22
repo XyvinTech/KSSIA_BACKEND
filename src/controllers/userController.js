@@ -596,7 +596,7 @@ exports.loginUser = async (req, res) => {
     .verifyIdToken(id)
     .then(async (decodedToken) => {
       user = await User.findOne({
-        phone: decodedToken.phone_number
+            "phone_numbers.personal": decodedToken.phone_number
       });
       if (!user) {
         return responseHandler(res, 404, "User not found");
