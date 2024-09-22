@@ -228,3 +228,10 @@ exports.RequirementsSchema = Joi.object({
     image: Joi.string(),
     reason: Joi.string(),
 });
+
+exports.createReport = Joi.object({
+    content: Joi.string().required(),
+    reportTo: Joi.array(),
+    reportType: Joi.string().required(),
+    reportedItemId: Joi.string().required(),
+  });

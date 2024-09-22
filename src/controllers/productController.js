@@ -2,6 +2,7 @@ require("dotenv").config();
 const path = require("path");
 const responseHandler = require("../helpers/responseHandler");
 const Product = require("../models/products");
+const User = require("../models/user")
 const {
   productsSchemaval
 } = require("../validation");
@@ -114,16 +115,37 @@ exports.editProduct = async (req, res) => {
 /****************************************************************************************************/
 exports.getAllProducts = async (req, res) => {
 
+  const reqUser = req.userId;
+
   const {
     pageNo = 1, limit = 10
   } = req.query;
   const skipCount = limit * (pageNo - 1);
+  let filter = {};
+
+  const user = await User.findById(reqUser);
+  if (user) {
+    const blockedUsersList = user.blocked_users || [];;
+    const blockedProductSellers = user.blocked_products || [];;
+    // Extract userIds from both lists
+    const blockedUserIds = blockedUsersList.map(item => item.userId);
+    const blockedProductUserIds = blockedProductSellers.map(item => item.userId);
+    // Combine both lists into a single array
+    const combinedBlockedUserIds = [...blockedUserIds, ...blockedProductUserIds];
+    // To remove duplicates 
+    const uniqueBlockedUserIds = [...new Set(combinedBlockedUserIds)];
+    filter = {
+      seller_id: {
+        $nin: uniqueBlockedUserIds
+      }
+    };
+  }
 
   // Get total count of products
-  const totalCount = await Product.countDocuments();
+  const totalCount = await Product.countDocuments(filter);
 
   // Fetch products with pagination, populate seller information, and sort
-  const products = await Product.find()
+  const products = await Product.find(filter)
     .populate({
       path: "seller_id",
       select: "name membership_id"
@@ -161,9 +183,23 @@ exports.getProductsById = async (req, res) => {
   const {
     productId
   } = req.params;
+  const reqUser = req.userId;
 
   if (!productId) {
     return responseHandler(res, 400, "Invalid request");
+  }
+
+  const user = await User.findById(reqUser);
+  if (user) {
+    const blockedUsersList = user.blocked_users || [];;
+    const blockedProductSellers = user.blocked_products || [];;
+    // Extract userIds from both lists
+    const blockedUserIds = blockedUsersList.map(item => item.userId);
+    const blockedProductUserIds = blockedProductSellers.map(item => item.userId);
+    // Combine both lists into a single array
+    const combinedBlockedUserIds = [...blockedUserIds, ...blockedProductUserIds];
+    // To remove duplicates 
+    const uniqueBlockedUserIds = [...new Set(combinedBlockedUserIds)];
   }
 
   const product = await Product.findById(productId)
@@ -172,8 +208,14 @@ exports.getProductsById = async (req, res) => {
       select: "name membership_id"
     })
     .exec();
+
   if (!product) {
     return responseHandler(res, 404, "Product not found");
+  }
+
+  // Check if the seller of the product is blocked
+  if (uniqueBlockedUserIds.includes(product.seller_id._id)) {
+    return responseHandler(res, 403, "You have blocked the seller of this product or have blocked the products by this seller");
   }
 
   return responseHandler(res, 200, "Product retrieved successfully!", product);
@@ -186,9 +228,28 @@ exports.getProductsBySeller = async (req, res) => {
   const {
     sellerId
   } = req.params;
+  const reqUser = req.userId;
 
   if (!sellerId) {
     return responseHandler(res, 400, "Invalid request");
+  }
+
+  const user = await User.findById(reqUser);
+  if (user) {
+    const blockedUsersList = user.blocked_users || [];;
+    const blockedProductSellers = user.blocked_products || [];;
+    // Extract userIds from both lists
+    const blockedUserIds = blockedUsersList.map(item => item.userId);
+    const blockedProductUserIds = blockedProductSellers.map(item => item.userId);
+    // Combine both lists into a single array
+    const combinedBlockedUserIds = [...blockedUserIds, ...blockedProductUserIds];
+    // To remove duplicates 
+    const uniqueBlockedUserIds = [...new Set(combinedBlockedUserIds)];
+
+    // Check if the seller of the product is blocked
+    if (uniqueBlockedUserIds.includes(sellerId)) {
+      return responseHandler(res, 403, "You have blocked the seller of this product or have blocked the products by this seller");
+    }
   }
 
   const products = await Product.find({

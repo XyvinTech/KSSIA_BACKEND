@@ -1,17 +1,34 @@
 const responseHandler = require("../helpers/responseHandler");
 const Report = require("../models/report");
+const {
+    createReport
+} = require("../validation");
 
 exports.createReport = async (req, res) => {
-    req.body.reportBy = req.userId;
-    const newReport = await Report.create(req.body);
-    if (newReport) {
-        return responseHandler(res, 201, "Report created successfully", newReport);
+    try {
+        const {
+            error
+        } = createReport.validate(req.body, {
+            abortEarly: true,
+        });
+        if (error) {
+            return responseHandler(res, 400, `Invalid input: ${error.message}`);
+        }
+        req.body.reportBy = req.userId;
+        const newReport = await Report.create(req.body);
+        if (newReport) {
+            return responseHandler(res, 201, "Report created successfully", newReport);
+        }
+    } catch (error) {
+        return responseHandler(res, 500, `Internal Server Error ${error.message}`);
     }
 };
 
 exports.getReports = async (req, res) => {
 
-    const { pageNo = 1, limit = 10, search } = req.query;
+    const {
+        pageNo = 1, limit = 10, search
+    } = req.query;
     const skipCount = 10 * (pageNo - 1);
     const filter = {};
     const totalCount = await Report.countDocuments(filter);

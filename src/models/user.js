@@ -72,11 +72,11 @@ const userSchema = new mongoose.Schema(
             reason: { type: String, required: true } // Reason for blocking
         }],
         blocked_products:[{
-            productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+            userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
             reason: { type: String, required: true } // Reason for blocking
         }],
         blocked_requirements: [{
-            requirementId: { type: mongoose.Schema.Types.ObjectId, ref: 'Requirements' },
+            userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
             reason: { type: String, required: true } // Reason for blocking
         }]
     },
