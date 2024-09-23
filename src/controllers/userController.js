@@ -169,143 +169,152 @@ exports.getUserById = async (req, res) => {
 /****************************************************************************************************/
 
 exports.editProfile = async (req, res) => {
-  console.log("entered")
-  const {
-    userId
-  } = req.params;
-  const data = req.body;
+  try {
+    console.log("entered")
+    const {
+      userId
+    } = req.params;
+    const data = req.body;
 
-  // Validate the presence of the userId in the request body
-  if (!userId) {
-    return responseHandler(res, 400, "Invalid request");
-  }
-
-  // Validate the input data
-  const {
-    error
-  } = EditUserSchema.validate(data, {
-    abortEarly: true
-  });
-
-  // Check if an error exists in the validation
-  if (error) {
-    return responseHandler(res, 400, `Invalid input: ${error.message}`);
-  }
-
-  // Fetch current user data
-  const currentUser = await User.findById(userId);
-  if (!currentUser) {
-    return responseHandler(res, 404, "User not found");
-  }
-  console.log(currentUser);
-
-  const bucketName = process.env.AWS_S3_BUCKET;
-
-  // Handle deletion of old files if new URLs are provided
-
-  if (
-    !data.profile_picture ||
-    (data.profile_picture !== currentUser.profile_picture &&
-      currentUser.profile_picture !== undefined &&
-      currentUser.profile_picture != "")
-  ) {
-    if (currentUser.profile_picture) {
-      const oldFileKey = path.basename(currentUser.profile_picture);
-      await deleteFile(bucketName, oldFileKey);
+    // Validate the presence of the userId in the request body
+    if (!userId) {
+      return responseHandler(res, 400, "Invalid request");
     }
-  }
 
-  if (
-    !data.company_logo ||
-    (data.company_logo !== currentUser.company_logo &&
-      currentUser.company_logo !== undefined &&
-      currentUser.company_logo != "")
-  ) {
-    if(currentUser.company_logo){
-      const oldFileKey = path.basename(currentUser.company_logo);
-    await deleteFile(bucketName, oldFileKey);
+    // Validate the input data
+    const {
+      error
+    } = EditUserSchema.validate(data, {
+      abortEarly: true
+    });
+
+    // Check if an error exists in the validation
+    if (error) {
+      return responseHandler(res, 400, `Invalid input: ${error.message}`);
     }
-  }
 
-  const fieldsToCheck = ["awards", "certificates", "brochure"];
-  for (const field of fieldsToCheck) {
-    if (data[field]) {
-      for (const item of currentUser[field]) {
-        const isStillPresent = data[field].some(
-          (newItem) => newItem.url === item.url
-        );
-        if (
-          !isStillPresent &&
-          item.url &&
-          item.url != "" &&
-          item.url !== undefined
-        ) {
-          if(item.url){
-            let oldFileKey = path.basename(item.url);
-            await deleteFile(bucketName, oldFileKey);
+    // Fetch current user data
+    const currentUser = await User.findById(userId);
+    if (!currentUser) {
+      return responseHandler(res, 404, "User not found");
+    }
+    console.log(currentUser);
+
+    const bucketName = process.env.AWS_S3_BUCKET;
+
+    // Handle deletion of old files if new URLs are provided
+
+    if (
+      !data.profile_picture ||
+      (data.profile_picture !== currentUser.profile_picture &&
+        currentUser.profile_picture !== undefined &&
+        currentUser.profile_picture != "")
+    ) {
+      if (currentUser.profile_picture) {
+        const oldFileKey = path.basename(currentUser.profile_picture);
+        await deleteFile(bucketName, oldFileKey);
+      }
+    }
+
+    if (
+      !data.company_logo ||
+      (data.company_logo !== currentUser.company_logo &&
+        currentUser.company_logo !== undefined &&
+        currentUser.company_logo != "")
+    ) {
+      if (currentUser.company_logo) {
+        const oldFileKey = path.basename(currentUser.company_logo);
+        await deleteFile(bucketName, oldFileKey);
+      }
+    }
+
+    const fieldsToCheck = ["awards", "certificates", "brochure"];
+    for (const field of fieldsToCheck) {
+      if (data[field]) {
+        for (const item of currentUser[field]) {
+          const isStillPresent = data[field].some(
+            (newItem) => newItem.url === item.url
+          );
+          if (
+            !isStillPresent &&
+            item.url &&
+            item.url != "" &&
+            item.url !== undefined
+          ) {
+            if (item.url) {
+              let oldFileKey = path.basename(item.url);
+              await deleteFile(bucketName, oldFileKey);
+            }
           }
         }
       }
     }
-  }
 
-  // Update the user's profile with the validated data
-  const updatedUser = await User.findByIdAndUpdate(userId, data, {
-    new: true,
-    runValidators: true,
-  });
-
-  if (!updatedUser) {
-    return responseHandler(res, 404, "User not found");
-  }
-
-  // Update products if any changes exist in the data
-  if (data.products) {
-    const currentProducts = await Product.find({
-      seller_id: userId
+    // Update the user's profile with the validated data
+    const updatedUser = await User.findByIdAndUpdate(userId, data, {
+      new: true,
+      runValidators: true,
     });
-    const currentProductsMap = new Map(
-      currentProducts.map((product) => [product._id.toString(), product])
+
+    if (!updatedUser) {
+      return responseHandler(res, 404, "User not found");
+    }
+
+    // Update products if any changes exist in the data
+    if (data.products) {
+      const currentProducts = await Product.find({
+        seller_id: userId
+      });
+      const currentProductsMap = new Map(
+        currentProducts.map((product) => [product._id.toString(), product])
+      );
+
+      for (let productData of data.products) {
+        if (productData._id) {
+          const existingProduct = currentProductsMap.get(productData._id);
+          if (existingProduct) {
+            await Product.findByIdAndUpdate(productData._id, productData, {
+              new: true,
+              runValidators: true,
+            });
+            currentProductsMap.delete(productData._id);
+          } else {
+            const newProduct = new Product({
+              ...productData,
+              seller_id: userId
+            });
+            await newProduct.save();
+          }
+        } else {
+          return responseHandler(res, 404, "Invalid request");
+        }
+      }
+
+      // Remove products that were not in the update request, and delete associated images
+      for (let remainingProduct of currentProductsMap.values()) {
+        if (remainingProduct.image) {
+          let oldImageKey = path.basename(remainingProduct.image);
+          await deleteFile(bucketName, oldImageKey);
+        }
+        await Product.findByIdAndDelete(remainingProduct._id);
+      }
+    }
+
+    return responseHandler(
+      res,
+      200,
+      "User profile updated successfully",
+      updatedUser
     );
 
-    for (let productData of data.products) {
-      if (productData._id) {
-        const existingProduct = currentProductsMap.get(productData._id);
-        if (existingProduct) {
-          await Product.findByIdAndUpdate(productData._id, productData, {
-            new: true,
-            runValidators: true,
-          });
-          currentProductsMap.delete(productData._id);
-        } else {
-          const newProduct = new Product({
-            ...productData,
-            seller_id: userId
-          });
-          await newProduct.save();
-        }
-      } else {
-        return responseHandler(res, 404, "Invalid request");
-      }
-    }
-
-    // Remove products that were not in the update request, and delete associated images
-    for (let remainingProduct of currentProductsMap.values()) {
-      if (remainingProduct.image) {
-        let oldImageKey = path.basename(remainingProduct.image);
-        await deleteFile(bucketName, oldImageKey);
-      }
-      await Product.findByIdAndDelete(remainingProduct._id);
-    }
+  } catch (error) {
+    return responseHandler(
+      res,
+      500,
+      `Internal server error ${error}`
+    );
   }
-
-  return responseHandler(
-    res,
-    200,
-    "User profile updated successfully",
-    updatedUser
-  );
-};
+}
 
 /****************************************************************************************************/
 /*                  Function to search users using name aggregation and fuse.js                     */
