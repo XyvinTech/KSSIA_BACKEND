@@ -169,6 +169,7 @@ exports.getUserById = async (req, res) => {
 /****************************************************************************************************/
 
 exports.editProfile = async (req, res) => {
+  console.log("entered")
   const {
     userId
   } = req.params;
