@@ -207,8 +207,10 @@ exports.editProfile = async (req, res) => {
       currentUser.profile_picture !== undefined &&
       currentUser.profile_picture != "")
   ) {
-    const oldFileKey = path.basename(currentUser.profile_picture);
-    await deleteFile(bucketName, oldFileKey);
+    if (currentUser.profile_picture) {
+      const oldFileKey = path.basename(currentUser.profile_picture);
+      await deleteFile(bucketName, oldFileKey);
+    }
   }
 
   if (
@@ -217,8 +219,10 @@ exports.editProfile = async (req, res) => {
       currentUser.company_logo !== undefined &&
       currentUser.company_logo != "")
   ) {
-    const oldFileKey = path.basename(currentUser.company_logo);
+    if(currentUser.company_logo){
+      const oldFileKey = path.basename(currentUser.company_logo);
     await deleteFile(bucketName, oldFileKey);
+    }
   }
 
   const fieldsToCheck = ["awards", "certificates", "brochure"];
@@ -234,8 +238,10 @@ exports.editProfile = async (req, res) => {
           item.url != "" &&
           item.url !== undefined
         ) {
-          let oldFileKey = path.basename(item.url);
-          await deleteFile(bucketName, oldFileKey);
+          if(item.url){
+            let oldFileKey = path.basename(item.url);
+            await deleteFile(bucketName, oldFileKey);
+          }
         }
       }
     }
