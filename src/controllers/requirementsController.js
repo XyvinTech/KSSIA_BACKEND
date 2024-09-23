@@ -149,7 +149,7 @@ exports.getAllRequirementsUser = async (req, res) => {
     } = req.query;
     const skipCount = limit * (pageNo - 1);
 
-    let filter = {};
+    let filter = {status:"approved"};
 
     const user = await User.findById(reqUser);
     if (user) {
