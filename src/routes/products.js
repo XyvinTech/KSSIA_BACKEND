@@ -13,7 +13,10 @@ productRoute.use(authVerify);
 productRoute.post('/', upload.single('image'), asyncHandler(productController.addProduct));
 
 // Route to retrieve all products
-productRoute.get('/', asyncHandler(productController.getAllProducts));
+productRoute.get('/', asyncHandler(productController.getAllProductsUser));
+
+// Route to retrieve all products admin
+productRoute.get('/admin', asyncHandler(productController.getAllProducts));
 
 // Route to retrieve a single product by ID
 productRoute.get('/:productId', asyncHandler(productController.getProductsById));

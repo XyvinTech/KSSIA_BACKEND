@@ -115,13 +115,59 @@ exports.editProduct = async (req, res) => {
 /****************************************************************************************************/
 exports.getAllProducts = async (req, res) => {
 
+  const {
+    pageNo = 1, limit = 10
+  } = req.query;
+  const skipCount = limit * (pageNo - 1);
+  let filter = {};
+
+  // Get total count of products
+  const totalCount = await Product.countDocuments(filter);
+
+  // Fetch products with pagination, populate seller information, and sort
+  const products = await Product.find(filter)
+    .populate({
+      path: "seller_id",
+      select: "name membership_id"
+    })
+    .skip(skipCount)
+    .limit(limit)
+    .sort({
+      createdAt: -1
+    })
+    .lean() // Convert to plain JS objects
+    .exec();
+
+  // Map the products to include the required seller's full name
+  const mappedProducts = products.map((product) => {
+    return {
+      ...product, // Spread the original product data
+      full_name: `${product.seller_id?.name.first_name || ''} ${product.seller_id?.name.middle_name || ''} ${product.seller_id?.name.last_name || ''}`.trim(), // Concatenate seller's full name
+    };
+  });
+
+  // Return the paginated and mapped product data
+  return responseHandler(
+    res,
+    200,
+    "Products retrieved successfully!",
+    mappedProducts,
+    totalCount
+  );
+};
+
+/****************************************************************************************************/
+/*                             Function to get all products for users                               */
+/****************************************************************************************************/
+exports.getAllProductsUser = async (req, res) => {
+
   const reqUser = req.userId;
 
   const {
     pageNo = 1, limit = 10
   } = req.query;
   const skipCount = limit * (pageNo - 1);
-  let filter = {};
+  let filter = {status:true};
 
   const user = await User.findById(reqUser);
   if (user) {
@@ -137,7 +183,8 @@ exports.getAllProducts = async (req, res) => {
     filter = {
       seller_id: {
         $nin: uniqueBlockedUserIds
-      }
+      },
+      status:true
     };
   }
 
