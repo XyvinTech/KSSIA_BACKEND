@@ -120,36 +120,36 @@ userSchema.methods.unblockUser = function (userId) {
 };
 
 // Block a product instance method
-userSchema.methods.blockProduct = function (productId, reason) {
-    const isBlocked = this.blocked_products.some(blockedProduct => blockedProduct.productId.toString() === productId.toString());
+userSchema.methods.blockProducts = function (userId, reason) {
+    const isBlocked = this.blocked_products.some(blockedProduct => blockedProduct.userId.toString() === userId.toString());
 
     if (!isBlocked) {
-        this.blocked_products.push({ productId, reason });
+        this.blocked_products.push({ userId, reason });
         return this.save();
     }
     return Promise.resolve(this);
 };
 
 // Unblock a product instance method
-userSchema.methods.unblockProduct = function (productId) {
-    this.blocked_products = this.blocked_products.filter(blockedProduct => blockedProduct.productId.toString() !== productId.toString());
+userSchema.methods.unblockProducts = function (userId) {
+    this.blocked_products = this.blocked_products.filter(blockedProduct => blockedProduct.userId.toString() !== userId.toString());
     return this.save();
 };
 
 // Block a requirement instance method
-userSchema.methods.blockRequirement = function (requirementId, reason) {
-    const isBlocked = this.blocked_requirements.some(blockedRequirement => blockedRequirement.requirementId.toString() === requirementId.toString());
+userSchema.methods.blockRequirements = function (userId, reason) {
+    const isBlocked = this.blocked_requirements.some(blockedRequirement => blockedRequirement.userId.toString() === userId.toString());
 
     if (!isBlocked) {
-        this.blocked_requirements.push({ requirementId, reason });
+        this.blocked_requirements.push({ userId, reason });
         return this.save();
     }
     return Promise.resolve(this);
 };
 
 // Unblock a requirement instance method
-userSchema.methods.unblockRequirement = function (requirementId) {
-    this.blocked_requirements = this.blocked_requirements.filter(blockedRequirement => blockedRequirement.requirementId.toString() !== requirementId.toString());
+userSchema.methods.unblockRequirements = function (userId) {
+    this.blocked_requirements = this.blocked_requirements.filter(blockedRequirement => blockedRequirement.userId.toString() !== userId.toString());
     return this.save();
 };
 

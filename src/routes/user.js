@@ -44,6 +44,22 @@ userRoute
   .delete(asyncHandler(userController.deleteReview));
 
 userRoute
+  .route('/block/products/:blockUserId')
+  .post(asyncHandler(userController.blockProduct)); // Block products by a user
+
+userRoute
+  .route('/unblock/products/:blockedUserId')
+  .post(asyncHandler(userController.unblockProduct)); // Unblock products by a user
+
+userRoute
+  .route('/block/requirements/:blockUserId')
+  .post(asyncHandler(userController.blockRequirement)); // Block requirements by a user
+
+userRoute
+  .route('/unblock/requirements/:blockedUserId')
+  .post(asyncHandler(userController.unblockRequirement)); // Unblock requirements by a user
+
+userRoute
   .route('/block/:blockUserId')
   .post(asyncHandler(userController.blockUser)); // Block a user
 

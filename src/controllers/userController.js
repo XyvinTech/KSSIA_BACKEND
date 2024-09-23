@@ -516,10 +516,17 @@ exports.blockUser = async (req, res) => {
       return responseHandler(res, 404, "User not found.");
     }
 
-    // Block the user with the provided reason
-    await user.blockUser(blockUserId, reason);
+    // block the user if they are not in the blocked list
+    const isBlocked = user.blocked_users.some(blockedUser => blockedUser.userId.toString() === blockUserId.toString());
 
-    return responseHandler(res, 200, "User blocked successfully.", user);
+    if (!isBlocked) {
+      // Block the user with the provided reason
+      await user.blockUser(blockUserId, reason);
+      return responseHandler(res, 200, "User blocked successfully.", user);
+    }
+
+    return responseHandler(res, 400, "User is already blocked.");
+    
   } catch (error) {
     console.error(error);
     return responseHandler(res, 500, "An error occurred while blocking the user.");
@@ -560,7 +567,7 @@ exports.unblockUser = async (req, res) => {
     }
 
     // Unblock the user if they are in the blocked list
-    const isBlocked = user.blocked.some(blockedUser => blockedUser.userId.toString() === blockedUserId.toString());
+    const isBlocked = user.blocked_users.some(blockedUser => blockedUser.userId.toString() === blockedUserId.toString());
 
     if (!isBlocked) {
       return responseHandler(res, 400, "User is not currently blocked.");
@@ -574,6 +581,214 @@ exports.unblockUser = async (req, res) => {
     // Handle any errors
     console.error(error);
     return responseHandler(res, 500, "An error occurred while unblocking the user.");
+  }
+};
+
+/****************************************************************************************************/
+/*                              function to block products by a user                                */
+/****************************************************************************************************/
+
+exports.blockProduct = async (req, res) => {
+  const userId = req.userId;
+  const {
+    blockUserId
+  } = req.params;
+  const {
+    reason
+  } = req.body;
+
+  // Validate input
+  if (!blockUserId || !reason || reason.trim() === "") {
+    return responseHandler(res, 400, "Invalid request. Please provide a valid seller to block and a reason.");
+  }
+
+  // Prevent a user from blocking themselves
+  if (userId === blockUserId) {
+    return responseHandler(res, 400, "You cannot block yourself.");
+  }
+
+  try {
+    // Check if the seller to block exists
+    const userToBlock = await User.findById(blockUserId);
+    if (!userToBlock) {
+      return responseHandler(res, 404, "Seller to be blocked not found.");
+    }
+
+    // Check if the current user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return responseHandler(res, 404, "User not found.");
+    }
+
+    // block the seller if they are not in the blocked list
+    const isBlocked = user.blocked_products.some(blockedUser => blockedUser.userId.toString() === blockUserId.toString());
+
+    if (!isBlocked) {
+      // Block the seller with the provided reason
+      await user.blockProducts(blockUserId, reason);
+      return responseHandler(res, 200, "products by seller blocked successfully.", user);
+    }
+
+    return responseHandler(res, 400, "Products by seller is already blocked.");
+
+  } catch (error) {
+    console.error(error);
+    return responseHandler(res, 500, "An error occurred while blocking the products by the seller.");
+  }
+};
+
+/****************************************************************************************************/
+/*                              function to unblock products by a user                              */
+/****************************************************************************************************/
+
+exports.unblockProduct = async (req, res) => {
+  const userId = req.userId;
+  const {
+    blockedUserId
+  } = req.params;
+
+  // Validate input
+  if (!blockedUserId) {
+    return responseHandler(res, 400, "Invalid request. Please provide a valid seller to unblock.");
+  }
+
+  // Prevent a user from unblocking themselves
+  if (userId === blockedUserId) {
+    return responseHandler(res, 400, "You cannot unblock yourself.");
+  }
+
+  try {
+    // Check if the user to unblock exists
+    const userToUnblock = await User.findById(blockedUserId);
+    if (!userToUnblock) {
+      return responseHandler(res, 404, "Seller to be unblocked not found.");
+    }
+
+    // Check if the current user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return responseHandler(res, 404, "User not found.");
+    }
+
+    // Unblock the user if they are in the blocked list
+    const isBlocked = user.blocked_products.some(blockedUser => blockedUser.userId.toString() === blockedUserId.toString());
+
+    if (!isBlocked) {
+      return responseHandler(res, 400, "Products by the seller is not currently blocked.");
+    }
+
+    // Unblock the user
+    await user.unblockProducts(blockedUserId);
+
+    return responseHandler(res, 200, "Products by seller unblocked successfully.", user);
+  } catch (error) {
+    // Handle any errors
+    console.error(error);
+    return responseHandler(res, 500, "An error occurred while unblocking products by the seller.");
+  }
+};
+
+/****************************************************************************************************/
+/*                            function to block requirements by a user                              */
+/****************************************************************************************************/
+
+exports.blockRequirement = async (req, res) => {
+  const userId = req.userId;
+  const {
+    blockUserId
+  } = req.params;
+  const {
+    reason
+  } = req.body;
+
+  // Validate input
+  if (!blockUserId || !reason || reason.trim() === "") {
+    return responseHandler(res, 400, "Invalid request. Please provide a valid user to block and a reason.");
+  }
+
+  // Prevent a user from blocking themselves
+  if (userId === blockUserId) {
+    return responseHandler(res, 400, "You cannot block yourself.");
+  }
+
+  try {
+    // Check if the user to block exists
+    const userToBlock = await User.findById(blockUserId);
+    if (!userToBlock) {
+      return responseHandler(res, 404, "User to be blocked not found.");
+    }
+
+    // Check if the current user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return responseHandler(res, 404, "User not found.");
+    }
+
+    // block the user if they are not in the blocked list
+    const isBlocked = user.blocked_requirements.some(blockedUser => blockedUser.userId.toString() === blockUserId.toString());
+
+    if (!isBlocked) {
+      // Block the user with the provided reason
+      await user.blockRequirements(blockUserId, reason);
+      return responseHandler(res, 200, "Requirements by user blocked successfully.", user);
+    }
+
+    return responseHandler(res, 400, "Requirements by user is already blocked.");
+
+  } catch (error) {
+    console.error(error);
+    return responseHandler(res, 500, "An error occurred while blocking the requirements by the user.");
+  }
+};
+
+/****************************************************************************************************/
+/*                            function to unblock requirements by a user                            */
+/****************************************************************************************************/
+
+exports.unblockRequirement = async (req, res) => {
+  const userId = req.userId;
+  const {
+    blockedUserId
+  } = req.params;
+
+  // Validate input
+  if (!blockedUserId) {
+    return responseHandler(res, 400, "Invalid request. Please provide a valid user to unblock.");
+  }
+
+  // Prevent a user from unblocking themselves
+  if (userId === blockedUserId) {
+    return responseHandler(res, 400, "You cannot unblock yourself.");
+  }
+
+  try {
+    // Check if the user to unblock exists
+    const userToUnblock = await User.findById(blockedUserId);
+    if (!userToUnblock) {
+      return responseHandler(res, 404, "User to be unblocked not found.");
+    }
+
+    // Check if the current user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return responseHandler(res, 404, "User not found.");
+    }
+
+    // Unblock the user if they are in the blocked list
+    const isBlocked = user.blocked_requirements.some(blockedUser => blockedUser.userId.toString() === blockedUserId.toString());
+
+    if (!isBlocked) {
+      return responseHandler(res, 400, "Requirements by the user is not currently blocked.");
+    }
+
+    // Unblock the user
+    await user.unblockRequirements(blockedUserId);
+
+    return responseHandler(res, 200, "Requirements by user unblocked successfully.", user);
+  } catch (error) {
+    // Handle any errors
+    console.error(error);
+    return responseHandler(res, 500, "An error occurred while unblocking Requirements by the user.");
   }
 };
 

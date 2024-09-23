@@ -100,3 +100,16 @@ exports.getAdminById = async (req, res) => {
 
     return responseHandler(res, 200, 'Admin retrieved successfully', admin);
 };
+
+// Get admin details
+exports.getAdmin = async (req, res) => {
+    const adminId = req.id;
+    
+    // Find the admin by ID
+    const admin = await Admin.findById(adminId);
+    if (!admin) {
+        return responseHandler(res, 404, 'Admin not found');
+    }
+
+    return responseHandler(res, 200, 'Admin retrieved successfully', admin);
+};
