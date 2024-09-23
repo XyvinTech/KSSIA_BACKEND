@@ -18,7 +18,7 @@ const schemaUrl = Joi.object({
 const otherSchema = Joi.object({
     name: Joi.string(),
     url: Joi.string().uri(),
-    authority_name : Joi.string()
+    authority_name: Joi.string()
 });
 
 const productsSchema = Joi.object({
@@ -183,12 +183,27 @@ exports.EditPromotionSchema = Joi.object({
     type: Joi.string().valid('banner', 'video', 'poster', 'notice').required(),
     banner_image_url: Joi.string(),
     upload_video: Joi.string(),
-    yt_link: Joi.string().when('type', { is: 'video', then: Joi.required() }),
-    video_title: Joi.string().when('type', { is: 'video', then: Joi.required() }),
+    yt_link: Joi.string().when('type', {
+        is: 'video',
+        then: Joi.required()
+    }),
+    video_title: Joi.string().when('type', {
+        is: 'video',
+        then: Joi.required()
+    }),
     poster_image_url: Joi.string(),
-    notice_title: Joi.string().when('type', { is: 'notice', then: Joi.required() }),
-    notice_description: Joi.string().when('type', { is: 'notice', then: Joi.required() }),
-    notice_link: Joi.string().when('type', { is: 'notice', then: Joi.required() }),
+    notice_title: Joi.string().when('type', {
+        is: 'notice',
+        then: Joi.required()
+    }),
+    notice_description: Joi.string().when('type', {
+        is: 'notice',
+        then: Joi.required()
+    }),
+    notice_link: Joi.string().when('type', {
+        is: 'notice',
+        then: Joi.required()
+    }),
     status: Joi.boolean().default(false),
     startDate: Joi.date(),
     endDate: Joi.date()
@@ -234,4 +249,18 @@ exports.createReport = Joi.object({
     reportTo: Joi.array(),
     reportType: Joi.string().required(),
     reportedItemId: Joi.string().required(),
-  });
+});
+
+exports.createRoleSchema = Joi.object({
+    roleName: Joi.string().required(),
+    description: Joi.string(),
+    permissions: Joi.array(),
+    status: Joi.boolean(),
+});
+
+exports.editRoleSchema = Joi.object({
+    roleName: Joi.string(),
+    description: Joi.string(),
+    permissions: Joi.array(),
+    status: Joi.boolean(),
+});

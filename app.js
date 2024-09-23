@@ -9,6 +9,7 @@ const { serviceAccount } = require("./src/config/firebase");
 const responseHandler = require("./src/helpers/responseHandler");
 const userRoute = require("./src/routes/user");
 const adminRoute = require("./src/routes/admin");
+const roleRoute = require("./src/routes/role");
 const productRoute = require("./src/routes/products");
 const eventRoute = require("./src/routes/events");
 const newsRoute = require("./src/routes/news");
@@ -66,7 +67,7 @@ app.use(`${BASE_PATH}/chats`, chatRoute);
 app.use(`${BASE_PATH}/requirements`, requirementsRoute);
 app.use(`${BASE_PATH}/api-docs`, swaggerUi.serve, swaggerUi.setup(specs));
 app.use(`${BASE_PATH}/report`, reportRoute);
-
+app.use(`${BASE_PATH}/role`, roleRoute);
 
 // Define a route for the API root
 app.get(BASE_PATH, (req, res) => {
