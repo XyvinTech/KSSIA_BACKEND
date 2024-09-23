@@ -168,6 +168,7 @@ exports.getUserById = async (req, res) => {
 /*                               Function to edit the user profile                                  */
 /****************************************************************************************************/
 
+
 exports.editProfile = async (req, res) => {
   try {
     console.log("entered")
