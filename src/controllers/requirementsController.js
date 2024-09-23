@@ -109,6 +109,39 @@ exports.updateRequirement = async (req, res) => {
 /****************************************************************************************************/
 exports.getAllRequirements = async (req, res) => {
 
+    const {
+        pageNo = 1, limit = 10
+    } = req.query;
+    const skipCount = limit * (pageNo - 1);
+
+    let filter = {};
+
+    try {
+        const totalCount = await Requirements.countDocuments(filter);
+        const requirements = await Requirements.find(filter)
+            .populate('author', 'name email')
+            .skip(skipCount)
+            .limit(limit)
+            .sort({
+                createdAt: -1
+            })
+            .lean()
+            .exec();
+
+        if (requirements.length === 0) {
+            return responseHandler(res, 404, "No requirements found");
+        }
+        return responseHandler(res, 200, "Successfully retrieved all requirements", requirements, totalCount);
+    } catch (err) {
+        return responseHandler(res, 500, `Error retrieving requirements: ${err.message}`);
+    }
+};
+
+/****************************************************************************************************/
+/*                         Function to get all requirements api for users                           */
+/****************************************************************************************************/
+exports.getAllRequirementsUser = async (req, res) => {
+
     const reqUser = req.userId;
 
     const {
@@ -132,7 +165,8 @@ exports.getAllRequirements = async (req, res) => {
         filter = {
             author: {
                 $nin: uniqueBlockedUserIds
-            }
+            },
+            status:"approved"
         };
     }
 
