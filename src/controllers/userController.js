@@ -196,6 +196,7 @@ exports.editProfile = async (req, res) => {
   if (!currentUser) {
     return responseHandler(res, 404, "User not found");
   }
+  console.log(currentUser);
 
   const bucketName = process.env.AWS_S3_BUCKET;
 
