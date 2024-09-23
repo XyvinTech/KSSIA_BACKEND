@@ -3,11 +3,11 @@ const Joi = require("joi");
 // User arrays Schema validation
 
 const phoneSchema = Joi.object({
-    personal: Joi.number().required(),
-    landline: Joi.number(),
-    company_phone_number: Joi.number(),
-    whatsapp_number: Joi.number(),
-    whatsapp_business_number: Joi.number()
+    personal: Joi.string().required(),
+    landline: Joi.string(),
+    company_phone_number: Joi.string(),
+    whatsapp_number: Joi.string(),
+    whatsapp_business_number: Joi.string()
 });
 
 const schemaUrl = Joi.object({

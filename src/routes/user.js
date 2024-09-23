@@ -67,4 +67,8 @@ userRoute
   .route('/unblock/:blockedUserId')
   .post(asyncHandler(userController.unblockUser)); // Unblock a user
 
+userRoute
+  .route('/request/ncf')
+  .post(asyncHandler(userController.requestNFC));
+
 module.exports = userRoute;

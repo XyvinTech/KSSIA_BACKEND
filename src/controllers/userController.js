@@ -526,7 +526,7 @@ exports.blockUser = async (req, res) => {
     }
 
     return responseHandler(res, 400, "User is already blocked.");
-    
+
   } catch (error) {
     console.error(error);
     return responseHandler(res, 500, "An error occurred while blocking the user.");
@@ -811,7 +811,7 @@ exports.loginUser = async (req, res) => {
     .verifyIdToken(id)
     .then(async (decodedToken) => {
       user = await User.findOne({
-            "phone_numbers.personal": decodedToken.phone_number
+        "phone_numbers.personal": decodedToken.phone_number
       });
       if (!user) {
         return responseHandler(res, 404, "User not found");
@@ -822,8 +822,7 @@ exports.loginUser = async (req, res) => {
         return responseHandler(
           res,
           200,
-          "User logged in successfully",
-          {
+          "User logged in successfully", {
             token: token,
             userId: user._id
           }
@@ -836,12 +835,59 @@ exports.loginUser = async (req, res) => {
         return responseHandler(
           res,
           200,
-          "User logged in successfully",
-          {
+          "User logged in successfully", {
             token: token,
             userId: user._id
           }
         );
       }
     });
+};
+
+/****************************************************************************************************/
+/*                                    function to request a nfc                                     */
+/****************************************************************************************************/
+
+exports.requestNFC = async (req, res) => {
+  const userId = req.userId;
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    return res.status(404).send('User not found');
+  }
+
+  // Send email
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.NODE_MAILER_USER,
+      pass: process.env.NODE_MAILER_PASS
+    }
+  });
+
+  // Prepare user details for the email
+  const userDetails = `
+   Name: ${user.name.first_name} ${user.name.middle_name ? user.name.middle_name + ' ' : ''}${user.name.last_name}
+   Email: ${user.email}
+   Membership ID: ${user.membership_id}
+   Phone Number: ${user.phone_numbers.personal}
+   Address: ${user.address}
+  `;
+
+  const mailOptions = {
+    from: process.env.NODE_MAILER_USER,
+    to: process.env.NODE_MAILER_USER,
+    subject: 'User Details for NFC (NFC request)',
+    text: `Hello,\n\nHere are your details:\n\n${userDetails}`
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    console.log("🚀 ~ exports.requestNFC= ~ error:", error)
+  }
+
+  return responseHandler(res, 201, 'Request NFC sent successfully!');
+
 };
