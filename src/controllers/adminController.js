@@ -275,9 +275,17 @@ exports.deleteUser = async (req, res) => {
 
 exports.getAllUsers = async (req, res) => {
   try {
+    const userId = req.userId;
+
     const { pageNo = 1, limit = 10 } = req.query;
     const skipCount = limit * (pageNo - 1);
-    const filter = {}; // Add any necessary filters here
+    let filter = {}; // Add any necessary filters here
+
+    if(userId && (userId != "")){
+      filter = {_id: {
+        $nin: userId
+      }}
+    }
 
     // Get total count of users
     const totalCount = await User.countDocuments(filter);
