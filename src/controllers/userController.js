@@ -5,6 +5,7 @@ const path = require("path");
 const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
 const responseHandler = require("../helpers/responseHandler");
+const nodemailer = require('nodemailer');
 const User = require("../models/user");
 const Product = require("../models/products");
 const {
