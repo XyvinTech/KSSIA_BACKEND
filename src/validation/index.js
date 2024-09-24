@@ -32,7 +32,7 @@ const productsSchema = Joi.object({
     date: Joi.date(),
     units: Joi.number().min(0),
     moq: Joi.number().min(0),
-    status: Joi.boolean().default(true),
+    status: Joi.string(),
     tags: Joi.array().items(Joi.string())
 });
 
