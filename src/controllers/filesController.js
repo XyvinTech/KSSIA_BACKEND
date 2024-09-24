@@ -60,7 +60,7 @@ exports.deleteFile = async (req, res) => {
         await deleteFile(bucketName, fileKey);
         return responseHandler(res, 200, "File deleted successfully");
     } catch (err) {
-        if( err.message == "File not found"){
+        if (err.message == "File not found") {
             return responseHandler(res, 404, "File not found");
         }
         return responseHandler(res, 500, err.message);
@@ -85,69 +85,132 @@ exports.checkFiles = async (req, res) => {
     // Get files that are linked to any model
     let linkedFiles = [];
 
-    // Collect URLs from all models
     users.forEach(user => {
-        if (user.profile_picture) linkedFiles.push(user.profile_picture);
-        if (user.company_logo) linkedFiles.push(user.company_logo);
-        user.awards.forEach(award => { if (award.url) linkedFiles.push(award.url); });
-        user.certificates.forEach(certificate => { if (certificate.url) linkedFiles.push(certificate.url); });
-        user.brochure.forEach(item => { if (item.url) linkedFiles.push(item.url); });
+        // Add profile picture URL
+        if (user.profile_picture) {
+            linkedFiles.push(user.profile_picture);
+        }
+        // Add company logo URL
+        if (user.company_logo) {
+            linkedFiles.push(user.company_logo);
+        }
+
+        // Add award URLs
+        user.awards.forEach(award => {
+            if (award.url) {
+                linkedFiles.push(award.url);
+            }
+        });
+
+        // Add certificate URLs
+        user.certificates.forEach(certificate => {
+            if (certificate.url) {
+                linkedFiles.push(certificate.url);
+            }
+        });
+
+        // Add brochure URLs
+        user.brochure.forEach(item => {
+            if (item.url) {
+                linkedFiles.push(item.url);
+            }
+        });
     });
 
     requirements.forEach(requirement => {
-        if (requirement.image) linkedFiles.push(requirement.image);
+        // Add requirement URLs
+        if (requirement.image) {
+            linkedFiles.push(requirement.image);
+        }
     });
 
     promotions.forEach(promotion => {
-        if (promotion.banner_image_url) linkedFiles.push(promotion.banner_image_url);
-        if (promotion.poster_image_url) linkedFiles.push(promotion.poster_image_url);
+        // Add banner image URLs
+        if (promotion.banner_image_url) {
+            linkedFiles.push(promotion.banner_image_url);
+        }
+
+        // Add poster image URLs
+        if (promotion.poster_image_url) {
+            linkedFiles.push(promotion.poster_image_url);
+        }
     });
 
     products.forEach(product => {
-        if (product.image) linkedFiles.push(product.image);
+        // Add product image URLs
+        if (product.image) {
+            linkedFiles.push(product.image);
+        }
     });
 
     payments.forEach(payment => {
-        if (payment.invoice_url) linkedFiles.push(payment.invoice_url);
+        // Add payment invoice URLs  
+        if (payment.invoice_url) {
+            linkedFiles.push(payment.invoice_url);
+        }
     });
 
     notifications.forEach(notification => {
-        if (notification.media_url) linkedFiles.push(notification.media_url);
-        if (notification.file_url) linkedFiles.push(notification.file_url);
+        // Add notification media URLs
+        if (notification.media_url) {
+            linkedFiles.push(notification.media_url);
+        }
+
+        // Add notification file URLs
+        if (notification.file_url) {
+            linkedFiles.push(notification.file_url);
+        }
     });
 
-    news.forEach(newsItem => {
-        if (newsItem.image) linkedFiles.push(newsItem.image);
+    news.forEach(news => {
+        // Add news image URLs
+        if (news.image) {
+            linkedFiles.push(news.image);
+        }
     });
 
     messages.forEach(message => {
+        // Add message attachment URLs
         message.attachments.forEach(attachment => {
-            if (attachment.url) linkedFiles.push(attachment.url);
+            if (attachment.url) {
+                linkedFiles.push(attachment.url);
+            }
         });
     });
 
     events.forEach(event => {
-        if (event.image) linkedFiles.push(event.image);
-        if (event.guest_image) linkedFiles.push(event.guest_image);
+        // Add event image URLs
+        if (event.image) {
+            linkedFiles.push(event.image);
+        }
+
+        // Add event guest image URLs 
+        if (event.guest_image) {
+            linkedFiles.push(event.guest_image);
+        }
+
+        // Add event speakers image URLs
         event.speakers.forEach(speaker => {
-            if (speaker.speaker_image) linkedFiles.push(speaker.speaker_image);
+            if (speaker.speaker_image) {
+                linkedFiles.push(speaker.speaker_image);
+            }
         });
     });
 
-    // Convert linked file URLs to just the file names (ignoring folder paths)
-    const linkedFileKeys = linkedFiles
-        .filter(link => typeof link === 'string') // Ensure link is a valid string
-        .map(link => path.basename(link));
+    const linkedFileKeys = [];
+    const filesToDelete = [];
 
-    // Get files that need to be deleted (those not present in linkedFileKeys)
-    const filesToDelete = files.filter(file => {
-        const fileKey = typeof file.key === 'string' ? path.basename(file.key) : null;
-        return fileKey && !linkedFileKeys.includes(fileKey);
-    });
+    for (const link of linkedFiles) {
+        const fileKey = path.basename(link);
+        linkedFileKeys.push(fileKey);
+    };
 
-    // Ensure filenames are case-insensitive if needed:
-    const normalizedLinkedFileKeys = linkedFileKeys.map(file => file.toLowerCase());
-    const normalizedFilesToDelete = filesToDelete.map(file => file.key.toLowerCase());
+    for (const file of files) {
+        if (!linkedFileKeys.includes(file)) {
+            // If the file is not linked, add it to the list of files to be deleted
+            filesToDelete.push(file);
+        }
+    };
 
     const response = {
         FilesLinked: linkedFileKeys,
