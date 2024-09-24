@@ -216,10 +216,10 @@ exports.checkFiles = async (req, res) => {
     const response = {
         FilesLinked : linkedFileKeys, 
         UnlinkedFiles: filesToDelete, 
-        Total_no_of_files: files.length(), 
-        No_of_linked_files: linkedFileKeys.length(), 
-        No_of_trash_files: filesToDelete.length(),
-        No_of_files_in_bucket_after_deletion: files.length() - filesToDelete.length(),
+        Total_no_of_files: files.length, 
+        No_of_linked_files: linkedFileKeys.length, 
+        No_of_trash_files: filesToDelete.length,
+        No_of_files_in_bucket_after_deletion: files.length - filesToDelete.length,
     };
 
     return responseHandler(res, 200, "File check successfully completed", response);
