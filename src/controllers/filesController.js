@@ -3,6 +3,7 @@ const responseHandler = require("../helpers/responseHandler");
 const handleFileUpload = require("../utils/fileHandler");
 const listFilesInBucket = require("../utils/listFilesInBucket");
 const deleteFile = require("../helpers/deleteFiles");
+const path = require('path');
 
 const Event = require("../models/events");
 const User = require("../models/user");
