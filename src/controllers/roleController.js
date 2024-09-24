@@ -44,6 +44,7 @@ exports.createRole = async (req, res) => {
 
 exports.editRole = async (req, res) => {
   try {
+    
     const check = await checkAccess(req.roleId, "permissions");
     if (!check || !check.includes("roleManagement_modify")) {
       return responseHandler(

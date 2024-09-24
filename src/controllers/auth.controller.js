@@ -23,7 +23,7 @@ exports.login = async (req, res) => {
     }
 
     // Generate JWT token
-    const token = jwt.sign({ id: admin._id, role: admin.role }, JWT_SECRET, {
+    const token = jwt.sign({ userId: admin._id, role: admin.role }, JWT_SECRET, {
         expiresIn: '1h',
     });
 
@@ -103,7 +103,7 @@ exports.getAdminById = async (req, res) => {
 
 // Get admin details
 exports.getAdmin = async (req, res) => {
-    const adminId = req.id;
+    const adminId = req.adminId;
     
     // Find the admin by ID
     const admin = await Admin.findById(adminId);
