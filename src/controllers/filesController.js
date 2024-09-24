@@ -80,7 +80,7 @@ exports.checkFiles = async (req, res) => {
 
     // Get all files linked with AWS S3 BUCKET
     const bucketName = process.env.AWS_S3_BUCKET;
-    const files = await listFilesInBucket(bucketName).promise();
+    const files = await listFilesInBucket(bucketName);
 
     // Get files that are linked to any model
     let linkedFiles = [];
