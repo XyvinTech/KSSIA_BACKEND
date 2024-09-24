@@ -85,12 +85,6 @@ exports.editEvent = async (req, res) => {
     const { eventId } = req.params;
     const data = req.body;
 
-    if (!eventId) return responseHandler(res, 400, "Invalid request");
-
-    // Validate the input data
-    const { error } = EditEventsSchema.validate(data, { abortEarly: true });
-    // if (error) return responseHandler(res, 400, `Invalid input: ${error.message}`);
-
     // Parse the speakers field, which is coming as a JSON string in form-data
     if (typeof req.body.speakers === 'string') {
         try {
@@ -99,82 +93,75 @@ exports.editEvent = async (req, res) => {
             return responseHandler(res, 400, 'Invalid input: "speakers" must be a valid JSON array');
         }
     }
-    // Find the event to update
-    let event;
-    try {
-        event = await Event.findById(eventId);
-        if (!event) return responseHandler(res, 404, "Event not found");
-    } catch (err) {
-        return responseHandler(res, 500, `Error finding event: ${err.message}`);
-    }
+
+    // Validate the input data using Joi
+    const { error } = EditEventsSchema.validate(data, { abortEarly: true });
+    if (error) return responseHandler(res, 400, `Invalid input: ${error.message}`);
 
     try {
-        // Handle file uploads if present
-        const bucketName = process.env.AWS_S3_BUCKET;
-        if (req.files) {
-            // Process main image
-            if (req.files.image) {
-                if (event.image) {
-                    // Delete old image from S3
-                    const oldImageKey = path.basename(event.image);
-                    await deleteFile(bucketName, oldImageKey);
-                }
-                data.image = await handleFileUpload(req.files.image[0], bucketName);
-            }
+        // Find the existing event
+        const event = await Event.findById(eventId);
+        if (!event) return responseHandler(res, 404, 'Event not found');
 
-            // Process guest image
-            if (req.files.guest_image) {
-                if (event.guest_image) {
-                    // Delete old guest image from S3
-                    const oldImageKey = path.basename(event.guest_image);
-                    await deleteFile(bucketName, oldImageKey);
-                }
-                data.guest_image = await handleFileUpload(req.files.guest_image[0], bucketName);
-            }
-
-            // Handle speaker images and assign them to the appropriate speaker by ID
-            if (data.speakers && Array.isArray(data.speakers)) {
-                const speakerImages = req.files.speaker_images || [];
-                data.speakers = await Promise.all(data.speakers.map(async (speaker, index) => {
-                    const speakerToUpdate = event.speakers.find(s => s._id.toString() === speaker._id);
-                    if (speakerToUpdate) {
-                        if (speakerImages[index]) {
-                            if (speakerToUpdate.speaker_image) {
-                                // Delete the old speaker image from S3
-                                const oldImageKey = path.basename(speakerToUpdate.speaker_image);
-                                await deleteFile(bucketName, oldImageKey);
-                            }
-                            // Upload the new speaker image to S3
-                            speaker.speaker_image = await handleFileUpload(speakerImages[index], bucketName);
-                        }
-                    }
-                    return speaker;
-                }));
-            }
-        }
-    } catch (err) {
-        return responseHandler(res, 500, `Error updating file: ${err.message}`);
-    }
-
-    try {
-        // Update the event with new data (only overwrite fields provided in request)
+        // Update event properties
         Object.assign(event, data);
-        
-        // Optionally use optimistic concurrency control
-        const updatedEvent = await Event.findByIdAndUpdate(eventId, data, {
-            new: true,
-            runValidators: true
-        });
 
-        if (!updatedEvent) {
-            return responseHandler(res, 404, "Event not found or already updated");
+        const bucketName = process.env.AWS_S3_BUCKET;
+
+        // Handle main event image
+        if (data.image) {
+            if (event.image) {
+                // Delete old image from the server
+                const oldImageKey = path.basename(event.image);
+                await deleteFile(bucketName, oldImageKey);
+            }
+            // Assign new image URL
+            event.image = data.image;
         }
 
-        return responseHandler(res, 200, "Event updated successfully!", updatedEvent);
+        // Handle guest image
+        if (data.guest_image) {
+            if (event.guest_image) {
+                // Delete old guest image from the server
+                const oldGuestImageKey = path.basename(event.guest_image);
+                await deleteFile(bucketName, oldGuestImageKey);
+            }
+            // Assign new guest image URL
+            event.guest_image = data.guest_image;
+        }
+
+        // Handle speaker images
+        if (data.speakers && Array.isArray(data.speakers)) {
+            const oldSpeakerImages = event.speakers.map(s => s.speaker_image);
+
+            for (let i = 0; i < data.speakers.length; i++) {
+                const speaker = data.speakers[i];
+                const oldImage = oldSpeakerImages[i];
+
+                // Update speaker image if new one is provided
+                if (speaker.speaker_image) {
+                    if (oldImage) {
+                        // Delete old image from the server
+                        const oldImageKey = path.basename(oldImage);
+                        await deleteFile(bucketName, oldImageKey);
+                    }
+                    // Assign new speaker image URL
+                    speaker.speaker_image = speaker.speaker_image; // Assuming this contains the new URL
+                } else if (oldImage) {
+                    // If no new image is provided, keep the old one
+                    speaker.speaker_image = oldImage;
+                }
+            }
+        }
+
+        // Save the updated event
+        await event.save();
+        return responseHandler(res, 200, "Event updated successfully!", event);
     } catch (err) {
-        return responseHandler(res, 500, `Error saving event: ${err.message}`);
+        return responseHandler(res, 500, `Error updating event: ${err.message}`);
     }
 };
+
 
 /****************************************************************************************************/
 /*                                  Function to get all events                                     */
