@@ -1,5 +1,6 @@
 const responseHandler = require("../helpers/responseHandler");
 const Report = require("../models/report");
+const { report } = require("../routes/user");
 const {
     createReport
 } = require("../validation");
@@ -41,5 +42,18 @@ exports.getReports = async (req, res) => {
         })
         .lean();
     return responseHandler(res, 200, "Reports found successfull..!", data, totalCount);
+
+};
+
+exports.deleteReports = async (req, res) => {
+
+    const reportId = req.params.reportid;
+
+    const report = await Report.findByIdAndDelete(reportId);
+    if(!report){
+        return responseHandler(res, 404, "Report not found");
+    }
+
+    return responseHandler(res, 200, "Report deleted successfull..!");
 
 };

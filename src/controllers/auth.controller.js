@@ -113,3 +113,17 @@ exports.getAdmin = async (req, res) => {
 
     return responseHandler(res, 200, 'Admin retrieved successfully', admin);
 };
+
+// Delete admin details
+exports.deleteAdmin = async (req, res) => {
+    const adminId = req.adminId;
+    const delId = req.params.id;
+    
+    // Find the admin by ID
+    const admin = await Admin.findByIdAndDelete(delId);
+    if (!admin) {
+        return responseHandler(res, 404, 'Admin not found');
+    }
+
+    return responseHandler(res, 200, 'Admin Delete successfully', admin);
+};

@@ -15,5 +15,6 @@ authRoute.put('/:id', asyncHandler(authController.editAdmin)); // Edit admin
 authRoute.get('/all', asyncHandler(authController.getAllAdmins)); // Get all admins
 authRoute.get('/admin/:id', asyncHandler(authController.getAdminById)); // Get admin by ID
 authRoute.get('/', asyncHandler(authController.getAdmin)); // Get admin details
+authRoute.delete('/:id', asyncHandler(authController.deleteAdmin)); // Delete admin by ID
 
 module.exports = authRoute;

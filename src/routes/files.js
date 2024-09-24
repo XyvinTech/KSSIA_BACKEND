@@ -5,6 +5,11 @@ const authVerify = require("../middlewares/authVerify");
 const upload = require("../middlewares/uploads");
 const filesRoute = express.Router();
 
+filesRoute
+  .route("/get-linked-files")
+  .get(asyncHandler(filesController.checkFiles));
+
+  
 filesRoute.use(authVerify);
 
 filesRoute

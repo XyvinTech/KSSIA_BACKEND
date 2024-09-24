@@ -11,4 +11,8 @@ reportRoute
   .post(asyncHandler(reportController.createReport))
   .get(asyncHandler(reportController.getReports));
 
+reportRoute
+  .route("/:reportid")
+  .delete(asyncHandler(reportController.deleteReports));
+
 module.exports = reportRoute;
