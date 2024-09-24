@@ -15,7 +15,7 @@ const authVerify = (req, res, next) => {
       return responseHandler(res, 403, `Failed to authenticate token...!`);
     }
 
-    req.userId = decoded.userId;
+    req.userId = decoded.payload?.userId;
     req.adminId = decoded.id;
     req.roleId = decoded.role;
 
