@@ -14,7 +14,12 @@ const productSchema = new mongoose.Schema(
         description: { type: String },
         moq: { type: Number, min: 0 },
         units: { type: Number, min: 0 },
-        status: { type: Boolean , default:true },
+        status: { 
+            type: String,
+            default: "pending",
+            enum: ["pending", "accepted", "rejected"], 
+        },
+        reason:{ type:String },
         tags: [{ type: String }],
     },
     {

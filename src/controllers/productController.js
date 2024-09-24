@@ -167,7 +167,9 @@ exports.getAllProductsUser = async (req, res) => {
     pageNo = 1, limit = 10
   } = req.query;
   const skipCount = limit * (pageNo - 1);
-  let filter = {status:true};
+  let filter = {
+    status: "accepted"
+  };
 
   const user = await User.findById(reqUser);
   if (user) {
@@ -184,7 +186,7 @@ exports.getAllProductsUser = async (req, res) => {
       seller_id: {
         $nin: uniqueBlockedUserIds
       },
-      status:true
+      status: "accepted"
     };
   }
 
@@ -230,6 +232,7 @@ exports.getProductsById = async (req, res) => {
   const {
     productId
   } = req.params;
+
   const reqUser = req.userId;
 
   if (!productId) {
@@ -237,6 +240,7 @@ exports.getProductsById = async (req, res) => {
   }
 
   const user = await User.findById(reqUser);
+
   if (user) {
     const blockedUsersList = user.blocked_users || [];;
     const blockedProductSellers = user.blocked_products || [];;
@@ -260,9 +264,11 @@ exports.getProductsById = async (req, res) => {
     return responseHandler(res, 404, "Product not found");
   }
 
-  // Check if the seller of the product is blocked
-  if (uniqueBlockedUserIds.includes(product.seller_id._id)) {
-    return responseHandler(res, 403, "You have blocked the seller of this product or have blocked the products by this seller");
+  if (uniqueBlockedUserIds) {
+    // Check if the seller of the product is blocked
+    if (uniqueBlockedUserIds.includes(product.seller_id._id)) {
+      return responseHandler(res, 403, "You have blocked the seller of this product or have blocked the products by this seller");
+    }
   }
 
   return responseHandler(res, 200, "Product retrieved successfully!", product);
@@ -351,4 +357,37 @@ exports.deleteProduct = async (req, res) => {
   }
 
   return responseHandler(res, 200, "Product deleted successfully!");
+};
+
+/****************************************************************************************************/
+/*                             Function to update status of product                                 */
+/****************************************************************************************************/
+exports.updateProductStatus = async (req, res) => {
+  const {
+    productId
+  } = req.params;
+  const {
+      status,
+      reason
+  } = req.body;
+
+  const validStatuses = ["pending", "approved", "rejected"];
+  if (!validStatuses.includes(status)) {
+      return responseHandler(res, 400, "Invalid status value");
+  }
+
+  const product = await Product.findById(productId);
+  if (!product) {
+    return responseHandler(res, 404, "Product not found");
+  }
+
+  product.status = status;
+  product.reason = reason;
+
+  try {
+      await product.save();
+      return responseHandler(res, 200, "Product status updated successfully", product);
+  } catch (err) {
+      return responseHandler(res, 500, `Error saving product: ${err.message}`);
+  }
 };

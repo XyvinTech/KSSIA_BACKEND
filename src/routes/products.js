@@ -30,4 +30,7 @@ productRoute.delete('/:productId', asyncHandler(productController.deleteProduct)
 // Route to retrieve products by seller ID
 productRoute.get('/seller/:sellerId', asyncHandler(productController.getProductsBySeller));
 
+// Route to update the status of a product
+productRoute.patch('/:productId/status', asyncHandler(productController.updateProductStatus));
+
 module.exports = productRoute;
