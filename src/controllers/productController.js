@@ -241,6 +241,8 @@ exports.getProductsById = async (req, res) => {
 
   const user = await User.findById(reqUser);
 
+  const uniqueBlockedUserIds =[]
+
   if (user) {
     const blockedUsersList = user.blocked_users || [];;
     const blockedProductSellers = user.blocked_products || [];;
@@ -250,7 +252,7 @@ exports.getProductsById = async (req, res) => {
     // Combine both lists into a single array
     const combinedBlockedUserIds = [...blockedUserIds, ...blockedProductUserIds];
     // To remove duplicates 
-    const uniqueBlockedUserIds = [...new Set(combinedBlockedUserIds)];
+    uniqueBlockedUserIds = [...new Set(combinedBlockedUserIds)];
   }
 
   const product = await Product.findById(productId)
