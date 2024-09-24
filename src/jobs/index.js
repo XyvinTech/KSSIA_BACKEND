@@ -1,1 +1,2 @@
 require("./updateEventStatus"); 
+require("./deleteUnwantedFiles"); 
