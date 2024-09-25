@@ -110,7 +110,7 @@ exports.editEvent = async (req, res) => {
         const bucketName = process.env.AWS_S3_BUCKET;
 
         // Handle main event image
-        if (data.image) {
+        if (data.image && (data.image != event.image)) {
             if (event.image) {
                 // Delete old image from the server
                 const oldImageKey = path.basename(event.image);
@@ -121,7 +121,7 @@ exports.editEvent = async (req, res) => {
         }
 
         // Handle guest image
-        if (data.guest_image) {
+        if (data.guest_image && (data.guest_image != event.guest_image)) {
             if (event.guest_image) {
                 // Delete old guest image from the server
                 const oldGuestImageKey = path.basename(event.guest_image);
@@ -140,7 +140,7 @@ exports.editEvent = async (req, res) => {
                 const oldImage = oldSpeakerImages[i];
 
                 // Update speaker image if new one is provided
-                if (speaker.speaker_image) {
+                if (speaker.speaker_image && (speaker.speaker_image != oldImage)) {
                     if (oldImage) {
                         // Delete old image from the server
                         const oldImageKey = path.basename(oldImage);
