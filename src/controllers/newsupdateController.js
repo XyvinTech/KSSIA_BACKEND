@@ -113,7 +113,7 @@ exports.getAllNews = async (req, res) => {
 
     const { pageNo = 1, limit = 10 } = req.query;
     const skipCount = limit * (pageNo - 1);
-    const filter = {};
+    let filter = {};
     if(userId){
         filter = {published: true};  
     }
