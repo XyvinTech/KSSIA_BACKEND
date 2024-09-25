@@ -223,7 +223,18 @@ exports.getPaymentById = async (req, res) => {
         if (!payment) {
             return responseHandler(res, 404, "Payment not found");
         }
-        return responseHandler(res, 200, "Successfully retrieved payment", payment);
+        
+        // Construct full name from the member's details
+        const full_name = `${payment.member?.name.first_name || ''} ${payment.member?.name.middle_name || ''} ${payment.member?.name.last_name || ''}`.trim();
+
+        // Add full_name to the payment object
+        const responsePayment = {
+            ...payment.toObject(), // Convert payment to a plain object
+            full_name // Add the constructed full name
+        };
+
+        return responseHandler(res, 200, "Successfully retrieved payment", responsePayment);
+        
     } catch (err) {
         return responseHandler(res, 500, `Error retrieving payment: ${err.message}`);
     }
