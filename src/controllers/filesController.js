@@ -68,158 +68,135 @@ exports.deleteFile = async (req, res) => {
 };
 
 exports.checkFiles = async (req, res) => {
-    const events = await Event.find();
-    const users = await User.find();
-    const products = await Product.find();
-    const news = await News.find();
-    const promotions = await Promotion.find();
-    const notifications = await Notification.find();
-    const messages = await Messages.find();
-    const payments = await Payment.find();
-    const requirements = await Requirements.find();
+    // Batch sizing the query
+    const batchSize = 100;
 
-    // Get all files linked with AWS S3 BUCKET
-    const bucketName = process.env.AWS_S3_BUCKET;
-    const files = await listFilesInBucket(bucketName);
+    async function processModelInBatches(Model, processFunc) {
+        let currentPage = 0;
+        let results;
 
-    // Get files that are linked to any model
-    let linkedFiles = [];
+        do {
+            // Fetch a batch of results using pagination
+            results = await Model.find().skip(currentPage * batchSize).limit(batchSize);
+            await Promise.all(results.map(processFunc)); // Process each result in parallel
+            currentPage++;
+        } while (results.length > 0); // Continue while there are still results to process
+    }
 
-    users.forEach(user => {
-        // Add profile picture URL
-        if (user.profile_picture) {
-            linkedFiles.push(user.profile_picture);
-        }
-        // Add company logo URL
-        if (user.company_logo) {
-            linkedFiles.push(user.company_logo);
-        }
+    async function gatherLinkedFiles() {
+        const linkedFiles = [];
 
-        // Add award URLs
-        user.awards.forEach(award => {
-            if (award.url) {
-                linkedFiles.push(award.url);
-            }
+        // Process users and their file links
+        await processModelInBatches(User, user => {
+            // Add profile picture URL
+            if (user.profile_picture) linkedFiles.push(user.profile_picture);
+
+            // Add company logo URL
+            if (user.company_logo) linkedFiles.push(user.company_logo);
+
+            // Add award URLs
+            user.awards.forEach(award => {
+                if (award.url) linkedFiles.push(award.url);
+            });
+
+            // Add certificate URLs
+            user.certificates.forEach(cert => {
+                if (cert.url) linkedFiles.push(cert.url);
+            });
+
+            // Add brochure URLs
+            user.brochure.forEach(item => {
+                if (item.url) linkedFiles.push(item.url);
+            });
         });
 
-        // Add certificate URLs
-        user.certificates.forEach(certificate => {
-            if (certificate.url) {
-                linkedFiles.push(certificate.url);
-            }
+        // Process requirements and their image URLs
+        await processModelInBatches(Requirements, req => {
+            // Add requirement URLs
+            if (req.image) linkedFiles.push(req.image);
         });
 
-        // Add brochure URLs
-        user.brochure.forEach(item => {
-            if (item.url) {
-                linkedFiles.push(item.url);
-            }
+        // Process promotions and their file links
+        await processModelInBatches(Promotion, promo => {
+            // Add banner image URLs
+            if (promo.banner_image_url) linkedFiles.push(promo.banner_image_url);
+
+            // Add poster image URLs
+            if (promo.poster_image_url) linkedFiles.push(promo.poster_image_url);
         });
-    });
 
-    requirements.forEach(requirement => {
-        // Add requirement URLs
-        if (requirement.image) {
-            linkedFiles.push(requirement.image);
-        }
-    });
-
-    promotions.forEach(promotion => {
-        // Add banner image URLs
-        if (promotion.banner_image_url) {
-            linkedFiles.push(promotion.banner_image_url);
-        }
-
-        // Add poster image URLs
-        if (promotion.poster_image_url) {
-            linkedFiles.push(promotion.poster_image_url);
-        }
-    });
-
-    products.forEach(product => {
-        // Add product image URLs
-        if (product.image) {
-            linkedFiles.push(product.image);
-        }
-    });
-
-    payments.forEach(payment => {
-        // Add payment invoice URLs  
-        if (payment.invoice_url) {
-            linkedFiles.push(payment.invoice_url);
-        }
-    });
-
-    notifications.forEach(notification => {
-        // Add notification media URLs
-        if (notification.media_url) {
-            linkedFiles.push(notification.media_url);
-        }
-
-        // Add notification file URLs
-        if (notification.file_url) {
-            linkedFiles.push(notification.file_url);
-        }
-    });
-
-    news.forEach(news => {
-        // Add news image URLs
-        if (news.image) {
-            linkedFiles.push(news.image);
-        }
-    });
-
-    messages.forEach(message => {
-        // Add message attachment URLs
-        message.attachments.forEach(attachment => {
-            if (attachment.url) {
-                linkedFiles.push(attachment.url);
-            }
+        // Process products and their image URLs
+        await processModelInBatches(Product, product => {
+            // Add product image URLs
+            if (product.image) linkedFiles.push(product.image);
         });
-    });
 
-    events.forEach(event => {
-        // Add event image URLs
-        if (event.image) {
-            linkedFiles.push(event.image);
-        }
-
-        // Add event guest image URLs 
-        if (event.guest_image) {
-            linkedFiles.push(event.guest_image);
-        }
-
-        // Add event speakers image URLs
-        event.speakers.forEach(speaker => {
-            if (speaker.speaker_image) {
-                linkedFiles.push(speaker.speaker_image);
-            }
+        // Process payments and their invoice URLs
+        await processModelInBatches(Payment, payment => {
+            // Add payment invoice URLs  
+            if (payment.invoice_url) linkedFiles.push(payment.invoice_url);
         });
-    });
 
-    const linkedFileKeys = [];
-    const filesToDelete = [];
+        // Process notifications and their media and file URLs
+        await processModelInBatches(Notification, notification => {
+            // Add notification media URLs
+            if (notification.media_url) linkedFiles.push(notification.media_url);
 
-    for (const link of linkedFiles) {
-        const fileKey = path.basename(link);
-        linkedFileKeys.push(fileKey);
-    };
+            // Add notification file URLs
+            if (notification.file_url) linkedFiles.push(notification.file_url);
+        });
 
-    for (const file of files) {
-        if (!linkedFileKeys.includes(file)) {
-            // If the file is not linked, add it to the list of files to be deleted
-            filesToDelete.push(file);
-        }
-    };
+        // Process news and their image URLs
+        await processModelInBatches(News, news => {
+            // Add news image URLs
+            if (news.image) linkedFiles.push(news.image);
+        });
 
-    const response = {
-        FilesLinked: linkedFileKeys,
-        UnlinkedFiles: filesToDelete,
-        Total_no_of_files: files.length,
-        No_of_linked_files: linkedFileKeys.length,
-        No_of_trash_files: filesToDelete.length,
-        No_of_files_in_bucket_after_deletion: files.length - filesToDelete.length,
-    };
+        // Process messages and their attachment URLs
+        await processModelInBatches(Messages, message => {
+            message.attachments.forEach(attachment => {
+                // Add message attachment URLs
+                if (attachment.url) linkedFiles.push(attachment.url);
+            });
+        });
 
-    return responseHandler(res, 200, "File check successfully completed", response);
+        // Process events and their image URLs
+        await processModelInBatches(Event, event => {
+            // Add event image URLs
+            if (event.image) linkedFiles.push(event.image);
+
+            // Add event guest image URLs 
+            if (event.guest_image) linkedFiles.push(event.guest_image);
+
+            // Add event speakers' image URLs
+            event.speakers.forEach(speaker => {
+                if (speaker.speaker_image) linkedFiles.push(speaker.speaker_image);
+            });
+        });
+
+        return linkedFiles;
+    }
+
+    try {
+        const bucketName = process.env.AWS_S3_BUCKET;
+        const files = await listFilesInBucket(bucketName);
+
+        // Gather linked files from all models
+        const linkedFiles = await gatherLinkedFiles();
+        const linkedFileKeys = linkedFiles.map(link => path.basename(link));
+        const filesToDelete = files.filter(file => !linkedFileKeys.includes(file));
+
+        const response = {
+            FilesLinked: linkedFileKeys,
+            UnlinkedFiles: filesToDelete,
+            Total_no_of_files: files.length,
+            No_of_linked_files: linkedFileKeys.length,
+            No_of_trash_files: filesToDelete.length,
+            No_of_files_in_bucket_after_deletion: files.length - filesToDelete.length,
+        };
+
+        return responseHandler(res, 200, "File check successfully completed", response);
+    } catch (err) {
+        console.error("Error performing check:", err);
+    }
 };
