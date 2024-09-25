@@ -201,7 +201,10 @@ exports.getEventById = async (req, res) => {
     } = req.params;
     if (!eventId) return responseHandler(res, 400, "Invalid request");
 
-    const event = await Event.findById(eventId);
+    const event = await Event.findById(eventId).populate({
+        path: "rsvp",
+        select: "name company_name phone_numbers"
+      });
     if (!event) return responseHandler(res, 404, "Event not found");
 
     return responseHandler(res, 200, "Event retrieved successfully", event);
