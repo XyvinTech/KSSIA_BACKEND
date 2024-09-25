@@ -5,6 +5,7 @@ const deleteFile = require("../helpers/deleteFiles");
 const responseHandler = require("../helpers/responseHandler");
 const Event = require("../models/events");
 const {
+    CreateEventsSchema,
     EditEventsSchema
 } = require("../validation");
 
@@ -26,7 +27,7 @@ exports.createEvent = async (req, res) => {
     }
 
     // Validate the input data using Joi
-    const { error } = EditEventsSchema.validate(data, { abortEarly: true });
+    const { error } = CreateEventsSchema.validate(data, { abortEarly: true });
 
     // Check if an event with the same details already exists
     const eventExist = await Event.findOne({
