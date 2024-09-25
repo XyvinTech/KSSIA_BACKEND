@@ -111,9 +111,10 @@ exports.getAllNews = async (req, res) => {
 
     const { pageNo = 1, limit = 10 } = req.query;
     const skipCount = limit * (pageNo - 1);
+    const filter = {published: true};  
 
-    const totalCount = await News.countDocuments();
-    const news = await News.find()
+    const totalCount = await News.countDocuments(filter);
+    const news = await News.find(filter)
     .skip(skipCount)
     .limit(limit)
     .sort({ createdAt: -1 })
