@@ -1,9 +1,16 @@
 const responseHandler = require("../helpers/responseHandler");
 const Report = require("../models/report");
-const { report } = require("../routes/user");
+const {
+    report
+} = require("../routes/user");
 const {
     createReport
 } = require("../validation");
+
+const User = require("../models/user");
+const Product = require("../models/products");
+const Messages = require("../models/messages");
+const Requirements = require("../models/requirements");
 
 exports.createReport = async (req, res) => {
     try {
@@ -34,6 +41,10 @@ exports.getReports = async (req, res) => {
     const filter = {};
     const totalCount = await Report.countDocuments(filter);
     const data = await Report.find(filter)
+        .populate({
+            path: "reportBy",
+            select: "name company_name phone_numbers"
+        })
         .skip(skipCount)
         .limit(limit)
         .sort({
@@ -41,7 +52,36 @@ exports.getReports = async (req, res) => {
             _id: 1
         })
         .lean();
-    return responseHandler(res, 200, "Reports found successfull..!", data, totalCount);
+
+    const reportData = await Promise.all(data.map(async (element) => {
+        let reportedElement;
+
+        const reportedItemId = element.reportedItemId;
+
+        switch (element.reportType) {
+            case "product":
+                reportedElement = await Product.findById(reportedItemId);
+                break;
+            case "requirement":
+                reportedElement = await Requirements.findById(reportedItemId);
+                break;
+            case "user":
+                reportedElement = await User.findById(reportedItemId);
+                break;
+            case "chat":
+                reportedElement = await Messages.findById(reportedItemId);
+                break;
+            default:
+                reportedElement = null; // Handle unknown report types
+        }
+
+        return {
+            ...element,
+            reportedElement: reportedElement
+        };
+    }));
+
+    return responseHandler(res, 200, "Reports found successfull..!", reportData, totalCount);
 
 };
 
@@ -50,7 +90,7 @@ exports.deleteReports = async (req, res) => {
     const reportId = req.params.reportid;
 
     const report = await Report.findByIdAndDelete(reportId);
-    if(!report){
+    if (!report) {
         return responseHandler(res, 404, "Report not found");
     }
 
