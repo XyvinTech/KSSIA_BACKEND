@@ -109,14 +109,18 @@ exports.editNews = async (req, res) => {
 /****************************************************************************************************/
 exports.getAllNews = async (req, res) => {
 
-    const userId = req.params;
+    const { userId } = req.params;
 
     const { pageNo = 1, limit = 10 } = req.query;
     const skipCount = limit * (pageNo - 1);
     let filter = {};
+
+    console.log(userId);
+
     if(userId && ((userId != undefined) || (userId != ''))){
         filter = {published: true};  
     }
+    console.log(filter);
 
     const totalCount = await News.countDocuments(filter);
     const news = await News.find(filter)
