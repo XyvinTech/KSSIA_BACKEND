@@ -134,8 +134,8 @@ const speakerSchema = Joi.object({
 });
 
 exports.EditEventsSchema = Joi.object({
-    name: Joi.string().required(),
-    type: Joi.string().required(),
+    name: Joi.string(),
+    type: Joi.string(),
     // image: Joi.string().uri(),
     description: Joi.string(),
     startDate: Joi.date(),
@@ -144,10 +144,10 @@ exports.EditEventsSchema = Joi.object({
     endTime: Joi.date(),
     platform: Joi.string(),
     meeting_link: Joi.string(),
-    organiser_name: Joi.string().required(),
-    organiser_company_name: Joi.string().required(),
+    organiser_name: Joi.string(),
+    organiser_company_name: Joi.string(),
     // guest_image: Joi.string().uri(),
-    organiser_role: Joi.string().required(),
+    organiser_role: Joi.string(),
     speakers: Joi.array().items(speakerSchema),
     activate: Joi.boolean()
 });
