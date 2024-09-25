@@ -156,7 +156,10 @@ exports.editEvent = async (req, res) => {
         }
 
         // Save the updated event
-        await event.save();
+        const edited = await event.save();
+        if(!edited){
+            return responseHandler(res, 200, "Event updation failed!", event);
+        }
         return responseHandler(res, 200, "Event updated successfully!", event);
     } catch (err) {
         return responseHandler(res, 500, `Error updating event: ${err.message}`);

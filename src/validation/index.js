@@ -129,8 +129,9 @@ exports.EditAdminSchema = Joi.object({
 const speakerSchema = Joi.object({
     speaker_name: Joi.string().required(),
     speaker_designation: Joi.string().required(),
-    speaker_image: Joi.string().uri(),
-    speaker_role: Joi.string().required()
+    speaker_image: Joi.string().uri().allow(''),
+    speaker_role: Joi.string().required(),
+    _id: Joi.string()
 });
 
 exports.CreateEventsSchema = Joi.object({
@@ -155,7 +156,7 @@ exports.CreateEventsSchema = Joi.object({
 exports.EditEventsSchema = Joi.object({
     name: Joi.string(),
     type: Joi.string(),
-    // image: Joi.string().uri(),
+    image: Joi.string().uri(),
     description: Joi.string(),
     startDate: Joi.date(),
     endDate: Joi.date(),
@@ -165,7 +166,7 @@ exports.EditEventsSchema = Joi.object({
     meeting_link: Joi.string(),
     organiser_name: Joi.string(),
     organiser_company_name: Joi.string(),
-    // guest_image: Joi.string().uri(),
+    guest_image: Joi.string().uri(),
     organiser_role: Joi.string(),
     speakers: Joi.array().items(speakerSchema),
     activate: Joi.boolean()
