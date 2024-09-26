@@ -8,6 +8,7 @@ const paymentSchema = new mongoose.Schema({
     date: { type: Date },
     time: { type: Date },
     amount: { type: Number },
+    type: { type: String },
     mode_of_payment: { type: String },
     invoice_id: { type: String },
     category: { 

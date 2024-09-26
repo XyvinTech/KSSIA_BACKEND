@@ -13,6 +13,7 @@ reportRoute
 
 reportRoute
   .route("/:reportid")
-  .delete(asyncHandler(reportController.deleteReports));
+  .delete(asyncHandler(reportController.deleteReports))
+  .get(asyncHandler(reportController.getReportById));
 
 module.exports = reportRoute;

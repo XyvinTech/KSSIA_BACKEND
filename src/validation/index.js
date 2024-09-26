@@ -12,12 +12,12 @@ const phoneSchema = Joi.object({
 
 const schemaUrl = Joi.object({
     platform: Joi.string(),
-    url: Joi.string().uri()
+    url: Joi.string()
 });
 
 const otherSchema = Joi.object({
     name: Joi.string(),
-    url: Joi.string().uri(),
+    url: Joi.string(),
     authority_name: Joi.string()
 });
 
@@ -233,6 +233,7 @@ exports.PaymentSchema = Joi.object({
     member: Joi.string().hex().length(24).required(),
     membership_id: Joi.string(),
     date: Joi.date().required(),
+    type: Joi.string(),
     time: Joi.date().required(),
     amount: Joi.number().positive().required(),
     mode_of_payment: Joi.string().required(),
@@ -247,6 +248,7 @@ exports.PaymentSchema = Joi.object({
 exports.UserPaymentSchema = Joi.object({
     category: Joi.string().required().valid('app', 'membership'),
     invoice_url: Joi.string().uri().allow(''),
+    type: Joi.string(),
     remarks: Joi.string().allow(''),
 });
 
