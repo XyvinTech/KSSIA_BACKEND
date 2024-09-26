@@ -233,7 +233,7 @@ exports.PaymentSchema = Joi.object({
     member: Joi.string().hex().length(24).required(),
     membership_id: Joi.string(),
     date: Joi.date().required(),
-    type: Joi.string(),
+    plan: Joi.string(),
     time: Joi.date().required(),
     amount: Joi.number().positive().required(),
     mode_of_payment: Joi.string().required(),
