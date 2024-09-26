@@ -294,7 +294,7 @@ exports.getAllUsers = async (req, res) => {
       // Map the data to include the required fields (full name and mobile)
       const mappedData = users.map((user) => {
         return {
-          ...user, // Spread the original user data
+          ...user._doc, // Spread the original user data
           full_name: `${user.name.first_name} ${user.name.middle_name || ''} ${user.name.last_name}`, // Concatenate names
           mobile: user.phone_numbers?.personal || 'N/A', // Handle phone number or return 'N/A'
         };
