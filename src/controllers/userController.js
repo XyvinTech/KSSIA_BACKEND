@@ -142,7 +142,11 @@ exports.getUserById = async (req, res) => {
   }
 
   // Check if a user with this id exists
-  const user = await User.findById(userId);
+  const user = await User.findById(userId)
+  .populate({
+    path: "reviews.reviewer",
+    select: "name profile_picture"
+  });
   if (!user) {
     // If the user is not found, return a 404 status code with the error message
     // console.log('User not found');                                               // Debug line
