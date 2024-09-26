@@ -373,7 +373,7 @@ exports.updateProductStatus = async (req, res) => {
       reason
   } = req.body;
 
-  const validStatuses = ["pending", "accepted", "rejected"];
+  const validStatuses = ["pending", "accepted", "rejected", "reported"];
   if (!validStatuses.includes(status)) {
       return responseHandler(res, 400, "Invalid status value");
   }
