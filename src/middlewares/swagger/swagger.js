@@ -58,7 +58,7 @@ const options = {
     ],
     servers: [
       {
-        url: `https://http://65.0.49.224:${PORT}/api/${API_VERSION}`,
+        url: `http://65.0.49.224:${PORT}/api/${API_VERSION}`,
       },
       {
         url: `http://43.205.89.79/api/${API_VERSION}`,
