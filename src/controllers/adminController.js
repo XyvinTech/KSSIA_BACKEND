@@ -312,6 +312,10 @@ exports.getAllUsers = async (req, res) => {
 
       // Fetch users with pagination and sorting
       const users = await User.find(filter)
+        .populate({
+          path: "reviews.reviewer",
+          select: "name profile_picture"
+        })
         .skip(skipCount)
         .limit(limit)
         .sort({
