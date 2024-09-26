@@ -2,23 +2,41 @@ const mongoose = require('mongoose');
 
 const notificationSchema = new mongoose.Schema(
     {
-        to: { 
+        to: [{
             type: mongoose.Schema.Types.ObjectId,
-            ref: "User" 
-        },
-        subject: { type: String },
-        content: { type: String },
-        upload_url: { type: String },
-        upload_file_url: { type: String },
-        url: { type: String },
-        type: { type: Boolean },
-        read_status: { type: Boolean, default: false }
+            ref: "User",
+            required: true
+        }],
+        subject: { type: String, required: true },
+        content: { type: String, required: true },
+        media_url: { type: String },
+        file_url: { type: String },
+        link_url: { type: String },
+        type: { type: String, enum: ['email', 'in-app'], required: true },
+        readBy: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User"
+        }]
     },
     {
         timestamps: true
     }
 );
 
-const notification = mongoose.model("Products", notificationSchema);
+notificationSchema.index({ to: 1, type: 1 });
 
-module.exports = notification;
+notificationSchema.statics.countUnread = function (userId) {
+    return this.countDocuments({ to: userId, readBy: { $ne: userId }, type: 'in-app' });
+};
+
+notificationSchema.methods.markAsRead = function (userId) {
+    if (!this.readBy.includes(userId)) {
+        this.readBy.push(userId);
+        return this.save();
+    }
+    return Promise.resolve(this); // Return the existing document if no change was made.
+};
+
+const Notification = mongoose.model("Notification", notificationSchema);
+
+module.exports = Notification;

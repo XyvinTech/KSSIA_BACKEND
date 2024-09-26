@@ -3,23 +3,30 @@ const mongoose = require('mongoose');
 const paymentSchema = new mongoose.Schema({
     member: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true,
+        ref: 'User'
     },
-    date: { type: Date, required: true },
-    time: { type: Date, required: true },
-    amount: { type: Number, required: true },
-    mode_of_payment: { type: String, required: true },
-    category: { type: String, required: true },
+    date: { type: Date },
+    time: { type: Date },
+    amount: { type: Number },
+    type: { type: String },
+    mode_of_payment: { type: String },
+    invoice_id: { type: String },
+    category: { 
+        type: String,
+        enum: ["app","membership"]
+    },
     status: { 
         type: String,
         default: "pending",
         enum: ["pending", "accepted", "resubmit", "rejected"],
-     },
+    },
+    renewal: { type: Date },
+    days: { type: Number , default: 365},
     invoice_url: { type: String },
     remarks: { type: String },
+    reason: { type: String },
 });
 
-const payment = mongoose.model('Payment', paymentSchema);
+const Payment = mongoose.model('Payment', paymentSchema);
 
-module.exports = payment;
+module.exports = Payment;

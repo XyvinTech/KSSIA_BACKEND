@@ -1,0 +1,2 @@
+require("./updateEventStatus"); 
+require("./deleteUnwantedFiles"); 

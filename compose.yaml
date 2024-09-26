@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  server:
+    build:
+      context: .
+    env_file:
+      - .env  # Reference the .env file
+    ports:
+      - 3000:3000
