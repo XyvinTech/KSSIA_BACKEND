@@ -65,7 +65,7 @@ exports.createInAppNotification = async (req, res) => {
             data.subject,
             data.content,
             data.file_url
-          );
+        );
 
         // Create a new in-app notification
         const newNotification = new Notification({

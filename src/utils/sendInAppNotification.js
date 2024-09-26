@@ -30,19 +30,30 @@ const sendInAppNotification = async (fcmTokens, title, body, media = null) => {
                     }),
                 },
             },
-            tokens: fcmTokens,
         };
 
-        const response = await getMessaging().sendEachForMulticast(message);
-        console.log("🚀 ~ Multicast message sent successfully:", response);
-
-        if (response.failureCount > 0) {
-            response.responses.forEach((resp, idx) => {
-                if (!resp.success) {
-                    console.error(`🚀 ~ Token at index ${idx} failed with error:`, resp.error.message);
-                }
-            });
+        if(fcmTokens.length === 1){
+            const singleMessage = {
+                ...message,
+                token: fcmTokens[0]
+            };
+            const response =  await getMessaging().send(singleMessage);
+            console.log("🚀 ~ Single message sent successfully:", response);
         }
+
+        else{
+            message.tokens = fcmTokens;
+            const response = await getMessaging().sendEachForMulticast(message);
+            console.log("🚀 ~ Multicast message sent successfully:", response);
+            if (response.failureCount > 0) {
+                response.responses.forEach((resp, idx) => {
+                    if (!resp.success) {
+                        console.error(`🚀 ~ Token at index ${idx} failed with error:`, resp.error.message);
+                    }
+                });
+            }
+        }
+        
     } catch (error) {
         console.error("🚀 ~ sendInAppNotification ~ error:", error.message);
     }
