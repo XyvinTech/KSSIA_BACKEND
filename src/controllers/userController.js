@@ -8,6 +8,7 @@ const responseHandler = require("../helpers/responseHandler");
 const nodemailer = require('nodemailer');
 const User = require("../models/user");
 const Product = require("../models/products");
+const Setting = require("../models/settings");
 const {
   CreateUserSchema,
   ReviewSchema,
@@ -897,4 +898,19 @@ exports.requestNFC = async (req, res) => {
 
   return responseHandler(res, 201, 'Request NFC sent successfully!');
 
+};
+
+exports.getVersion = async (req, res) => {
+  try {
+    const settings = await Setting.findOne();
+
+    return responseHandler(
+      res,
+      200,
+      "App version fetched successfully",
+      settings
+    );
+  } catch (error) {
+    return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
+  }
 };
