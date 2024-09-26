@@ -325,8 +325,8 @@ exports.deleteInAppNotification = async (req, res) => {
     }
 
     try {
-        const result = await Notification.findByIdAndDelete(notificationId);
-        if (!result) {
+        const notification = await Notification.findByIdAndDelete(notificationId);
+        if (!notification) {
             return responseHandler(res, 404, 'Notification not found.');
         }
 
