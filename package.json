@@ -17,6 +17,7 @@
     "express": "^4.19.2",
     "firebase-admin": "^12.5.0",
     "fuse.js": "^7.0.0",
+    "i": "^0.3.7",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "kssia_backend": "file:",

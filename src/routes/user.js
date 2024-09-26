@@ -17,6 +17,8 @@ userRoute
   .route("/qr/:userId")
   .get(asyncHandler(userController.getUserById));
 
+userRoute.get("/app-version", userController.getVersion);
+
 userRoute.use(authVerify);
 
 userRoute  
