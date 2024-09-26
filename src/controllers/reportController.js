@@ -99,10 +99,10 @@ exports.deleteReports = async (req, res) => {
 };
 
 exports.getReportById = async (req, res) => {
-    const { reportID } = req.params;
+    const { reportid } = req.params;
 
     try {
-        const data = await Report.findById(reportID)
+        const data = await Report.findById(reportid)
             .populate({
                 path: "reportBy",
                 select: "name company_name phone_numbers"
