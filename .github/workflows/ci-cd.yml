@@ -78,8 +78,8 @@ jobs:
             # Pull Docker Image
             sudo docker pull ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
 
-            # sudo docker stop ${{ env.CONTAINER_NAME }} || true
-            # sudo docker rm ${{ env.CONTAINER_NAME }} || true
+            sudo docker stop ${{ env.CONTAINER_NAME }} || true
+            sudo docker rm ${{ env.CONTAINER_NAME }} || true
 
             sudo docker run -d \
               -p ${{ env.PORT }}:${{ env.PORT }}\
