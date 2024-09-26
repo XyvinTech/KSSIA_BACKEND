@@ -248,7 +248,7 @@ exports.PaymentSchema = Joi.object({
 exports.UserPaymentSchema = Joi.object({
     category: Joi.string().required().valid('app', 'membership'),
     invoice_url: Joi.string().uri().allow(''),
-    type: Joi.string(),
+    plan: Joi.string(),
     remarks: Joi.string().allow(''),
 });
 
