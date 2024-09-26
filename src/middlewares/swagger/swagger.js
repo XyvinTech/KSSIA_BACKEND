@@ -1,67 +1,65 @@
-const swaggerJsdoc = require('swagger-jsdoc');
-const swaggerUi = require('swagger-ui-express');
-const {
-  PORT,
-  API_VERSION
-} = process.env;
+const swaggerJsdoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
+const { PORT, API_VERSION } = process.env;
 
 const options = {
   definition: {
-    openapi: '3.0.0',
+    openapi: "3.0.0",
     info: {
-      title: 'KSSIA Back-End API',
-      version: '1.0.0',
-      description: 'KSSIA back-end API with Swagger documentation',
+      title: "KSSIA Back-End API",
+      version: "1.0.0",
+      description: "KSSIA back-end API with Swagger documentation",
     },
-    tags: [{
-        name: 'User',
-        description: 'Operations related to users'
+    tags: [
+      {
+        name: "User",
+        description: "Operations related to users",
       },
       {
-        name: 'Admin',
-        description: 'Administrative operations'
+        name: "Admin",
+        description: "Administrative operations",
       },
       {
-        name: 'Admin create and Auth',
-        description: 'Operations related to admin creation and auth'
+        name: "Admin create and Auth",
+        description: "Operations related to admin creation and auth",
       },
       {
-        name: 'Products',
-        description: 'Operations related to products'
+        name: "Products",
+        description: "Operations related to products",
       },
       {
-        name: 'Events',
-        description: 'Operations related to events'
+        name: "Events",
+        description: "Operations related to events",
       },
       {
-        name: 'News',
-        description: 'News related operations'
+        name: "News",
+        description: "News related operations",
       },
       {
-        name: 'Promotions',
-        description: 'Operations related to promotions'
+        name: "Promotions",
+        description: "Operations related to promotions",
       },
       {
-        name: 'Notifications',
-        description: 'Notification related operations'
+        name: "Notifications",
+        description: "Notification related operations",
       },
       {
-        name: 'Payments',
-        description: 'Operations related to payments'
+        name: "Payments",
+        description: "Operations related to payments",
       },
       {
-        name: 'Files',
-        description: 'Operations related to handeling files in AWS S3 Bucket'
+        name: "Files",
+        description: "Operations related to handeling files in AWS S3 Bucket",
       },
       {
-        name: 'Chats',
-        description: 'Operations related to handling Chats'
+        name: "Chats",
+        description: "Operations related to handling Chats",
       },
     ],
     servers: [
-      // {
-      //   url: `https://example.com/api/v1`,
-      // },
+      {
+        url: `https://http://65.0.49.224:${PORT}/api/${API_VERSION}`,
+      },
       {
         url: `http://43.205.89.79/api/${API_VERSION}`,
       },
@@ -79,935 +77,933 @@ const options = {
       },
       schemas: {
         User: {
-          type: 'object',
+          type: "object",
           properties: {
             _id: {
-              type: 'string',
-              description: 'User ID',
+              type: "string",
+              description: "User ID",
             },
             name: {
-              type: 'object',
+              type: "object",
               properties: {
                 first_name: {
-                  type: 'string',
-                  example: 'John',
+                  type: "string",
+                  example: "John",
                 },
                 middle_name: {
-                  type: 'string',
-                  example: 'Doe',
+                  type: "string",
+                  example: "Doe",
                 },
                 last_name: {
-                  type: 'string',
-                  example: 'Smith',
+                  type: "string",
+                  example: "Smith",
                 },
               },
-              required: ['first_name', 'last_name'],
+              required: ["first_name", "last_name"],
             },
             membership_id: {
-              type: 'string',
-              example: 'MEM12345',
+              type: "string",
+              example: "MEM12345",
             },
             blood_group: {
-              type: 'string',
-              example: 'O+',
+              type: "string",
+              example: "O+",
             },
             email: {
-              type: 'string',
-              format: 'email',
-              example: 'john.doe@example.com',
+              type: "string",
+              format: "email",
+              example: "john.doe@example.com",
             },
             profile_picture: {
-              type: 'string',
-              format: 'uri',
-              example: 'http://example.com/profile.jpg',
+              type: "string",
+              format: "uri",
+              example: "http://example.com/profile.jpg",
             },
             phone_numbers: {
-              type: 'object',
+              type: "object",
               properties: {
                 personal: {
-                  type: 'number',
+                  type: "number",
                   example: 1234567890,
                 },
                 landline: {
-                  type: 'number',
+                  type: "number",
                   example: 9876543210,
                 },
                 company_phone_number: {
-                  type: 'number',
+                  type: "number",
                 },
                 whatsapp_number: {
-                  type: 'number',
+                  type: "number",
                 },
                 whatsapp_business_number: {
-                  type: 'number',
+                  type: "number",
                 },
               },
-              required: ['personal'],
+              required: ["personal"],
             },
             otp: {
-              type: 'number',
-              description: 'One Time Password',
+              type: "number",
+              description: "One Time Password",
             },
             designation: {
-              type: 'string',
-              example: 'Software Engineer',
+              type: "string",
+              example: "Software Engineer",
             },
             company_name: {
-              type: 'string',
-              example: 'TechCorp',
+              type: "string",
+              example: "TechCorp",
             },
             company_address: {
-              type: 'string',
+              type: "string",
             },
             company_logo: {
-              type: 'string',
-              format: 'uri',
+              type: "string",
+              format: "uri",
             },
             company_email: {
-              type: 'string',
-              format: 'email',
-              example: 'contact@techcorp.com',
+              type: "string",
+              format: "email",
+              example: "contact@techcorp.com",
             },
             business_category: {
-              type: 'string',
-              example: 'IT Services',
+              type: "string",
+              example: "IT Services",
             },
             sub_category: {
-              type: 'string',
-              example: 'Software Development',
+              type: "string",
+              example: "Software Development",
             },
             bio: {
-              type: 'string',
+              type: "string",
             },
             address: {
-              type: 'string',
+              type: "string",
             },
             social_media: {
-              type: 'array',
+              type: "array",
               items: {
-                type: 'object',
+                type: "object",
                 properties: {
                   platform: {
-                    type: 'string',
+                    type: "string",
                   },
                   url: {
-                    type: 'string',
-                    format: 'uri',
+                    type: "string",
+                    format: "uri",
                   },
                 },
               },
             },
             websites: {
-              type: 'array',
+              type: "array",
               items: {
-                type: 'object',
+                type: "object",
                 properties: {
                   name: {
-                    type: 'string',
-                    example: 'TechCorp Website',
+                    type: "string",
+                    example: "TechCorp Website",
                   },
                   url: {
-                    type: 'string',
-                    format: 'uri',
-                    example: 'http://techcorp.com',
+                    type: "string",
+                    format: "uri",
+                    example: "http://techcorp.com",
                   },
                 },
               },
             },
             video: {
-              type: 'array',
+              type: "array",
               items: {
-                type: 'object',
+                type: "object",
                 properties: {
                   name: {
-                    type: 'string',
+                    type: "string",
                   },
                   url: {
-                    type: 'string',
-                    format: 'uri',
+                    type: "string",
+                    format: "uri",
                   },
                 },
               },
             },
             awards: {
-              type: 'array',
+              type: "array",
               items: {
-                type: 'object',
+                type: "object",
                 properties: {
                   url: {
-                    type: 'string',
-                    format: 'uri',
+                    type: "string",
+                    format: "uri",
                   },
                   name: {
-                    type: 'string',
+                    type: "string",
                   },
                   authority_name: {
-                    type: 'string',
+                    type: "string",
                   },
                 },
               },
             },
             certificates: {
-              type: 'array',
+              type: "array",
               items: {
-                type: 'object',
+                type: "object",
                 properties: {
                   name: {
-                    type: 'string',
+                    type: "string",
                   },
                   url: {
-                    type: 'string',
-                    format: 'uri',
+                    type: "string",
+                    format: "uri",
                   },
                 },
               },
             },
             brochure: {
-              type: 'array',
+              type: "array",
               items: {
-                type: 'object',
+                type: "object",
                 properties: {
                   name: {
-                    type: 'string',
+                    type: "string",
                   },
                   url: {
-                    type: 'string',
-                    format: 'uri',
+                    type: "string",
+                    format: "uri",
                   },
                 },
               },
             },
             is_active: {
-              type: 'boolean',
+              type: "boolean",
               example: true,
             },
             is_deleted: {
-              type: 'boolean',
+              type: "boolean",
               example: false,
             },
             selectedTheme: {
-              type: 'string',
-              default: 'white',
+              type: "string",
+              default: "white",
             },
           },
-          required: [
-            'name',
-            'membership_id',
-            'phone_numbers',
-          ],
+          required: ["name", "membership_id", "phone_numbers"],
         },
         CreateUserRequest: {
-          type: 'object',
-          required: ['name', 'membership_id', 'email', 'phone_numbers'],
+          type: "object",
+          required: ["name", "membership_id", "email", "phone_numbers"],
           properties: {
             name: {
-              type: 'object',
+              type: "object",
               properties: {
                 first_name: {
-                  type: 'string',
-                  example: 'John'
+                  type: "string",
+                  example: "John",
                 },
                 middle_name: {
-                  type: 'string',
-                  example: 'Doe'
+                  type: "string",
+                  example: "Doe",
                 },
                 last_name: {
-                  type: 'string',
-                  example: 'Smith'
+                  type: "string",
+                  example: "Smith",
                 },
               },
-              required: ['first_name', 'last_name'],
+              required: ["first_name", "last_name"],
             },
             membership_id: {
-              type: 'string',
-              example: 'MEM12345'
+              type: "string",
+              example: "MEM12345",
             },
             blood_group: {
-              type: 'string',
-              example: 'O+'
+              type: "string",
+              example: "O+",
             },
             email: {
-              type: 'string',
-              format: 'email',
-              example: 'john.doe@example.com'
+              type: "string",
+              format: "email",
+              example: "john.doe@example.com",
             },
             profile_picture: {
-              type: 'string',
-              format: 'uri',
-              example: 'http://example.com/profile.jpg'
+              type: "string",
+              format: "uri",
+              example: "http://example.com/profile.jpg",
             },
             phone_numbers: {
-              type: 'object',
+              type: "object",
               properties: {
                 personal: {
-                  type: 'number',
-                  example: 1234567890
+                  type: "number",
+                  example: 1234567890,
                 },
                 landline: {
-                  type: 'number',
-                  example: 9876543210
+                  type: "number",
+                  example: 9876543210,
                 },
                 company_phone_number: {
-                  type: 'number'
+                  type: "number",
                 },
                 whatsapp_number: {
-                  type: 'number'
+                  type: "number",
                 },
                 whatsapp_business_number: {
-                  type: 'number'
+                  type: "number",
                 },
               },
-              required: ['personal'],
+              required: ["personal"],
             },
             designation: {
-              type: 'string',
-              example: 'Software Engineer'
+              type: "string",
+              example: "Software Engineer",
             },
             company_name: {
-              type: 'string',
-              example: 'TechCorp'
+              type: "string",
+              example: "TechCorp",
             },
             company_email: {
-              type: 'string',
-              format: 'email',
-              example: 'contact@techcorp.com'
+              type: "string",
+              format: "email",
+              example: "contact@techcorp.com",
             },
             business_category: {
-              type: 'string',
-              example: 'IT Services'
+              type: "string",
+              example: "IT Services",
             },
             sub_category: {
-              type: 'string',
-              example: 'Software Development'
+              type: "string",
+              example: "Software Development",
             },
             address: {
-              type: 'string',
+              type: "string",
             },
             websites: {
-              type: 'array',
+              type: "array",
               items: {
-                type: 'object',
+                type: "object",
                 properties: {
                   name: {
-                    type: 'string',
-                    example: 'TechCorp Website'
+                    type: "string",
+                    example: "TechCorp Website",
                   },
                   url: {
-                    type: 'string',
-                    format: 'uri',
-                    example: 'http://techcorp.com'
+                    type: "string",
+                    format: "uri",
+                    example: "http://techcorp.com",
                   },
                 },
               },
             },
             is_active: {
-              type: 'boolean',
-              example: true
+              type: "boolean",
+              example: true,
             },
             is_deleted: {
-              type: 'boolean',
-              example: false
+              type: "boolean",
+              example: false,
             },
           },
         },
         EditUserRequest: {
-          type: 'object',
+          type: "object",
           properties: {
             name: {
-              type: 'object',
+              type: "object",
               properties: {
                 first_name: {
-                  type: 'string'
+                  type: "string",
                 },
                 middle_name: {
-                  type: 'string'
+                  type: "string",
                 },
                 last_name: {
-                  type: 'string'
+                  type: "string",
                 },
               },
             },
             blood_group: {
-              type: 'string'
+              type: "string",
             },
             email: {
-              type: 'string',
-              format: 'email'
+              type: "string",
+              format: "email",
             },
             profile_picture: {
-              type: 'string',
-              format: 'uri'
+              type: "string",
+              format: "uri",
             },
             phone_numbers: {
-              type: 'object',
+              type: "object",
               properties: {
                 personal: {
-                  type: 'number'
+                  type: "number",
                 },
                 landline: {
-                  type: 'number'
+                  type: "number",
                 },
                 company_phone_number: {
-                  type: 'number'
+                  type: "number",
                 },
                 whatsapp_number: {
-                  type: 'number'
+                  type: "number",
                 },
                 whatsapp_business_number: {
-                  type: 'number'
+                  type: "number",
                 },
               },
             },
             otp: {
-              type: 'number'
+              type: "number",
             },
             designation: {
-              type: 'string'
+              type: "string",
             },
             company_name: {
-              type: 'string'
+              type: "string",
             },
             company_address: {
-              type: 'string'
+              type: "string",
             },
             company_logo: {
-              type: 'string',
-              format: 'uri'
+              type: "string",
+              format: "uri",
             },
             company_email: {
-              type: 'string',
-              format: 'email'
+              type: "string",
+              format: "email",
             },
             business_category: {
-              type: 'string'
+              type: "string",
             },
             sub_category: {
-              type: 'string'
+              type: "string",
             },
             bio: {
-              type: 'string'
+              type: "string",
             },
             address: {
-              type: 'string',
+              type: "string",
             },
             social_media: {
-              type: 'array',
+              type: "array",
               items: {
-                type: 'object',
+                type: "object",
                 properties: {
                   platform: {
-                    type: 'string'
+                    type: "string",
                   },
                   url: {
-                    type: 'string',
-                    format: 'uri'
+                    type: "string",
+                    format: "uri",
                   },
                 },
               },
             },
             websites: {
-              type: 'array',
+              type: "array",
               items: {
-                type: 'object',
+                type: "object",
                 properties: {
                   name: {
-                    type: 'string'
+                    type: "string",
                   },
                   url: {
-                    type: 'string',
-                    format: 'uri'
+                    type: "string",
+                    format: "uri",
                   },
                 },
               },
             },
             video: {
-              type: 'array',
+              type: "array",
               items: {
-                type: 'object',
+                type: "object",
                 properties: {
                   name: {
-                    type: 'string'
+                    type: "string",
                   },
                   url: {
-                    type: 'string',
-                    format: 'uri'
+                    type: "string",
+                    format: "uri",
                   },
                 },
               },
             },
             awards: {
-              type: 'array',
+              type: "array",
               items: {
-                type: 'object',
+                type: "object",
                 properties: {
                   name: {
-                    type: 'string'
+                    type: "string",
                   },
                   url: {
-                    type: 'string',
-                    format: 'uri'
+                    type: "string",
+                    format: "uri",
                   },
                   authority_name: {
-                    type: 'string'
-                  }
+                    type: "string",
+                  },
                 },
               },
             },
             certificates: {
-              type: 'array',
+              type: "array",
               items: {
-                type: 'object',
+                type: "object",
                 properties: {
                   name: {
-                    type: 'string'
+                    type: "string",
                   },
                   url: {
-                    type: 'string',
-                    format: 'uri'
+                    type: "string",
+                    format: "uri",
                   },
                 },
               },
             },
             brochure: {
-              type: 'array',
+              type: "array",
               items: {
-                type: 'object',
+                type: "object",
                 properties: {
                   name: {
-                    type: 'string'
+                    type: "string",
                   },
                   url: {
-                    type: 'string',
-                    format: 'uri'
+                    type: "string",
+                    format: "uri",
                   },
                 },
               },
             },
             product: {
-              type: 'array',
+              type: "array",
               items: {
-                type: 'object',
+                type: "object",
                 properties: {
                   _id: {
-                    type: 'string'
+                    type: "string",
                   },
                   seller_id: {
-                    type: 'string'
+                    type: "string",
                   },
                   name: {
-                    type: 'string'
+                    type: "string",
                   },
                   image: {
-                    type: 'string',
-                    format: 'uri'
+                    type: "string",
+                    format: "uri",
                   },
                   price: {
-                    type: 'number'
+                    type: "number",
                   },
                   offer_price: {
-                    type: 'number'
+                    type: "number",
                   },
                   description: {
-                    type: 'string'
+                    type: "string",
                   },
                   moq: {
-                    type: 'integer'
+                    type: "integer",
                   },
                   units: {
-                    type: 'string'
+                    type: "string",
                   },
                   status: {
-                    type: 'string'
+                    type: "string",
                   },
                   tags: {
-                    type: 'array',
+                    type: "array",
                     items: {
-                      type: 'string'
-                    }
-                  }
-                }
-              }
+                      type: "string",
+                    },
+                  },
+                },
+              },
             },
             is_active: {
-              type: 'boolean'
+              type: "boolean",
             },
             is_deleted: {
-              type: 'boolean'
+              type: "boolean",
             },
             selectedTheme: {
-              type: 'string',
-              default: 'white'
-            }
+              type: "string",
+              default: "white",
+            },
           },
         },
         Admin: {
-          type: 'object',
+          type: "object",
           properties: {
             name: {
-              type: 'string',
-              example: 'John Doe',
-              description: 'The admin\'s full name',
+              type: "string",
+              example: "John Doe",
+              description: "The admin's full name",
             },
             email: {
-              type: 'string',
-              format: 'email',
-              example: 'admin@example.com',
-              description: 'The admin\'s email address',
+              type: "string",
+              format: "email",
+              example: "admin@example.com",
+              description: "The admin's email address",
             },
             password: {
-              type: 'string',
-              format: 'password',
-              description: 'The admin\'s password (hashed)',
+              type: "string",
+              format: "password",
+              description: "The admin's password (hashed)",
             },
             role: {
-              type: 'string',
-              example: 'Administrator',
-              description: 'The role assigned to the admin',
+              type: "string",
+              example: "Administrator",
+              description: "The role assigned to the admin",
             },
             createdAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Timestamp when the admin was created',
+              type: "string",
+              format: "date-time",
+              description: "Timestamp when the admin was created",
             },
             updatedAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Timestamp when the admin was last updated',
+              type: "string",
+              format: "date-time",
+              description: "Timestamp when the admin was last updated",
             },
             is_active: {
-              type: 'boolean',
+              type: "boolean",
               example: true,
-              description: 'Indicates whether the admin is currently active',
+              description: "Indicates whether the admin is currently active",
             },
             is_deleted: {
-              type: 'boolean',
+              type: "boolean",
               example: false,
-              description: 'Indicates whether the admin has been deleted',
+              description: "Indicates whether the admin has been deleted",
             },
           },
-          required: [
-            'name',
-            'email',
-            'password',
-            'role',
-          ],
+          required: ["name", "email", "password", "role"],
         },
         Product: {
-          type: 'object',
+          type: "object",
           properties: {
             _id: {
-              type: 'string',
-              description: 'Product ID',
+              type: "string",
+              description: "Product ID",
             },
             seller_id: {
-              type: 'string',
-              description: 'Seller ID',
+              type: "string",
+              description: "Seller ID",
             },
             name: {
-              type: 'string',
-              example: 'Product Name',
+              type: "string",
+              example: "Product Name",
             },
             image: {
-              type: 'string',
-              format: 'uri',
-              example: 'http://example.com/product.jpg',
+              type: "string",
+              format: "uri",
+              example: "http://example.com/product.jpg",
             },
             price: {
-              type: 'number',
-              format: 'float',
+              type: "number",
+              format: "float",
               example: 19.99,
             },
             offer_price: {
-              type: 'number',
-              format: 'float',
+              type: "number",
+              format: "float",
               example: 15.99,
             },
             description: {
-              type: 'string',
-              example: 'Product description here',
+              type: "string",
+              example: "Product description here",
             },
             moq: {
-              type: 'number',
+              type: "number",
               example: 10,
             },
             units: {
-              type: 'string',
-              example: 'units',
+              type: "string",
+              example: "units",
             },
             status: {
-              type: 'string',
-              example: 'available',
+              type: "string",
+              example: "available",
             },
             tags: {
-              type: 'array',
+              type: "array",
               items: {
-                type: 'string',
+                type: "string",
               },
             },
           },
         },
         Event: {
-          type: 'object',
+          type: "object",
           properties: {
             _id: {
-              type: 'string',
-              description: 'Event ID',
+              type: "string",
+              description: "Event ID",
             },
             type: {
-              type: 'string',
-              description: 'Type of the event',
-              example: 'Webinar',
+              type: "string",
+              description: "Type of the event",
+              example: "Webinar",
             },
             name: {
-              type: 'string',
-              description: 'Name of the event',
-              example: 'Annual Tech Conference',
+              type: "string",
+              description: "Name of the event",
+              example: "Annual Tech Conference",
             },
             image: {
-              type: 'string',
-              format: 'uri',
-              description: 'URL of the event image',
-              example: 'http://example.com/event.jpg',
+              type: "string",
+              format: "uri",
+              description: "URL of the event image",
+              example: "http://example.com/event.jpg",
             },
             description: {
-              type: 'string',
-              description: 'Description of the event',
-              example: 'Annual Tech Conference is a big event conducted by xyz',
+              type: "string",
+              description: "Description of the event",
+              example: "Annual Tech Conference is a big event conducted by xyz",
             },
             date: {
-              type: 'string',
-              format: 'date',
-              description: 'Date of the event',
-              example: '2024-08-15',
+              type: "string",
+              format: "date",
+              description: "Date of the event",
+              example: "2024-08-15",
             },
             time: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Time of the event',
-              example: '2024-08-15T14:00:00Z',
+              type: "string",
+              format: "date-time",
+              description: "Time of the event",
+              example: "2024-08-15T14:00:00Z",
             },
             platform: {
-              type: 'string',
-              description: 'Platform where the event will be hosted',
-              example: 'Zoom',
+              type: "string",
+              description: "Platform where the event will be hosted",
+              example: "Zoom",
             },
             meeting_link: {
-              type: 'string',
-              format: 'uri',
-              description: 'Link to the meeting',
-              example: 'http://example.com/meeting',
+              type: "string",
+              format: "uri",
+              description: "Link to the meeting",
+              example: "http://example.com/meeting",
             },
             organiser_name: {
-              type: 'string',
-              description: 'Name of the event organiser',
-              example: 'John Doe',
+              type: "string",
+              description: "Name of the event organiser",
+              example: "John Doe",
             },
             organiser_company_name: {
-              type: 'string',
-              description: 'Company name of the event organiser',
-              example: 'TechCorp',
+              type: "string",
+              description: "Company name of the event organiser",
+              example: "TechCorp",
             },
             guest_image: {
-              type: 'string',
-              format: 'uri',
-              description: 'URL of the guest image',
-              example: 'http://example.com/guest.jpg',
+              type: "string",
+              format: "uri",
+              description: "URL of the guest image",
+              example: "http://example.com/guest.jpg",
             },
             organiser_role: {
-              type: 'string',
-              description: 'Role of the organiser',
-              example: 'Event Coordinator',
+              type: "string",
+              description: "Role of the organiser",
+              example: "Event Coordinator",
             },
             speakers: {
-              type: 'array',
+              type: "array",
               items: {
-                type: 'object',
+                type: "object",
                 properties: {
                   speaker_name: {
-                    type: 'string',
-                    description: 'Name of the speaker',
-                    example: 'Alice Smith',
+                    type: "string",
+                    description: "Name of the speaker",
+                    example: "Alice Smith",
                   },
                   speaker_designation: {
-                    type: 'string',
-                    description: 'Designation of the speaker',
-                    example: 'Lead Developer',
+                    type: "string",
+                    description: "Designation of the speaker",
+                    example: "Lead Developer",
                   },
                   speaker_image: {
-                    type: 'string',
-                    format: 'uri',
-                    description: 'URL of the speaker image',
-                    example: 'http://example.com/speaker.jpg',
+                    type: "string",
+                    format: "uri",
+                    description: "URL of the speaker image",
+                    example: "http://example.com/speaker.jpg",
                   },
                   speaker_role: {
-                    type: 'string',
-                    description: 'Role of the speaker',
-                    example: 'Keynote Speaker',
+                    type: "string",
+                    description: "Role of the speaker",
+                    example: "Keynote Speaker",
                   },
                 },
               },
             },
             activate: {
-              type: 'boolean',
-              description: 'Whether the event is activated',
+              type: "boolean",
+              description: "Whether the event is activated",
               example: true,
             },
           },
           required: [
-            'name',
-            'organiser_name',
-            'organiser_company_name',
-            'organiser_role',
+            "name",
+            "organiser_name",
+            "organiser_company_name",
+            "organiser_role",
           ],
         },
         News: {
-          type: 'object',
+          type: "object",
           properties: {
             _id: {
-              type: 'string',
-              description: 'News article ID',
+              type: "string",
+              description: "News article ID",
             },
             category: {
-              type: 'string',
-              description: 'Category of the news article',
+              type: "string",
+              description: "Category of the news article",
             },
             title: {
-              type: 'string',
-              description: 'Title of the news article',
+              type: "string",
+              description: "Title of the news article",
             },
             image: {
-              type: 'string',
-              format: 'uri',
-              description: 'URL of the news article image',
+              type: "string",
+              format: "uri",
+              description: "URL of the news article image",
             },
             content: {
-              type: 'string',
-              description: 'Content of the news article',
+              type: "string",
+              description: "Content of the news article",
             },
           },
         },
         Promotion: {
-          type: 'object',
+          type: "object",
           properties: {
             _id: {
-              type: 'string',
-              description: 'Promotion ID'
+              type: "string",
+              description: "Promotion ID",
             },
             type: {
-              type: 'string',
-              enum: ['banner', 'video', 'poster', 'notice'],
-              description: 'Type of the promotion'
+              type: "string",
+              enum: ["banner", "video", "poster", "notice"],
+              description: "Type of the promotion",
             },
             banner_image_url: {
-              type: 'string',
-              format: 'uri',
-              description: 'URL of the banner image (required if type is "banner")'
+              type: "string",
+              format: "uri",
+              description:
+                'URL of the banner image (required if type is "banner")',
             },
             upload_video: {
-              type: 'string',
-              format: 'uri',
-              description: 'URL of the uploaded video (required if type is "video")'
+              type: "string",
+              format: "uri",
+              description:
+                'URL of the uploaded video (required if type is "video")',
             },
             yt_link: {
-              type: 'string',
-              description: 'YouTube link (required if type is "video")'
+              type: "string",
+              description: 'YouTube link (required if type is "video")',
             },
             video_title: {
-              type: 'string',
-              description: 'Title of the video (required if type is "video")'
+              type: "string",
+              description: 'Title of the video (required if type is "video")',
             },
             poster_image_url: {
-              type: 'string',
-              format: 'uri',
-              description: 'URL of the poster image (required if type is "poster")'
+              type: "string",
+              format: "uri",
+              description:
+                'URL of the poster image (required if type is "poster")',
             },
             notice_title: {
-              type: 'string',
-              description: 'Title of the notice (required if type is "notice")'
+              type: "string",
+              description: 'Title of the notice (required if type is "notice")',
             },
             notice_description: {
-              type: 'string',
-              description: 'Description of the notice (required if type is "notice")'
+              type: "string",
+              description:
+                'Description of the notice (required if type is "notice")',
             },
             notice_link: {
-              type: 'string',
-              description: 'Link associated with the notice (required if type is "notice")'
+              type: "string",
+              description:
+                'Link associated with the notice (required if type is "notice")',
             },
             status: {
-              type: 'boolean',
-              description: 'Status of the promotion'
+              type: "boolean",
+              description: "Status of the promotion",
             },
             startDate: {
-              type: 'string',
-              format: 'date',
-              description: 'Start date of the promotion'
+              type: "string",
+              format: "date",
+              description: "Start date of the promotion",
             },
             endDate: {
-              type: 'string',
-              format: 'date',
-              description: 'End date of the promotion'
+              type: "string",
+              format: "date",
+              description: "End date of the promotion",
             },
             createdAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Creation timestamp'
+              type: "string",
+              format: "date-time",
+              description: "Creation timestamp",
             },
             updatedAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Last update timestamp'
-            }
-          }
+              type: "string",
+              format: "date-time",
+              description: "Last update timestamp",
+            },
+          },
         },
-        Messages:{
-          type: 'object',
-          properties:{
-            _id:{
-              type: 'string',
-              format: 'uuid'
+        Messages: {
+          type: "object",
+          properties: {
+            _id: {
+              type: "string",
+              format: "uuid",
             },
-            from:{
-              type: 'string',
-              format: 'uuid'
+            from: {
+              type: "string",
+              format: "uuid",
             },
-            to:{
-              type: 'string',
-              format: 'uuid'
+            to: {
+              type: "string",
+              format: "uuid",
             },
-            content:{
-              type: 'string'
+            content: {
+              type: "string",
             },
-            attachments:{
-              type: 'array',
-              items:{
-                type: 'object',
-                properties:{
-                  fileType:{
-                    type: 'string'
+            attachments: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  fileType: {
+                    type: "string",
                   },
-                  url:{
-                    type: 'string'
-                  }
-                }
-              }
+                  url: {
+                    type: "string",
+                  },
+                },
+              },
             },
-            status:{
-              type: 'string',
-              enum: ['sent', 'delivered', 'seen']
+            status: {
+              type: "string",
+              enum: ["sent", "delivered", "seen"],
             },
-            timestamp:{
-              type: 'string',
-              format: 'date-time'
-            }
-          }
-        }
+            timestamp: {
+              type: "string",
+              format: "date-time",
+            },
+          },
+        },
       },
     },
-    security: [{
-      BearerAuth: [],
-    }, ],
+    security: [
+      {
+        BearerAuth: [],
+      },
+    ],
   },
-  apis: ['./src/middlewares/swagger/paths/*.js'], // Path to your API routes
+  apis: ["./src/middlewares/swagger/paths/*.js"], // Path to your API routes
 };
 
 const specs = swaggerJsdoc(options);
