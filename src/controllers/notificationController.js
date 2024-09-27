@@ -85,13 +85,23 @@ exports.createInAppNotification = async (req, res) => {
 
 exports.getallInAppNotifications = async (req, res) => {
 
-    const notifications = await Notification.find({
-        type: 'in-app'
-    });
+    const { pageNo = 1, limit = 10 } = req.query;
+    const skipCount = limit * (pageNo - 1);
+    const filter = { type: 'in-app' };
+    
+    const totalCount = await Notification.countDocuments(filter);
+    const notifications = await Notification.find(filter)
+        .skip(skipCount)
+        .limit(limit)
+        .sort({
+          createdAt: -1
+        })
+        .lean();
+        
     if (!notifications) {
         return responseHandler(res, 404, 'No notifications found');
     }
-    return responseHandler(res, 200, 'Notifications retrieved successfully!', notifications);
+    return responseHandler(res, 200, 'Notifications retrieved successfully!', notifications, totalCount);
 };
 
 /****************************************************************************************************/
@@ -325,8 +335,8 @@ exports.deleteInAppNotification = async (req, res) => {
     }
 
     try {
-        const result = await Notification.findByIdAndDelete(notificationId);
-        if (!result) {
+        const notification = await Notification.findByIdAndDelete(notificationId);
+        if (!notification) {
             return responseHandler(res, 404, 'Notification not found.');
         }
 

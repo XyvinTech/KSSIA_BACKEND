@@ -10,7 +10,7 @@ const requirementsSchema = new mongoose.Schema({
     content: { type: String },
     status: {
         type: String,
-        enum: ['pending', 'approved', 'rejected'],
+        enum: ['pending', 'approved', 'rejected', 'reported'],
         default: 'pending'
     },
     reason: { type: String }

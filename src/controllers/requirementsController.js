@@ -232,7 +232,7 @@ exports.updateRequirementStatus = async (req, res) => {
         reason
     } = req.body;
 
-    const validStatuses = ["pending", "approved", "rejected"];
+    const validStatuses = ["pending", "approved", "rejected" , "reported"];
     if (!validStatuses.includes(status)) {
         return responseHandler(res, 400, "Invalid status value");
     }
