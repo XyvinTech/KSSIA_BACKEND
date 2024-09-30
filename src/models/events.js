@@ -25,6 +25,9 @@ const eventSchema = new mongoose.Schema({
     endTime: {
         type: Date
     },
+    venue:{
+        type: String
+    },
     platform: {
         type: String
     },

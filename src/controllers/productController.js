@@ -2,7 +2,8 @@ require("dotenv").config();
 const path = require("path");
 const responseHandler = require("../helpers/responseHandler");
 const Product = require("../models/products");
-const User = require("../models/user")
+const User = require("../models/user");
+const Message = require("../models/messages");
 const {
   productsSchemaval
 } = require("../validation");
@@ -393,3 +394,18 @@ exports.updateProductStatus = async (req, res) => {
       return responseHandler(res, 500, `Error saving product: ${err.message}`);
   }
 };
+
+/****************************************************************************************************/
+/*                         Function to count messages based on product                              */
+/****************************************************************************************************/
+exports.getMessageCount = async (req, res) => {
+  const userId = req.userId;
+
+  if(userId == undefined || userId == ""){
+    return responseHandler(res, 401, "Unauthorized");
+  }
+
+  const products = await Product.find({seller_id: userId});
+  const messageCount = await Message.countDocuments({product: {$in: products.map(p => p._id)}});
+  return responseHandler(res, 200, "Message count for products", {messageCount});
+}

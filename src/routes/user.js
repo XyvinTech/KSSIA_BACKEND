@@ -71,6 +71,6 @@ userRoute
 
 userRoute
   .route('/request/nfc')
-  .post(asyncHandler(userController.requestNFC));
+  .post(asyncHandler(userController.requestNFC)); // Request NFC 
 
 module.exports = userRoute;
