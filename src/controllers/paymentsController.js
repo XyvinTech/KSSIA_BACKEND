@@ -321,6 +321,7 @@ exports.getUserPayments = async (req, res) => {
         return responseHandler(res, 404, "User not found");
     }
 
+    const totalCount = await Payment.find({ member: userId });
     const payments = await Payment.find({ member: userId })
         .skip(skipCount)
         .limit(limit)
@@ -332,7 +333,7 @@ exports.getUserPayments = async (req, res) => {
         return responseHandler(res, 404, "No payments found");
     }
 
-    return responseHandler(res, 200, "Successfully retrieved payments", payments);
+    return responseHandler(res, 200, "Successfully retrieved payments", payments, totalCount);
 };
 
 /****************************************************************************************************/
