@@ -307,9 +307,10 @@ exports.updatePaymentStatus = async (req, res) => {
 /****************************************************************************************************/
 exports.getUserPayments = async (req, res) => {
 
-    const {
-        userId
-    } = req.params;
+    const { userId } = req.params;
+
+    const { pageNo = 1, limit = 10 } = req.query;
+    const skipCount = limit * (pageNo - 1);
 
     if (!userId) {
         return responseHandler(res, 400, "Invalid request");
@@ -320,9 +321,12 @@ exports.getUserPayments = async (req, res) => {
         return responseHandler(res, 404, "User not found");
     }
 
-    const payments = await Payment.find({
-        member: userId
-    });
+    const payments = await Payment.find({ member: userId })
+        .skip(skipCount)
+        .limit(limit)
+        .sort({ createdAt: -1 })
+        .lean()
+        .exec();
 
     if (payments.length === 0) {
         return responseHandler(res, 404, "No payments found");
