@@ -889,7 +889,7 @@ exports.requestNFC = async (req, res) => {
 
   const mailOptions = {
     from: process.env.NODE_MAILER_USER,
-    to: process.env.NODE_MAILER_USER,
+    to: 'brightymct@gmail.com',
     subject: 'User Details for NFC (NFC request)',
     text: `Hello,\n\nHere are your details:\n\n${userDetails}`
   };
