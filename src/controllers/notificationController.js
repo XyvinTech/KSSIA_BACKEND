@@ -242,9 +242,9 @@ exports.updateInAppNotification = async (req, res) => {
             data.file_url
         );
         await notification.save();
-        return responseHandler(res, 200, "News article updated successfully!", notification);
+        return responseHandler(res, 200, "Notifiaction updated successfully!", notification);
     } catch (err) {
-        return responseHandler(res, 500, `Error saving news: ${err.message}`);
+        return responseHandler(res, 500, `Error saving notification: ${err.message}`);
     }
 
 };
@@ -479,3 +479,32 @@ exports.createAndSendEmailNotification = async (req, res) => {
         return responseHandler(res, 500, `Server error: ${err.message}`);
     }
 };
+
+/*************************************************************************************k***************/
+/*                                Function to get notification by ID                                 */
+/****************************************************************************************************/
+
+exports.getNotificationByID = async (req, res) => {
+
+    const {
+        notificationId
+    } = req.params;
+
+    if (!notificationId) {
+        // If notificationId is not provided, return a 400 status code with the error message
+        // console.log('Invalid request');                                              // Debug line
+        return responseHandler(res, 400, `Invalid request`);
+    }
+
+    try {
+        const notification = await Notification.findById(notificationId);
+        if (!notification) {
+            return responseHandler(res, 404, 'Notification not found.');
+        }
+
+        return responseHandler(res, 200, "Notifiaction fetched successfully!", notification);
+
+    } catch (err) {
+        return responseHandler(res, 500, `Error fetching notification: ${err.message}`);
+    }
+}

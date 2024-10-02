@@ -40,6 +40,17 @@ notificationRoute.put(
     asyncHandler(notificationController.updateInAppNotification)
 );
 
+notificationRoute.get(
+    '/in-app/:notificationId', 
+    asyncHandler(notificationController.getNotificationByID)
+);
+
+// Route to delete an in-app notification
+notificationRoute.delete(
+    '/in-app/:notificationId', 
+    asyncHandler(notificationController.deleteInAppNotification)
+);
+
 // Route to mark a notification as read
 notificationRoute.put(
     '/in-app/:notificationId/read/:userId', 
@@ -50,12 +61,6 @@ notificationRoute.put(
 notificationRoute.get(
     '/in-app/unread-count/:userId', 
     asyncHandler(notificationController.getUnreadNotificationCount)
-);
-
-// Route to delete an in-app notification
-notificationRoute.delete(
-    '/in-app/:notificationId', 
-    asyncHandler(notificationController.deleteInAppNotification)
 );
 
 // Route to create and send email notifications
