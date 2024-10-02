@@ -904,6 +904,10 @@ exports.requestNFC = async (req, res) => {
 
 };
 
+/****************************************************************************************************/
+/*                                   function to get app version                                    */
+/****************************************************************************************************/
+
 exports.getVersion = async (req, res) => {
   try {
     const settings = await Setting.findOne();

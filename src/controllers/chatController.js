@@ -132,6 +132,7 @@ exports.getChatThreads = async (req, res) => {
     const chatThreads = await ChatThread.find({ participants: req.userId })
       .populate("participants", "name profile_picture")
       .populate("lastMessage")
+      .sort({ updated_at: -1 })
       .exec();
 
     return responseHandler(

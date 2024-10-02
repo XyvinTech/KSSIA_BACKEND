@@ -158,20 +158,20 @@ exports.getAllProducts = async (req, res) => {
 };
 
 /****************************************************************************************************/
-/*                             Function to get all products for users                               */
+/*                      Function to get all products for users using search                         */
 /****************************************************************************************************/
 exports.getAllProductsUser = async (req, res) => {
 
   const reqUser = req.userId;
 
-  const {
-    pageNo = 1, limit = 10
-  } = req.query;
+  const { pageNo = 1, limit = 10, search = '' } = req.query;
   const skipCount = limit * (pageNo - 1);
   let filter = {
-    status: "accepted"
+    status: "accepted",
+    $text: { $search: search }  // Using text search index
+    // OR
+    // name: { $regex: new RegExp(search, 'i') }  // Case-insensitive search on name
   };
-
   const user = await User.findById(reqUser);
   if (user) {
     const blockedUsersList = user.blocked_users || [];;
