@@ -34,8 +34,11 @@ console.log(PORT, API_VERSION, NODE_ENV);
 // Enable Cross-Origin Resource Sharing (CORS) middleware
 app.use(cors());
 
-// Parse JSON request bodies
-app.use(express.json({limit: '50mb'}));
+// Increase the limit for JSON requests
+app.use(express.json({ limit: '50mb' })); // Set the limit to 50 MB
+
+// Increase the limit for URL-encoded requests
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Set the base path for API routes
 const BASE_PATH = `/api/${API_VERSION}`;
