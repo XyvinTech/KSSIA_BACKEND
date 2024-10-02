@@ -35,7 +35,7 @@ console.log(PORT, API_VERSION, NODE_ENV);
 app.use(cors());
 
 // Parse JSON request bodies
-app.use(express.json());
+app.use(express.json({limit: '50mb'}));
 
 // Set the base path for API routes
 const BASE_PATH = `/api/${API_VERSION}`;
