@@ -4,21 +4,21 @@ const Joi = require("joi");
 
 const phoneSchema = Joi.object({
     personal: Joi.string().required(),
-    landline: Joi.string(),
-    company_phone_number: Joi.string(),
-    whatsapp_number: Joi.string(),
-    whatsapp_business_number: Joi.string()
+    landline: Joi.string().allow(''),
+    company_phone_number: Joi.string().allow(''),
+    whatsapp_number: Joi.string().allow(''),
+    whatsapp_business_number: Joi.string().allow('')
 });
 
 const schemaUrl = Joi.object({
-    platform: Joi.string(),
-    url: Joi.string()
+    platform: Joi.string().allow(''),
+    url: Joi.string().allow('')
 });
 
 const otherSchema = Joi.object({
-    name: Joi.string(),
-    url: Joi.string(),
-    authority_name: Joi.string()
+    name: Joi.string().allow(''),
+    url: Joi.string().allow(''),
+    authority_name: Joi.string().allow('')
 });
 
 const productsSchema = Joi.object({
@@ -47,18 +47,18 @@ exports.CreateUserSchema = Joi.object({
     membership_id: Joi.string().required(),
     blood_group: Joi.string(),
     email: Joi.string().email().required(),
-    profile_picture: Joi.string().uri(),
-    bio: Joi.string(),
+    profile_picture: Joi.string().uri().allow(''),
+    bio: Joi.string().allow(''),
     phone_numbers: phoneSchema.required(),
-    designation: Joi.string(),
-    company_name: Joi.string(),
-    company_email: Joi.string().email(),
-    company_address: Joi.string(),
-    company_logo: Joi.string().uri(),
+    designation: Joi.string().allow(''),
+    company_name: Joi.string().allow(''),
+    company_email: Joi.string().email().allow(''),
+    company_address: Joi.string().allow(''),
+    company_logo: Joi.string().uri().allow(''),
     business_category: Joi.string(),
     sub_category: Joi.string(),
     address: Joi.string(),
-    websites: Joi.array().items(otherSchema),
+    websites: Joi.array().items(otherSchema).allow(''),
     status: Joi.string(),
     is_active: Joi.boolean().default(true),
     is_deleted: Joi.boolean().default(false)
@@ -69,32 +69,32 @@ exports.CreateUserSchema = Joi.object({
 exports.EditUserSchema = Joi.object({
     name: Joi.object({
         first_name: Joi.string().required(),
-        middle_name: Joi.string().optional(),
+        middle_name: Joi.string().optional().allow(''),
         last_name: Joi.string().required()
     }).required(),
-    blood_group: Joi.string(),
+    blood_group: Joi.string().allow(''),
     email: Joi.string().email().required(),
-    profile_picture: Joi.string().uri(),
+    profile_picture: Joi.string().uri().allow(''),
     phone_numbers: phoneSchema.required(),
-    designation: Joi.string(),
-    company_name: Joi.string(),
-    company_email: Joi.string().email(),
-    company_address: Joi.string(),
-    company_logo: Joi.string().uri(),
-    business_category: Joi.string(),
-    sub_category: Joi.string(),
+    designation: Joi.string().allow(''),
+    company_name: Joi.string().allow(''),
+    company_email: Joi.string().email().allow(''),
+    company_address: Joi.string().allow(''),
+    company_logo: Joi.string().uri().allow(''),
+    business_category: Joi.string().allow(''),
+    sub_category: Joi.string().allow(''),
     // business_category: Joi.string(),
     // sub_category: Joi.string(),
-    bio: Joi.string(),
-    address: Joi.string(),
-    social_media: Joi.array().items(schemaUrl),
-    websites: Joi.array().items(otherSchema),
-    video: Joi.array().items(otherSchema),
-    awards: Joi.array().items(otherSchema),
-    certificates: Joi.array().items(otherSchema),
-    brochure: Joi.array().items(otherSchema),
-    products: Joi.array().items(productsSchema),
-    status: Joi.string(),
+    bio: Joi.string().allow(''),
+    address: Joi.string().allow(''),
+    social_media: Joi.array().items(schemaUrl).allow(''),
+    websites: Joi.array().items(otherSchema).allow(''),
+    video: Joi.array().items(otherSchema).allow(''),
+    awards: Joi.array().items(otherSchema).allow(''),
+    certificates: Joi.array().items(otherSchema).allow(''),
+    brochure: Joi.array().items(otherSchema).allow(''),
+    products: Joi.array().items(productsSchema).allow(''),
+    status: Joi.string().allow(''),
     is_active: Joi.boolean().default(true),
     is_deleted: Joi.boolean().default(false),
     selectedTheme: Joi.string()
