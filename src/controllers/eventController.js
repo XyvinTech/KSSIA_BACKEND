@@ -174,20 +174,34 @@ exports.editEvent = async (req, res) => {
 // Get all events
 exports.getAllEvents = async (req, res) => {
 
-    const { pageNo = 1, limit = 10 } = req.query;
+    const { pageNo = 1, limit = 10, search = "" } = req.query;
     const skipCount = limit * (pageNo - 1);
-    const filter = {};
+
+    // Build search filter
+    const filter = search ? {
+        $or: [
+            { name: { $regex: search, $options: "i" } },  // case-insensitive search
+            { type: { $regex: search, $options: "i" } },
+            { organiser_name: { $regex: search, $options: "i" } },
+            { organiser_company_name: { $regex: search, $options: "i" } },
+            { description: { $regex: search, $options: "i" } },
+            // Search inside speakers array for speaker_name, speaker_designation, or speaker_role
+            { speakers: { $elemMatch: { speaker_name: { $regex: search, $options: "i" } } } },
+            { speakers: { $elemMatch: { speaker_designation: { $regex: search, $options: "i" } } } },
+            { speakers: { $elemMatch: { speaker_role: { $regex: search, $options: "i" } } } }
+        ]
+    } : {};
 
     const totalCount = await Event.countDocuments(filter);
     const events = await Event.find(filter)
-    .skip(skipCount)
-    .limit(limit)
-    .sort({ startDate: -1 }) // Customize sorting as needed
-    .lean();
+        .skip(skipCount)
+        .limit(limit)
+        .sort({ startDate: -1 }) // Customize sorting as needed
+        .lean();
 
     return responseHandler(res, 200, "Events retrieved successfully", events, totalCount);
-
 };
+
 
 /****************************************************************************************************/
 /*                                 Function to get event by id                                    */

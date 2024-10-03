@@ -49,10 +49,12 @@ exports.createInAppNotification = async (req, res) => {
 
     let userFCM = [];
 
-    if (data.to[0] == '*'){
+    if (data.to[0] == "*"){
         const users = await User.find().select('fcm').exec();
         users.forEach(user => {
-            userFCM.push(user.fcm);
+            if (user.fcm != "" && user.fcm != undefined){
+                userFCM.push(user.fcm);
+            }
         }); 
     }
     
