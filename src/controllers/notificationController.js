@@ -48,12 +48,22 @@ exports.createInAppNotification = async (req, res) => {
     }
 
     let userFCM = [];
-    if (data.to.length > 0) {
-        for (let i = 0; i < data.to.length; i++) {
-            const id = data.to[i];
-            const findUser = await User.findById(id);
-            if (findUser) {
-                userFCM.push(findUser.fcm);
+
+    if (data.to[0] == '*'){
+        const users = await User.find().select('fcm').exec();
+        users.forEach(user => {
+            userFCM.push(user.fcm);
+        }); 
+    }
+    
+    else{
+        if (data.to.length > 0) {
+            for (let i = 0; i < data.to.length; i++) {
+                const id = data.to[i];
+                const findUser = await User.findById(id);
+                if (findUser) {
+                    userFCM.push(findUser.fcm);
+                }
             }
         }
     }
