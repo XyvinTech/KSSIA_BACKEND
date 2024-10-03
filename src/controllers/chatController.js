@@ -83,6 +83,7 @@ exports.sendMessage = async (req, res) => {
     return responseHandler(res, 500, "Internal Server Error");
   }
 };
+
 /****************************************************************************************************/
 /*                                   Function to get messages between users                         */
 /****************************************************************************************************/
@@ -132,6 +133,7 @@ exports.getChatThreads = async (req, res) => {
     const chatThreads = await ChatThread.find({ participants: req.userId })
       .populate("participants", "name profile_picture")
       .populate("lastMessage")
+      .sort({ updatedAt: -1 })
       .exec();
 
     return responseHandler(
@@ -145,6 +147,7 @@ exports.getChatThreads = async (req, res) => {
     return responseHandler(res, 500, "Internal Server Error");
   }
 };
+
 /****************************************************************************************************/
 /*                                   Function to mark message seen                                  */
 /****************************************************************************************************/
@@ -175,6 +178,7 @@ exports.markMessagesAsSeen = async (req, res) => {
     return responseHandler(res, 500, "Internal Server Error");
   }
 };
+
 /****************************************************************************************************/
 /*                                   Function to delete message                                     */
 /****************************************************************************************************/
@@ -221,6 +225,7 @@ exports.deleteMessage = async (req, res) => {
     return responseHandler(res, 500, `Error deleting message: ${err.message}`);
   }
 };
+
 /****************************************************************************************************/
 /*                                   Function to delete chats                                       */
 /****************************************************************************************************/
@@ -256,6 +261,7 @@ exports.deleteAllMessagesOfUser = async (req, res) => {
     return responseHandler(res, 500, "Internal Server Error");
   }
 };
+
 /****************************************************************************************************/
 /*                                   Function to get unread notification                            */
 /****************************************************************************************************/

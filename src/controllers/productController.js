@@ -158,72 +158,142 @@ exports.getAllProducts = async (req, res) => {
 };
 
 /****************************************************************************************************/
-/*                             Function to get all products for users                               */
+/*                  Function to get all products for users using search and aggregation              */
 /****************************************************************************************************/
 exports.getAllProductsUser = async (req, res) => {
+  try {
+    const reqUser = req.userId;
+    const { pageNo = 1, limit = 10, search = '' } = req.query;
+    const skipCount = limit * (pageNo - 1);
 
-  const reqUser = req.userId;
+    let filter = { status: "accepted" };
 
-  const {
-    pageNo = 1, limit = 10
-  } = req.query;
-  const skipCount = limit * (pageNo - 1);
-  let filter = {
-    status: "accepted"
-  };
+    // Fetch the current user to get their blocked lists
+    const user = await User.findById(reqUser);
+    if (user) {
+      const blockedUsersList = user.blocked_users || [];
+      const blockedProductSellers = user.blocked_products || [];
 
-  const user = await User.findById(reqUser);
-  if (user) {
-    const blockedUsersList = user.blocked_users || [];;
-    const blockedProductSellers = user.blocked_products || [];;
-    // Extract userIds from both lists
-    const blockedUserIds = blockedUsersList.map(item => item.userId);
-    const blockedProductUserIds = blockedProductSellers.map(item => item.userId);
-    // Combine both lists into a single array
-    const combinedBlockedUserIds = [...blockedUserIds, ...blockedProductUserIds];
-    // To remove duplicates 
-    const uniqueBlockedUserIds = [...new Set(combinedBlockedUserIds)];
-    filter = {
-      seller_id: {
-        $nin: uniqueBlockedUserIds
+      // Extract userIds from both lists and remove duplicates
+      const blockedUserIds = blockedUsersList.map(item => item.userId);
+      const blockedProductUserIds = blockedProductSellers.map(item => item.userId);
+      const uniqueBlockedUserIds = [...new Set([...blockedUserIds, ...blockedProductUserIds])];
+
+      // Add blocked user ids to the filter to exclude products from these users
+      filter.seller_id = { $nin: uniqueBlockedUserIds };
+    }
+
+    // Build the aggregation pipeline
+    const pipeline = [
+      // Stage 1: Match products based on status and blocked users
+      {
+        $match: filter
       },
-      status: "accepted"
-    };
+      // Stage 2: Lookup seller information (equivalent to populate)
+      {
+        $lookup: {
+          from: 'users', // Assuming 'users' is the collection name for User model
+          localField: 'seller_id',
+          foreignField: '_id',
+          as: 'seller_info'
+        }
+      },
+      // Stage 3: Unwind the seller_info array to get a single object
+      {
+        $unwind: '$seller_info'
+      },
+      // Stage 4: Build the search filter (product name, description, seller names)
+      {
+        $match: {
+          $or: [
+            { name: { $regex: search, $options: 'i' } }, // Product name
+            { description: { $regex: search, $options: 'i' } }, // Product description
+            { 'seller_info.name.first_name': { $regex: search, $options: 'i' } }, // Seller first name
+            { 'seller_info.name.middle_name': { $regex: search, $options: 'i' } }, // Seller middle name
+            { 'seller_info.name.last_name': { $regex: search, $options: 'i' } }, // Seller last name
+          ]
+        }
+      },
+      // Stage 5: Add a full name field for the seller
+      {
+        $addFields: {
+          full_name: {
+            $concat: [
+              { $ifNull: ['$seller_info.name.first_name', ''] },
+              ' ',
+              { $ifNull: ['$seller_info.name.middle_name', ''] },
+              ' ',
+              { $ifNull: ['$seller_info.name.last_name', ''] }
+            ]
+          }
+        }
+      },
+      // Stage 6: Sort by creation date (newest first)
+      {
+        $sort: { createdAt: -1 }
+      },
+      // Stage 7: Skip to the correct page
+      {
+        $skip: skipCount
+      },
+      // Stage 8: Limit the number of documents returned
+      {
+        $limit: parseInt(limit)
+      },
+      // Stage 9: Project the required fields (you can modify this based on what you need)
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          image: 1,
+          price: 1,
+          offer_price: 1,
+          description: 1,
+          moq: 1,
+          status: 1,
+          tags: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          full_name: 1,
+          'seller_info.membership_id': 1
+        }
+      }
+    ];
+
+    // Stage 10: Get the total count of products matching the filter
+    const totalCountPipeline = [
+      { $match: filter },
+      { $lookup: { from: 'users', localField: 'seller_id', foreignField: '_id', as: 'seller_info' } },
+      { $unwind: '$seller_info' },
+      { $match: { $or: [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { 'seller_info.name.first_name': { $regex: search, $options: 'i' } },
+        { 'seller_info.name.middle_name': { $regex: search, $options: 'i' } },
+        { 'seller_info.name.last_name': { $regex: search, $options: 'i' } }
+      ] } },
+      { $count: "totalCount" }
+    ];
+
+    // Execute the aggregation for products
+    const products = await Product.aggregate(pipeline);
+    
+    // Execute the total count aggregation
+    const totalCountResult = await Product.aggregate(totalCountPipeline);
+    const totalCount = totalCountResult[0]?.totalCount || 0;
+
+    // Return the paginated and mapped product data with total count
+    return responseHandler(
+      res,
+      200,
+      "Products retrieved successfully!",
+      products,
+      totalCount
+    );
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    return responseHandler(res, 500, "Error fetching products");
   }
-
-  // Get total count of products
-  const totalCount = await Product.countDocuments(filter);
-
-  // Fetch products with pagination, populate seller information, and sort
-  const products = await Product.find(filter)
-    .populate({
-      path: "seller_id",
-      select: "name membership_id"
-    })
-    .skip(skipCount)
-    .limit(limit)
-    .sort({
-      createdAt: -1
-    })
-    .lean() // Convert to plain JS objects
-    .exec();
-
-  // Map the products to include the required seller's full name
-  const mappedProducts = products.map((product) => {
-    return {
-      ...product, // Spread the original product data
-      full_name: `${product.seller_id?.name.first_name || ''} ${product.seller_id?.name.middle_name || ''} ${product.seller_id?.name.last_name || ''}`.trim(), // Concatenate seller's full name
-    };
-  });
-
-  // Return the paginated and mapped product data
-  return responseHandler(
-    res,
-    200,
-    "Products retrieved successfully!",
-    mappedProducts,
-    totalCount
-  );
 };
 
 /****************************************************************************************************/

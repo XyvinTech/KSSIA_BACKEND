@@ -13,7 +13,7 @@ const productSchema = new mongoose.Schema(
         offer_price: { type: Number, min: 0 },
         description: { type: String },
         moq: { type: Number, min: 0 },
-        units: { type: Number, min: 0 },
+        units: { type: String},
         status: { 
             type: String,
             default: "pending",
