@@ -116,9 +116,7 @@ exports.editProduct = async (req, res) => {
 /****************************************************************************************************/
 exports.getAllProducts = async (req, res) => {
 
-  const {
-    pageNo = 1, limit = 10
-  } = req.query;
+  const { pageNo = 1, limit = 10, search = "" } = req.query;
   const skipCount = limit * (pageNo - 1);
   let filter = {};
 

@@ -209,7 +209,7 @@ exports.getPromotionsByType = async (req, res) => {
         .limit(limit)
         .sort({ createdAt: -1 })
         .lean();
-        return responseHandler(res, 200, "Promotions retrieved successfully", promotions);
+        return responseHandler(res, 200, "Promotions retrieved successfully", promotions, totalCount);
     } catch (err) {
         return responseHandler(res, 500, `Server error: ${err.message}`);
     }
