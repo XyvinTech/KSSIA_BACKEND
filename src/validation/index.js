@@ -30,7 +30,7 @@ const productsSchema = Joi.object({
     offer_price: Joi.number().min(0),
     description: Joi.string(),
     date: Joi.date(),
-    units: Joi.number().min(0),
+    units: Joi.string(),
     moq: Joi.number().min(0),
     status: Joi.string(),
     tags: Joi.array().items(Joi.string())
