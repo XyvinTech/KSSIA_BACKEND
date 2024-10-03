@@ -24,7 +24,6 @@ const { specs, swaggerUi } = require('./src/middlewares/swagger/swagger');
 const { app, server } = require("./src/socket/socket.js"); // Import server and io from socket file
 const reportRoute = require("./src/routes/report");
 
-
 app.use(volleyball);
 
 // Define the PORT, NODE_ENV & API version based on environment variable
