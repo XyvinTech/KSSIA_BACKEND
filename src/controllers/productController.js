@@ -132,12 +132,12 @@ exports.getAllProducts = async (req, res) => {
         from: 'users', // Assuming 'users' is the collection name for User model
         localField: 'seller_id',
         foreignField: '_id',
-        as: 'seller_info'
+        as: 'seller_id'
       }
     },
-    // Stage 3: Unwind the seller_info array to get a single object
+    // Stage 3: Unwind the seller_id array to get a single object
     {
-      $unwind: '$seller_info'
+      $unwind: '$seller_id'
     },
     // Stage 4: Build the search filter (product name, description, seller names)
     {
@@ -145,9 +145,9 @@ exports.getAllProducts = async (req, res) => {
         $or: [
           { name: { $regex: search, $options: 'i' } }, // Product name
           { description: { $regex: search, $options: 'i' } }, // Product description
-          { 'seller_info.name.first_name': { $regex: search, $options: 'i' } }, // Seller first name
-          { 'seller_info.name.middle_name': { $regex: search, $options: 'i' } }, // Seller middle name
-          { 'seller_info.name.last_name': { $regex: search, $options: 'i' } }, // Seller last name
+          { 'seller_id.name.first_name': { $regex: search, $options: 'i' } }, // Seller first name
+          { 'seller_id.name.middle_name': { $regex: search, $options: 'i' } }, // Seller middle name
+          { 'seller_id.name.last_name': { $regex: search, $options: 'i' } }, // Seller last name
         ]
       }
     },
@@ -156,11 +156,11 @@ exports.getAllProducts = async (req, res) => {
       $addFields: {
         full_name: {
           $concat: [
-            { $ifNull: ['$seller_info.name.first_name', ''] },
+            { $ifNull: ['$seller_id.name.first_name', ''] },
             ' ',
-            { $ifNull: ['$seller_info.name.middle_name', ''] },
+            { $ifNull: ['$seller_id.name.middle_name', ''] },
             ' ',
-            { $ifNull: ['$seller_info.name.last_name', ''] }
+            { $ifNull: ['$seller_id.name.last_name', ''] }
           ]
         }
       }
@@ -192,7 +192,8 @@ exports.getAllProducts = async (req, res) => {
         createdAt: 1,
         updatedAt: 1,
         full_name: 1,
-        'seller_info.membership_id': 1
+        'seller_id.membership_id': 1,
+        'seller_id._id': 1
       }
     }
   ];
@@ -200,14 +201,14 @@ exports.getAllProducts = async (req, res) => {
   // Stage 10: Get the total count of products matching the filter
   const totalCountPipeline = [
     { $match: filter },
-    { $lookup: { from: 'users', localField: 'seller_id', foreignField: '_id', as: 'seller_info' } },
-    { $unwind: '$seller_info' },
+    { $lookup: { from: 'users', localField: 'seller_id', foreignField: '_id', as: 'seller_id' } },
+    { $unwind: '$seller_id' },
     { $match: { $or: [
       { name: { $regex: search, $options: 'i' } },
       { description: { $regex: search, $options: 'i' } },
-      { 'seller_info.name.first_name': { $regex: search, $options: 'i' } },
-      { 'seller_info.name.middle_name': { $regex: search, $options: 'i' } },
-      { 'seller_info.name.last_name': { $regex: search, $options: 'i' } }
+      { 'seller_id.name.first_name': { $regex: search, $options: 'i' } },
+      { 'seller_id.name.middle_name': { $regex: search, $options: 'i' } },
+      { 'seller_id.name.last_name': { $regex: search, $options: 'i' } }
     ] } },
     { $count: "totalCount" }
   ];
@@ -267,12 +268,12 @@ exports.getAllProductsUser = async (req, res) => {
           from: 'users', // Assuming 'users' is the collection name for User model
           localField: 'seller_id',
           foreignField: '_id',
-          as: 'seller_info'
+          as: 'seller_id'
         }
       },
-      // Stage 3: Unwind the seller_info array to get a single object
+      // Stage 3: Unwind the seller_id array to get a single object
       {
-        $unwind: '$seller_info'
+        $unwind: '$seller_id'
       },
       // Stage 4: Build the search filter (product name, description, seller names)
       {
@@ -280,9 +281,9 @@ exports.getAllProductsUser = async (req, res) => {
           $or: [
             { name: { $regex: search, $options: 'i' } }, // Product name
             { description: { $regex: search, $options: 'i' } }, // Product description
-            { 'seller_info.name.first_name': { $regex: search, $options: 'i' } }, // Seller first name
-            { 'seller_info.name.middle_name': { $regex: search, $options: 'i' } }, // Seller middle name
-            { 'seller_info.name.last_name': { $regex: search, $options: 'i' } }, // Seller last name
+            { 'seller_id.name.first_name': { $regex: search, $options: 'i' } }, // Seller first name
+            { 'seller_id.name.middle_name': { $regex: search, $options: 'i' } }, // Seller middle name
+            { 'seller_id.name.last_name': { $regex: search, $options: 'i' } }, // Seller last name
           ]
         }
       },
@@ -291,11 +292,11 @@ exports.getAllProductsUser = async (req, res) => {
         $addFields: {
           full_name: {
             $concat: [
-              { $ifNull: ['$seller_info.name.first_name', ''] },
+              { $ifNull: ['$seller_id.name.first_name', ''] },
               ' ',
-              { $ifNull: ['$seller_info.name.middle_name', ''] },
+              { $ifNull: ['$seller_id.name.middle_name', ''] },
               ' ',
-              { $ifNull: ['$seller_info.name.last_name', ''] }
+              { $ifNull: ['$seller_id.name.last_name', ''] }
             ]
           }
         }
@@ -327,7 +328,8 @@ exports.getAllProductsUser = async (req, res) => {
           createdAt: 1,
           updatedAt: 1,
           full_name: 1,
-          'seller_info.membership_id': 1
+          'seller_id.membership_id': 1,
+          'seller_id._id': 1
         }
       }
     ];
@@ -335,14 +337,14 @@ exports.getAllProductsUser = async (req, res) => {
     // Stage 10: Get the total count of products matching the filter
     const totalCountPipeline = [
       { $match: filter },
-      { $lookup: { from: 'users', localField: 'seller_id', foreignField: '_id', as: 'seller_info' } },
-      { $unwind: '$seller_info' },
+      { $lookup: { from: 'users', localField: 'seller_id', foreignField: '_id', as: 'seller_id' } },
+      { $unwind: '$seller_id' },
       { $match: { $or: [
         { name: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } },
-        { 'seller_info.name.first_name': { $regex: search, $options: 'i' } },
-        { 'seller_info.name.middle_name': { $regex: search, $options: 'i' } },
-        { 'seller_info.name.last_name': { $regex: search, $options: 'i' } }
+        { 'seller_id.name.first_name': { $regex: search, $options: 'i' } },
+        { 'seller_id.name.middle_name': { $regex: search, $options: 'i' } },
+        { 'seller_id.name.last_name': { $regex: search, $options: 'i' } }
       ] } },
       { $count: "totalCount" }
     ];
