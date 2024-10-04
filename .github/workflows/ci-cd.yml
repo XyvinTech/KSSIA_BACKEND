@@ -15,13 +15,12 @@ jobs:
         node-version: [20.x]
 
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-      ECR_REPOSITORY: kssia
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+      AWS_REGION: ${{ secrets.AWS_REGION_PROD }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID_PROD }}
+      ECR_REPOSITORY: kssia-dev
       IMAGE_TAG: latest
-  
 
     steps:
       - name: Checkout repository
@@ -40,27 +39,30 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: kssia
           IMAGE_TAG: latest
-        
-        run: |      
+
+        run: |
           docker build -t ${{env.ECR_REGISTRY}}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} .
           docker push ${{env.ECR_REGISTRY}}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
 
-
       - name: Deploy to EC2
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+          AWS_REGION: ${{ secrets.AWS_REGION_PROD }}
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID_PROD }}
+          API_VERSION: ${{ secrets.API_VERSION }}
+          MONGO_URL: ${{ secrets.MONGO_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          EMAIL_ID: ${{ secrets.EMAIL_ID }}
+          PASSWORD: ${{ secrets.PASSWORD }}
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: kssia
+          ECR_REPOSITORY: kssia-dev
           IMAGE_TAG: latest
           EC2_INSTANCE_IP: ${{ secrets.EC2_INSTANCE_IP }}
-          SSH_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
+          SSH_KEY: ${{ secrets.EC2_PRIVATE_KEY_PROD }}
           USERNAME: ec2-user
           PORT: 3000
           CONTAINER_NAME: KSSIA_BACKEND
-          ENV_FILE_PATH: /home/ec2-user/.env
 
         uses: appleboy/ssh-action@master
         with:
@@ -72,20 +74,28 @@ jobs:
 
             # Refresh ECR login
             aws ecr get-login-password --region ${{ env.AWS_REGION }} | sudo docker login --username AWS --password-stdin ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
-            
+
             # Pull Docker Image
             sudo docker pull ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
 
-            sudo docker stop ${{ env.CONTAINER_NAME }} || true
-            sudo docker rm ${{ env.CONTAINER_NAME }} || true
+            # sudo docker stop ${{ env.CONTAINER_NAME }} || true
+            # sudo docker rm ${{ env.CONTAINER_NAME }} || true
 
             sudo docker run -d \
               -p ${{ env.PORT }}:${{ env.PORT }}\
               --name ${{ env.CONTAINER_NAME }} \
-              --env-file ${{ env.ENV_FILE_PATH }} \
               -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
               -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
               -e AWS_REGION=${{ secrets.AWS_REGION }} \
+              -e AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }} \
+              -e API_VERSION=${{ env.API_VERSION }} \
+              -e MONGO_URL=${{ env.MONGO_URL }} \
+              -e JWT_SECRET=${{ env.JWT_SECRET }} \
+              -e NODE_MAILER_USER=${{ env.EMAIL_ID }} \
+              -e NODE_MAILER_PASS=${{ env.PASSWORD }} \
+              -e PORT=${{ env.PORT }} \
               -e ENVIRONMENT=production \
                 ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+
+
 
