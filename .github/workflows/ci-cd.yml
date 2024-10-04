@@ -37,7 +37,7 @@ jobs:
         id: build-and-push-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: kssia
+          ECR_REPOSITORY: kssia-dev
           IMAGE_TAG: latest
 
         run: |
