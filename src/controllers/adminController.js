@@ -275,20 +275,33 @@ exports.deleteUser = async (req, res) => {
 
 exports.getAllUsers = async (req, res) => {
   try {
+    
     const userId = req.userId;
+    const { pageNo = 1, limit = 10, search = "" } = req.query;
 
-    const { pageNo = 1, limit = 10 } = req.query;
-    let filter = {};
+    let filter = {}; // Initialize the filter object
 
-    if (userId && (userId != "" || userId != undefined)) {
-      filter = {
-        _id: {
-          $nin: userId
-        }
-      }
+    // Exclude the requesting user from the results
+    if (userId && (userId != "" || userId != undefined)){
+      filter._id = { $nin: userId };
     }
 
-    if (limit == "full") {
+    // Add search functionality
+    if (search) {
+      const regex = new RegExp(search, 'i'); // Case-insensitive regex
+      filter = {
+        ...filter,
+        $or: [
+          { 'name.first_name': { $regex: regex } },
+          { 'name.middle_name': { $regex: regex } },
+          { 'name.last_name': { $regex: regex } },
+          { email: { $regex: regex } },
+          { 'phone_numbers.personal': { $regex: regex } }
+        ]
+      };
+    }
+
+    if (limit === "full") {
       const users = await User.find(filter).populate({
         path: "reviews.reviewer",
         select: "name profile_picture"
@@ -298,16 +311,15 @@ exports.getAllUsers = async (req, res) => {
       const mappedData = users.map((user) => {
         return {
           ...user._doc, // Spread the original user data
-          full_name: `${user.name.first_name} ${user.name.middle_name || ''} ${user.name.last_name}`, // Concatenate names
+          full_name: `${user.name.first_name} ${user.name.middle_name || ''} ${user.name.last_name}`.trim(),
           mobile: user.phone_numbers?.personal || 'N/A', // Handle phone number or return 'N/A'
         };
       });
-      
-      // Return the paginated and mapped data
+
+      // Return the full data
       return responseHandler(res, 200, "Users retrieved successfully", mappedData);
 
     } else {
-
       const skipCount = limit * (pageNo - 1);
 
       // Get total count of users
@@ -321,16 +333,14 @@ exports.getAllUsers = async (req, res) => {
         })
         .skip(skipCount)
         .limit(limit)
-        .sort({
-          createdAt: -1
-        })
+        .sort({ createdAt: -1 })
         .lean();
 
       // Map the data to include the required fields (full name and mobile)
       const mappedData = users.map((user) => {
         return {
           ...user, // Spread the original user data
-          full_name: `${user.name.first_name} ${user.name.middle_name || ''} ${user.name.last_name}`, // Concatenate names
+          full_name: `${user.name.first_name} ${user.name.middle_name || ''} ${user.name.last_name}`.trim(),
           mobile: user.phone_numbers?.personal || 'N/A', // Handle phone number or return 'N/A'
         };
       });
