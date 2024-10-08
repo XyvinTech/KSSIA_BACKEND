@@ -33,57 +33,166 @@ exports.createReport = async (req, res) => {
 };
 
 exports.getReports = async (req, res) => {
-
     const {
-        pageNo = 1, limit = 10, search
+        pageNo = 1, limit = 10, search = ''
     } = req.query;
-    const skipCount = 10 * (pageNo - 1);
-    const filter = {};
-    const totalCount = await Report.countDocuments(filter);
-    const data = await Report.find(filter)
-        .populate({
-            path: "reportBy",
-            select: "name company_name phone_numbers"
-        })
-        .skip(skipCount)
-        .limit(limit)
-        .sort({
-            createdAt: -1,
-            _id: 1
-        })
-        .lean();
+    const skipCount = parseInt(limit) * (pageNo - 1);
+    
+    try {
+        // Aggregation pipeline
+        const pipeline = [
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'reportBy',
+                    foreignField: '_id',
+                    as: 'reportByDetails'
+                }
+            },
+            {
+                $unwind: '$reportByDetails'
+            },
+            {
+                $facet: {
+                    userReports: [
+                        { $match: { reportType: 'user' } },
+                        {
+                            $lookup: {
+                                from: 'users',
+                                localField: 'reportedItemId',
+                                foreignField: '_id',
+                                as: 'reportedElement'
+                            }
+                        },
+                        { $unwind: { path: '$reportedElement', preserveNullAndEmptyArrays: true } }
+                    ],
+                    productReports: [
+                        { $match: { reportType: 'product' } },
+                        {
+                            $lookup: {
+                                from: 'products',
+                                localField: 'reportedItemId',
+                                foreignField: '_id',
+                                as: 'reportedElement'
+                            }
+                        },
+                        { $unwind: { path: '$reportedElement', preserveNullAndEmptyArrays: true } }
+                    ],
+                    messageReports: [
+                        { $match: { reportType: 'chat' } },
+                        {
+                            $lookup: {
+                                from: 'messages',
+                                localField: 'reportedItemId',
+                                foreignField: '_id',
+                                as: 'reportedElement'
+                            }
+                        },
+                        { $unwind: { path: '$reportedElement', preserveNullAndEmptyArrays: true } }
+                    ],
+                    requirementReports: [
+                        { $match: { reportType: 'requirement' } },
+                        {
+                            $lookup: {
+                                from: 'requirements',
+                                localField: 'reportedItemId',
+                                foreignField: '_id',
+                                as: 'reportedElement'
+                            }
+                        },
+                        { $unwind: { path: '$reportedElement', preserveNullAndEmptyArrays: true } }
+                    ]
+                }
+            },
+            {
+                $project: {
+                    reports: {
+                        $concatArrays: ['$userReports', '$productReports', '$messageReports', '$requirementReports']
+                    }
+                }
+            },
+            {
+                $unwind: '$reports'
+            },
+            {
+                $replaceRoot: { newRoot: '$reports' }
+            },
+            {
+                $match: {
+                    $or: [
+                        { 'reportByDetails.name.first_name': { $regex: search, $options: 'i' } },
+                        { 'reportByDetails.name.middle_name': { $regex: search, $options: 'i' } },
+                        { 'reportByDetails.name.last_name': { $regex: search, $options: 'i' } },
+                        { 'reportByDetails.company_name': { $regex: search, $options: 'i' } },
+                        { 'reportByDetails.phone_numbers.personal': { $regex: search, $options: 'i' } },
+                        { 'reportedElement.name': { $regex: search, $options: 'i' } },
+                        { 'reportedElement.company_name': { $regex: search, $options: 'i' } },
+                        { 'reportedElement.description': { $regex: search, $options: 'i' } },
+                        { 'reportedElement.tags': { $regex: search, $options: 'i' } },
+                        { 'reportedElement.content': { $regex: search, $options: 'i' } },
+                        { 'reportedElement.subject': { $regex: search, $options: 'i' } }
+                    ]
+                }
+            },
+            {
+                $sort: { createdAt: -1 } // Sort reports by creation date (descending)
+            },
+            {
+                $facet: {
+                    data: [
+                        { $skip: skipCount }, // Pagination: skip documents
+                        { $limit: parseInt(limit) } // Pagination: limit the number of documents
+                    ],
+                    totalCount: [
+                        { $count: 'count' } // Get the total count of matching documents
+                    ]
+                }
+            }
+        ];
 
-    const reportData = await Promise.all(data.map(async (element) => {
-        let reportedElement;
+        // Execute the aggregation pipeline
+        const result = await Report.aggregate(pipeline);
+        const reportData = result[0].data || [];
+        const totalCount = result[0].totalCount.length > 0 ? result[0].totalCount[0].count : 0;
 
-        const reportedItemId = element.reportedItemId;
+        // Fetch reported items in parallel for each report
+        const reportDetails = await Promise.all(
+            reportData.map(async (element) => {
+                let reportedElement = null;
+                const reportedItemId = element.reportedItemId;
 
-        switch (element.reportType) {
-            case "product":
-                reportedElement = await Product.findById(reportedItemId);
-                break;
-            case "requirement":
-                reportedElement = await Requirements.findById(reportedItemId);
-                break;
-            case "user":
-                reportedElement = await User.findById(reportedItemId);
-                break;
-            case "chat":
-                reportedElement = await Messages.findById(reportedItemId);
-                break;
-            default:
-                reportedElement = null; // Handle unknown report types
-        }
+                switch (element.reportType) {
+                    case 'product':
+                        reportedElement = await Product.findById(reportedItemId).lean();
+                        break;
+                    case 'requirement':
+                        reportedElement = await Requirements.findById(reportedItemId).lean();
+                        break;
+                    case 'user':
+                        reportedElement = await User.findById(reportedItemId).lean();
+                        break;
+                    case 'chat':
+                        reportedElement = await Messages.findById(reportedItemId).lean();
+                        break;
+                    default:
+                        reportedElement = null;
+                }
 
-        return {
-            ...element,
-            reportedElement: reportedElement
-        };
-    }));
+                return {
+                    ...element,
+                    reportedElement
+                };
+            })
+        );
 
-    return responseHandler(res, 200, "Reports found successfull..!", reportData, totalCount);
-
+        // Send response with paginated data
+        return responseHandler(res, 200, 'Reports retrieved successfully!', reportDetails, totalCount);
+    } catch (error) {
+        console.error(error); // Log the error for debugging
+        return responseHandler(res, 500, 'Error fetching reports', null, null);
+    }
 };
+
 
 exports.deleteReports = async (req, res) => {
 

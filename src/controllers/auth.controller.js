@@ -82,8 +82,29 @@ exports.editAdmin = async (req, res) => {
 
 // Get all admins
 exports.getAllAdmins = async (req, res) => {
-    const admins = await Admin.find();
-    return responseHandler(res, 200, 'Admins retrieved successfully', admins);
+
+    const { pageNo = 1, limit = 10, search = "" } = req.query;
+    const skipCount = limit * (pageNo - 1);
+    let filter = {};
+
+    // Add search functionality
+    if (search) {
+        const regex = new RegExp(search, 'i'); // 'i' for case-insensitive
+        filter = {
+            $or: [
+                { name: { $regex: regex } },
+                { email: { $regex: regex } }
+            ]
+        };
+    }
+
+    const totalCount = await Admin.countDocuments(filter);
+    const admins = await Admin.find(filter)
+        .skip(skipCount)
+        .limit(limit)
+        .sort({ createdAt: -1 }) // Customize sorting as needed
+        .lean();
+    return responseHandler(res, 200, 'Admins retrieved successfully', admins, totalCount);
 };
 
 // Get admin by ID
