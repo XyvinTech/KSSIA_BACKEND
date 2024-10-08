@@ -147,6 +147,30 @@ exports.getReports = async (req, res) => {
                         { $count: 'count' } // Get the total count of matching documents
                     ]
                 }
+            },
+            {
+                $project: {
+                    reports: {
+                        content: '$reports.content',
+                        reportBy: '$reports.reportBy',
+                        reportType: '$reports.reportType',
+                        reportedItemId: '$reports.reportedItemId',
+                        createdAt: '$reports.createdAt',
+                        updatedAt: '$reports.updatedAt',
+                        reportByDetails: {
+                            _id: '$reports.reportByDetails._id',
+                            full_name: {
+                                $concat: [
+                                    { $ifNull: ['$reports.reportByDetails.name.first_name', ''] },
+                                    ' ',
+                                    { $ifNull: ['$reports.reportByDetails.name.middle_name', ''] },
+                                    ' ',
+                                    { $ifNull: ['$reports.reportByDetails.name.last_name', ''] }
+                                ]
+                            }
+                        }
+                    }
+                }
             }
         ];
 
