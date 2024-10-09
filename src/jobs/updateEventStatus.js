@@ -10,99 +10,103 @@ cron.schedule("* * * * *", async () => {
   const currentDateTime = moment.utc(now.format("YYYY-MM-DDTHH:mm")).toDate();
 
   try {
-    // Update events from "upcoming" or "postponded" to "live"
-    const liveEvents = await Event.updateMany(
+    // Update events from "upcoming" or "postponed" to "live"
+    const updatedLiveEvents = await Event.updateMany(
       {
         status: { $in: ["upcoming", "postponded"] },
         startDate: { $lte: now.toDate() },
         startTime: { $lte: currentDateTime },
       },
-      { status: "live" },
-      { new: true }
+      { status: "live" }
     );
 
-    try {
-      liveEvents.forEach( async event => {
-        const topic = `event_${event._id}`;
-        const message = {
+    // Retrieve only events that were updated to "live" in this operation
+    const liveEvents = await Event.find({
+      status: "live",
+      updatedAt: { $gte: now.subtract(1, 'minute').toDate() }, // Fetch only recently updated events
+      startDate: { $lte: now.toDate() },
+      startTime: { $lte: currentDateTime },
+    });
+
+    liveEvents.forEach(async (event) => {
+      const topic = `event_${event._id}`;
+      const message = {
+        notification: {
+          title: `Event ${event.name} is now live!`,
+          body: `The event ${event.name} has started. Join now!`,
+        },
+        topic: topic,
+        android: {
           notification: {
-            title: `Event ${event.name} is now live!`,
-            body: `The event ${event.name} has started. Join now!`,
+            imageUrl: event.image,
           },
-          topic: topic,
-          android: {
-            notification: {
-              imageUrl: event.image,
+        },
+        apns: {
+          payload: {
+            aps: {
+              "mutable-content": 1,
             },
           },
-          apns: {
-            payload: {
-              aps: {
-                "mutable-content": 1,
-              },
-            },
-            fcm_options: {
-              imageUrl: event.image,
-            },
+          fcm_options: {
+            imageUrl: event.image,
           },
-        };
-        
-        // Send the notification using the Firebase Cloud Messaging (FCM) service
-        await getMessaging().send(message);
+        },
+      };
 
-      });  
-    } catch (error) {
-      console.log(`error creating notification : ${error}`);
-    }
+      // Send the notification using Firebase Cloud Messaging (FCM)
+      await getMessaging().send(message);
+    });
 
-    console.log(`Updated ${liveEvents.modifiedCount} events to live`);
+    console.log(`Updated ${updatedLiveEvents.modifiedCount} notified: ${liveEvents.length} events to live`);
 
     // Update events from "live" to "completed"
-    const completedEvents = await Event.updateMany(
+    const updatedCompletedEvents = await Event.updateMany(
       {
         status: "live",
         endDate: { $lte: now.toDate() },
         endTime: { $lte: currentDateTime },
       },
-      { status: "completed" },
-      { new: true }
+      { status: "completed" }
     );
 
-    try {
-      completedEvents.forEach(async event => {
-        const topic = `event_${event._id}`;
-        const message = {
-          notification: {
-            title: `Event ${event.name} is now completed!`,
-            body: `The event ${event.name} has ended. Thank you for participating!`,
-          },
-          topic: topic,
-          android: {
-            notification: {
-              imageUrl: event.image,
-            },
-          },
-          apns: {
-            payload: {
-              aps: {
-                "mutable-content": 1,
-              },
-            },
-            fcm_options: {
-              imageUrl: event.image,
-            },
-          },
-        };
-        
-        // Send the notification using the Firebase Cloud Messaging (FCM) service
-        await getMessaging().send(message);
-      
-      });  
-    } catch (error) {
-      console.log(`error creating notification : ${error}`);
-    }
+    // Retrieve only events that were updated to "completed" in this operation
+    const completedEvents = await Event.find({
+      status: "completed",
+      updatedAt: { $gte: now.subtract(1, 'minute').toDate() }, // Fetch only recently updated events
+      endDate: { $lte: now.toDate() },
+      endTime: { $lte: currentDateTime },
+    });
 
-    console.log(`Updated ${completedEvents.modifiedCount} events to completed`);
+    completedEvents.forEach(async (event) => {
+      const topic = `event_${event._id}`;
+      const message = {
+        notification: {
+          title: `Event ${event.name} is now completed!`,
+          body: `The event ${event.name} has ended. Thank you for participating!`,
+        },
+        topic: topic,
+        android: {
+          notification: {
+            imageUrl: event.image,
+          },
+        },
+        apns: {
+          payload: {
+            aps: {
+              "mutable-content": 1,
+            },
+          },
+          fcm_options: {
+            imageUrl: event.image,
+          },
+        },
+      };
+
+      // Send the notification using Firebase Cloud Messaging (FCM)
+      await getMessaging().send(message);
+    });
+
+    console.log(`Updated: ${updatedCompletedEvents.modifiedCount} notified: ${completedEvents.length} events to completed`);
   } catch (err) {
     console.error("Error updating events:", err);
   }
