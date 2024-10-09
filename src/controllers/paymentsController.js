@@ -9,6 +9,7 @@ const {
     UserPaymentSchema
 } = require("../validation");
 const handleFileUpload = require("../utils/fileHandler");
+const sendInAppNotification = require("../utils/sendInAppNotification");
 
 /****************************************************************************************************/
 /*                                  Function to create payments                                     */
@@ -291,11 +292,41 @@ exports.updatePaymentStatus = async (req, res) => {
         return responseHandler(res, 404, "Payment details do not exist");
     }
 
+    if(status == "accepted"){
+        payment.reason = '';
+    }
+
     payment.status = status;
     payment.reason = reason;
 
     try {
         await payment.save();
+
+        try {
+
+            const user = await User.findById(payment.member);
+            if (!user) {
+                return responseHandler(res, 404, "User not found");
+            }
+    
+            const userFCM = user.fcm;
+            const subject = `${payment.category} status update`;
+            let content = `Your payment for ${payment.category} has been ${payment.status}`.trim();
+    
+            if((payment.reason != "") && (payment.reason != undefined)){
+                content = `Your payment for ${payment.category} has been ${payment.status} beacuse ${payment.reason}`.trim();
+            }
+    
+            await sendInAppNotification(
+                userFCM,
+                subject,
+                content
+            );
+    
+            } catch (error) {
+                console.log(`error creating notification : ${error}`);
+            }
+
         return responseHandler(res, 200, "Payment status updated successfully", payment);
     } catch (err) {
         return responseHandler(res, 500, `Error saving payment: ${err.message}`);

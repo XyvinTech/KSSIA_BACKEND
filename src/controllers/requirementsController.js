@@ -8,6 +8,7 @@ const deleteFile = require("../helpers/deleteFiles");
 const {
     RequirementsSchema
 } = require("../validation");
+const sendInAppNotification = require("../utils/sendInAppNotification");
 
 /****************************************************************************************************/
 /*                                Function to create requirements                                   */
@@ -320,11 +321,43 @@ exports.updateRequirementStatus = async (req, res) => {
         return responseHandler(res, 404, "Requirement details do not exist");
     }
 
+    if(status == "approved"){
+        requirement.reason = '';
+    }
+
     requirement.status = status;
     requirement.reason = reason;
 
     try {
         await requirement.save();
+
+        try {
+
+            const user = await User.findById(requirement.author);
+            if (!user) {
+                return responseHandler(res, 404, "User not found");
+            }
+    
+            const userFCM = user.fcm;
+            const subject = `Requirement status update`;
+            let content = `Your requirement has been ${requirement.status}`.trim();
+            const file_url = requirement.image;
+    
+            if((requirement.reason != "") && (requirement.reason != undefined)){
+                content = `Your requirement has been ${requirement.status} beacuse ${requirement.reason}`.trim();
+            }
+    
+            await sendInAppNotification(
+                userFCM,
+                subject,
+                content,
+                file_url
+            );
+    
+            } catch (error) {
+                console.log(`error creating notification : ${error}`);
+            }
+
         return responseHandler(res, 200, "Requirement status updated successfully", requirement);
     } catch (err) {
         return responseHandler(res, 500, `Error saving requirement: ${err.message}`);
