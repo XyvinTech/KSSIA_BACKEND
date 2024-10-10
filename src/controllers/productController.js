@@ -4,9 +4,7 @@ const responseHandler = require("../helpers/responseHandler");
 const Product = require("../models/products");
 const User = require("../models/user");
 const Message = require("../models/messages");
-const {
-  productsSchemaval
-} = require("../validation");
+const { productsSchemaval } = require("../validation");
 const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
 const sendInAppNotification = require("../utils/sendInAppNotification");
@@ -18,9 +16,7 @@ exports.addProduct = async (req, res) => {
   const data = req.body;
 
   // Validate the input data
-  const {
-    error
-  } = productsSchemaval.validate(data, {
+  const { error } = productsSchemaval.validate(data, {
     abortEarly: true,
   });
 
@@ -51,7 +47,7 @@ exports.addProduct = async (req, res) => {
   // Create a new product
   const newProduct = new Product({
     ...data,
-    image
+    image,
   });
   await newProduct.save();
 
@@ -62,9 +58,7 @@ exports.addProduct = async (req, res) => {
 /*                                    Function to edit product                                      */
 /****************************************************************************************************/
 exports.editProduct = async (req, res) => {
-  const {
-    productId
-  } = req.params;
+  const { productId } = req.params;
   const data = req.body;
 
   // Validate the presence of the productId in the request
@@ -73,9 +67,7 @@ exports.editProduct = async (req, res) => {
   }
 
   // Validate the input data
-  const {
-    error
-  } = productsSchemaval.validate(data, {
+  const { error } = productsSchemaval.validate(data, {
     abortEarly: true,
   });
 
@@ -105,7 +97,7 @@ exports.editProduct = async (req, res) => {
 
   // Update the product
   Object.assign(product, data, {
-    image
+    image,
   });
   await product.save();
 
@@ -116,7 +108,6 @@ exports.editProduct = async (req, res) => {
 /*                                  Function to get all products                                    */
 /****************************************************************************************************/
 exports.getAllProducts = async (req, res) => {
-
   const { pageNo = 1, limit = 10, search = "" } = req.query;
   const skipCount = limit * (pageNo - 1);
   let filter = {};
@@ -125,58 +116,58 @@ exports.getAllProducts = async (req, res) => {
   const pipeline = [
     // Stage 1: Match products based on status and blocked users
     {
-      $match: filter
+      $match: filter,
     },
     // Stage 2: Lookup seller information (equivalent to populate)
     {
       $lookup: {
-        from: 'users', // Assuming 'users' is the collection name for User model
-        localField: 'seller_id',
-        foreignField: '_id',
-        as: 'seller_id'
-      }
+        from: "users", // Assuming 'users' is the collection name for User model
+        localField: "seller_id",
+        foreignField: "_id",
+        as: "seller_id",
+      },
     },
     // Stage 3: Unwind the seller_id array to get a single object
     {
-      $unwind: '$seller_id'
+      $unwind: "$seller_id",
     },
     // Stage 4: Build the search filter (product name, description, seller names)
     {
       $match: {
         $or: [
-          { name: { $regex: search, $options: 'i' } }, // Product name
-          { description: { $regex: search, $options: 'i' } }, // Product description
-          { 'seller_id.name.first_name': { $regex: search, $options: 'i' } }, // Seller first name
-          { 'seller_id.name.middle_name': { $regex: search, $options: 'i' } }, // Seller middle name
-          { 'seller_id.name.last_name': { $regex: search, $options: 'i' } }, // Seller last name
-        ]
-      }
+          { name: { $regex: search, $options: "i" } }, // Product name
+          { description: { $regex: search, $options: "i" } }, // Product description
+          { "seller_id.name.first_name": { $regex: search, $options: "i" } }, // Seller first name
+          { "seller_id.name.middle_name": { $regex: search, $options: "i" } }, // Seller middle name
+          { "seller_id.name.last_name": { $regex: search, $options: "i" } }, // Seller last name
+        ],
+      },
     },
     // Stage 5: Add a full name field for the seller
     {
       $addFields: {
         full_name: {
           $concat: [
-            { $ifNull: ['$seller_id.name.first_name', ''] },
-            ' ',
-            { $ifNull: ['$seller_id.name.middle_name', ''] },
-            ' ',
-            { $ifNull: ['$seller_id.name.last_name', ''] }
-          ]
-        }
-      }
+            { $ifNull: ["$seller_id.name.first_name", ""] },
+            " ",
+            { $ifNull: ["$seller_id.name.middle_name", ""] },
+            " ",
+            { $ifNull: ["$seller_id.name.last_name", ""] },
+          ],
+        },
+      },
     },
     // Stage 6: Sort by creation date (newest first)
     {
-      $sort: { createdAt: -1 }
+      $sort: { createdAt: -1 },
     },
     // Stage 7: Skip to the correct page
     {
-      $skip: skipCount
+      $skip: skipCount,
     },
     // Stage 8: Limit the number of documents returned
     {
-      $limit: parseInt(limit)
+      $limit: parseInt(limit),
     },
     // Stage 9: Project the required fields (you can modify this based on what you need)
     {
@@ -193,30 +184,41 @@ exports.getAllProducts = async (req, res) => {
         createdAt: 1,
         updatedAt: 1,
         full_name: 1,
-        'seller_id.membership_id': 1,
-        'seller_id._id': 1
-      }
-    }
+        "seller_id.membership_id": 1,
+        "seller_id._id": 1,
+      },
+    },
   ];
 
   // Stage 10: Get the total count of products matching the filter
   const totalCountPipeline = [
     { $match: filter },
-    { $lookup: { from: 'users', localField: 'seller_id', foreignField: '_id', as: 'seller_id' } },
-    { $unwind: '$seller_id' },
-    { $match: { $or: [
-      { name: { $regex: search, $options: 'i' } },
-      { description: { $regex: search, $options: 'i' } },
-      { 'seller_id.name.first_name': { $regex: search, $options: 'i' } },
-      { 'seller_id.name.middle_name': { $regex: search, $options: 'i' } },
-      { 'seller_id.name.last_name': { $regex: search, $options: 'i' } }
-    ] } },
-    { $count: "totalCount" }
+    {
+      $lookup: {
+        from: "users",
+        localField: "seller_id",
+        foreignField: "_id",
+        as: "seller_id",
+      },
+    },
+    { $unwind: "$seller_id" },
+    {
+      $match: {
+        $or: [
+          { name: { $regex: search, $options: "i" } },
+          { description: { $regex: search, $options: "i" } },
+          { "seller_id.name.first_name": { $regex: search, $options: "i" } },
+          { "seller_id.name.middle_name": { $regex: search, $options: "i" } },
+          { "seller_id.name.last_name": { $regex: search, $options: "i" } },
+        ],
+      },
+    },
+    { $count: "totalCount" },
   ];
 
   // Execute the aggregation for products
   const products = await Product.aggregate(pipeline);
-  
+
   // Execute the total count aggregation
   const totalCountResult = await Product.aggregate(totalCountPipeline);
   const totalCount = totalCountResult[0]?.totalCount || 0;
@@ -237,7 +239,7 @@ exports.getAllProducts = async (req, res) => {
 exports.getAllProductsUser = async (req, res) => {
   try {
     const reqUser = req.userId;
-    const { pageNo = 1, limit = 10, search = '' } = req.query;
+    const { pageNo = 1, limit = 10, search = "" } = req.query;
     const skipCount = limit * (pageNo - 1);
 
     let filter = { status: "accepted" };
@@ -249,9 +251,18 @@ exports.getAllProductsUser = async (req, res) => {
       const blockedProductSellers = user.blocked_products || [];
 
       // Extract userIds from both lists and remove duplicates
-      const blockedUserIds = blockedUsersList.map(item => item.userId);
-      const blockedProductUserIds = blockedProductSellers.map(item => item.userId);
-      const uniqueBlockedUserIds = [...new Set([...blockedUserIds, ...blockedProductUserIds])];
+      const blockedUserIds = blockedUsersList.map(
+        (item) => item.userId
+      );
+      const blockedProductUserIds = blockedProductSellers.map(
+        (item) => item.userId
+      );
+      // Combine both lists into a single array, remove duplicates
+      const uniqueBlockedUserIds = [
+        ...new Set([...blockedUserIds, ...blockedProductUserIds]),
+      ];
+      // Add the requested user ID to the blocked list to avoid fetching the users product
+      uniqueBlockedUserIds.push(user._id);
 
       // Add blocked user ids to the filter to exclude products from these users
       filter.seller_id = { $nin: uniqueBlockedUserIds };
@@ -261,58 +272,58 @@ exports.getAllProductsUser = async (req, res) => {
     const pipeline = [
       // Stage 1: Match products based on status and blocked users
       {
-        $match: filter
+        $match: filter,
       },
       // Stage 2: Lookup seller information (equivalent to populate)
       {
         $lookup: {
-          from: 'users', // Assuming 'users' is the collection name for User model
-          localField: 'seller_id',
-          foreignField: '_id',
-          as: 'seller_id'
-        }
+          from: "users", // Assuming 'users' is the collection name for User model
+          localField: "seller_id",
+          foreignField: "_id",
+          as: "seller_id",
+        },
       },
       // Stage 3: Unwind the seller_id array to get a single object
       {
-        $unwind: '$seller_id'
+        $unwind: "$seller_id",
       },
       // Stage 4: Build the search filter (product name, description, seller names)
       {
         $match: {
           $or: [
-            { name: { $regex: search, $options: 'i' } }, // Product name
-            { description: { $regex: search, $options: 'i' } }, // Product description
-            { 'seller_id.name.first_name': { $regex: search, $options: 'i' } }, // Seller first name
-            { 'seller_id.name.middle_name': { $regex: search, $options: 'i' } }, // Seller middle name
-            { 'seller_id.name.last_name': { $regex: search, $options: 'i' } }, // Seller last name
-          ]
-        }
+            { name: { $regex: search, $options: "i" } }, // Product name
+            { description: { $regex: search, $options: "i" } }, // Product description
+            { "seller_id.name.first_name": { $regex: search, $options: "i" } }, // Seller first name
+            { "seller_id.name.middle_name": { $regex: search, $options: "i" } }, // Seller middle name
+            { "seller_id.name.last_name": { $regex: search, $options: "i" } }, // Seller last name
+          ],
+        },
       },
       // Stage 5: Add a full name field for the seller
       {
         $addFields: {
           full_name: {
             $concat: [
-              { $ifNull: ['$seller_id.name.first_name', ''] },
-              ' ',
-              { $ifNull: ['$seller_id.name.middle_name', ''] },
-              ' ',
-              { $ifNull: ['$seller_id.name.last_name', ''] }
-            ]
-          }
-        }
+              { $ifNull: ["$seller_id.name.first_name", ""] },
+              " ",
+              { $ifNull: ["$seller_id.name.middle_name", ""] },
+              " ",
+              { $ifNull: ["$seller_id.name.last_name", ""] },
+            ],
+          },
+        },
       },
       // Stage 6: Sort by creation date (newest first)
       {
-        $sort: { createdAt: -1 }
+        $sort: { createdAt: -1 },
       },
       // Stage 7: Skip to the correct page
       {
-        $skip: skipCount
+        $skip: skipCount,
       },
       // Stage 8: Limit the number of documents returned
       {
-        $limit: parseInt(limit)
+        $limit: parseInt(limit),
       },
       // Stage 9: Project the required fields (you can modify this based on what you need)
       {
@@ -329,30 +340,41 @@ exports.getAllProductsUser = async (req, res) => {
           createdAt: 1,
           updatedAt: 1,
           full_name: 1,
-          'seller_id.membership_id': 1,
-          'seller_id._id': 1
-        }
-      }
+          "seller_id.membership_id": 1,
+          "seller_id._id": 1,
+        },
+      },
     ];
 
     // Stage 10: Get the total count of products matching the filter
     const totalCountPipeline = [
       { $match: filter },
-      { $lookup: { from: 'users', localField: 'seller_id', foreignField: '_id', as: 'seller_id' } },
-      { $unwind: '$seller_id' },
-      { $match: { $or: [
-        { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-        { 'seller_id.name.first_name': { $regex: search, $options: 'i' } },
-        { 'seller_id.name.middle_name': { $regex: search, $options: 'i' } },
-        { 'seller_id.name.last_name': { $regex: search, $options: 'i' } }
-      ] } },
-      { $count: "totalCount" }
+      {
+        $lookup: {
+          from: "users",
+          localField: "seller_id",
+          foreignField: "_id",
+          as: "seller_id",
+        },
+      },
+      { $unwind: "$seller_id" },
+      {
+        $match: {
+          $or: [
+            { name: { $regex: search, $options: "i" } },
+            { description: { $regex: search, $options: "i" } },
+            { "seller_id.name.first_name": { $regex: search, $options: "i" } },
+            { "seller_id.name.middle_name": { $regex: search, $options: "i" } },
+            { "seller_id.name.last_name": { $regex: search, $options: "i" } },
+          ],
+        },
+      },
+      { $count: "totalCount" },
     ];
 
     // Execute the aggregation for products
     const products = await Product.aggregate(pipeline);
-    
+
     // Execute the total count aggregation
     const totalCountResult = await Product.aggregate(totalCountPipeline);
     const totalCount = totalCountResult[0]?.totalCount || 0;
@@ -375,9 +397,7 @@ exports.getAllProductsUser = async (req, res) => {
 /*                                 Function to get product by id                                    */
 /****************************************************************************************************/
 exports.getProductsById = async (req, res) => {
-  const {
-    productId
-  } = req.params;
+  const { productId } = req.params;
 
   const reqUser = req.userId;
 
@@ -387,24 +407,29 @@ exports.getProductsById = async (req, res) => {
 
   const user = await User.findById(reqUser);
 
-  const uniqueBlockedUserIds =[]
+  const uniqueBlockedUserIds = [];
 
   if (user) {
-    const blockedUsersList = user.blocked_users || [];;
-    const blockedProductSellers = user.blocked_products || [];;
+    const blockedUsersList = user.blocked_users || [];
+    const blockedProductSellers = user.blocked_products || [];
     // Extract userIds from both lists
-    const blockedUserIds = blockedUsersList.map(item => item.userId);
-    const blockedProductUserIds = blockedProductSellers.map(item => item.userId);
+    const blockedUserIds = blockedUsersList.map((item) => item.userId);
+    const blockedProductUserIds = blockedProductSellers.map(
+      (item) => item.userId
+    );
     // Combine both lists into a single array
-    const combinedBlockedUserIds = [...blockedUserIds, ...blockedProductUserIds];
-    // To remove duplicates 
+    const combinedBlockedUserIds = [
+      ...blockedUserIds,
+      ...blockedProductUserIds,
+    ];
+    // To remove duplicates
     uniqueBlockedUserIds = [...new Set(combinedBlockedUserIds)];
   }
 
   const product = await Product.findById(productId)
     .populate({
       path: "seller_id",
-      select: "name membership_id"
+      select: "name membership_id",
     })
     .exec();
 
@@ -415,7 +440,11 @@ exports.getProductsById = async (req, res) => {
   if (uniqueBlockedUserIds) {
     // Check if the seller of the product is blocked
     if (uniqueBlockedUserIds.includes(product.seller_id._id)) {
-      return responseHandler(res, 403, "You have blocked the seller of this product or have blocked the products by this seller");
+      return responseHandler(
+        res,
+        403,
+        "You have blocked the seller of this product or have blocked the products by this seller"
+      );
     }
   }
 
@@ -426,9 +455,7 @@ exports.getProductsById = async (req, res) => {
 /*                          Function to get products by a single seller                             */
 /****************************************************************************************************/
 exports.getProductsBySeller = async (req, res) => {
-  const {
-    sellerId
-  } = req.params;
+  const { sellerId } = req.params;
   const reqUser = req.userId;
 
   if (!sellerId) {
@@ -437,28 +464,37 @@ exports.getProductsBySeller = async (req, res) => {
 
   const user = await User.findById(reqUser);
   if (user) {
-    const blockedUsersList = user.blocked_users || [];;
-    const blockedProductSellers = user.blocked_products || [];;
+    const blockedUsersList = user.blocked_users || [];
+    const blockedProductSellers = user.blocked_products || [];
     // Extract userIds from both lists
-    const blockedUserIds = blockedUsersList.map(item => item.userId);
-    const blockedProductUserIds = blockedProductSellers.map(item => item.userId);
+    const blockedUserIds = blockedUsersList.map((item) => item.userId);
+    const blockedProductUserIds = blockedProductSellers.map(
+      (item) => item.userId
+    );
     // Combine both lists into a single array
-    const combinedBlockedUserIds = [...blockedUserIds, ...blockedProductUserIds];
-    // To remove duplicates 
+    const combinedBlockedUserIds = [
+      ...blockedUserIds,
+      ...blockedProductUserIds,
+    ];
+    // To remove duplicates
     const uniqueBlockedUserIds = [...new Set(combinedBlockedUserIds)];
 
     // Check if the seller of the product is blocked
     if (uniqueBlockedUserIds.includes(sellerId)) {
-      return responseHandler(res, 403, "You have blocked the seller of this product or have blocked the products by this seller");
+      return responseHandler(
+        res,
+        403,
+        "You have blocked the seller of this product or have blocked the products by this seller"
+      );
     }
   }
 
   const products = await Product.find({
-      seller_id: sellerId
-    })
+    seller_id: sellerId,
+  })
     .populate({
       path: "seller_id",
-      select: "name membership_id"
+      select: "name membership_id",
     })
     .exec();
   if (!products.length) {
@@ -477,9 +513,7 @@ exports.getProductsBySeller = async (req, res) => {
 /*                                   Function to delete product                                     */
 /****************************************************************************************************/
 exports.deleteProduct = async (req, res) => {
-  const {
-    productId
-  } = req.params;
+  const { productId } = req.params;
 
   if (!productId) {
     return responseHandler(res, 400, "Invalid request");
@@ -511,17 +545,12 @@ exports.deleteProduct = async (req, res) => {
 /*                             Function to update status of product                                 */
 /****************************************************************************************************/
 exports.updateProductStatus = async (req, res) => {
-  const {
-    productId
-  } = req.params;
-  const {
-      status,
-      reason
-  } = req.body;
+  const { productId } = req.params;
+  const { status, reason } = req.body;
 
   const validStatuses = ["pending", "accepted", "rejected", "reported"];
   if (!validStatuses.includes(status)) {
-      return responseHandler(res, 400, "Invalid status value");
+    return responseHandler(res, 400, "Invalid status value");
   }
 
   const product = await Product.findById(productId);
@@ -529,48 +558,52 @@ exports.updateProductStatus = async (req, res) => {
     return responseHandler(res, 404, "Product not found");
   }
 
-  if(status == "accepted"){
-    product.reason = '';
+  if (status == "accepted") {
+    product.reason = "";
   }
 
   product.status = status;
   product.reason = reason;
 
   try {
+    await product.save();
 
-      await product.save();
-
-      try {
-
-        const user = await User.findById(product.seller_id);
-        if (!user) {
-          return responseHandler(res, 404, "User not found");
-        }
-
-        const userFCM = user.fcm;
-        const subject = `${product.name} status update`;
-        let content = `Your product ${product.name} has been ${product.status}`.trim();
-        const file_url = product.image;
-
-        if((product.reason != "") && (product.reason != undefined)){
-          content = `Your product ${product.name} has been ${product.status} beacuse ${product.reason}`.trim();
-        }
-
-        await sendInAppNotification(
-          userFCM,
-          subject,
-          content,
-          file_url,
-          'approvals',
-        );
-
-      } catch (error) {
-        console.log(`error creating notification : ${error}`);
+    try {
+      const user = await User.findById(product.seller_id);
+      if (!user) {
+        return responseHandler(res, 404, "User not found");
       }
 
-      return responseHandler(res, 200, "Product status updated successfully", product);
+      const userFCM = user.fcm;
+      const subject = `${product.name} status update`;
+      let content =
+        `Your product ${product.name} has been ${product.status}`.trim();
+      const file_url = product.image;
+
+      if (product.reason != "" && product.reason != undefined) {
+        content =
+          `Your product ${product.name} has been ${product.status} beacuse ${product.reason}`.trim();
+      }
+
+      await sendInAppNotification(
+        userFCM,
+        subject,
+        content,
+        file_url,
+        "approvals"
+      );
+    } catch (error) {
+      console.log(`error creating notification : ${error}`);
+    }
+
+    return responseHandler(
+      res,
+      200,
+      "Product status updated successfully",
+      product
+    );
   } catch (err) {
-      return responseHandler(res, 500, `Error saving product: ${err.message}`);
+    return responseHandler(res, 500, `Error saving product: ${err.message}`);
   }
 };
 
@@ -580,11 +613,15 @@ exports.updateProductStatus = async (req, res) => {
 exports.getMessageCount = async (req, res) => {
   const userId = req.userId;
 
-  if(userId == undefined || userId == ""){
+  if (userId == undefined || userId == "") {
     return responseHandler(res, 401, "Unauthorized");
   }
 
-  const products = await Product.find({seller_id: userId});
-  const messageCount = await Message.countDocuments({product: {$in: products.map(p => p._id)}});
-  return responseHandler(res, 200, "Message count for products", {messageCount});
-}
+  const products = await Product.find({ seller_id: userId });
+  const messageCount = await Message.countDocuments({
+    product: { $in: products.map((p) => p._id) },
+  });
+  return responseHandler(res, 200, "Message count for products", {
+    messageCount,
+  });
+};
