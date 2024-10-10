@@ -99,6 +99,10 @@ exports.sendMessage = async (req, res) => {
     }
 
     let NotificationSubject = "New Message";
+    
+    let validAttachments = attachments.filter(att => att && att.startsWith('http'));
+    let imageUrl = validAttachments.length > 0 ? validAttachments[0].url : null;
+
 
     try {
       const user = await User.findById(from);
@@ -109,11 +113,13 @@ exports.sendMessage = async (req, res) => {
       NotificationSubject = `${full_name} sent you a message`;
 
       if (product_sent != '') {
-        NotificationSubject = `${full_name} sent you a message about product ${product_sent.name}`
+        NotificationSubject = `${full_name} sent you a message about product ${product_sent.name}`;
+        imageUrl = product_sent.image;
       }
 
       if (requirement_sent != '') {
-        NotificationSubject = `${full_name} sent you a message about requirement ${requirement_sent.content}`
+        NotificationSubject = `${full_name} sent you a message about requirement ${requirement_sent.content}`;
+        imageUrl = requirement_sent.image;
       }
 
     } catch (error) {
@@ -128,10 +134,7 @@ exports.sendMessage = async (req, res) => {
       console.log(userFCM);
       console.log(NotificationSubject);
       console.log(newMessage.content);
-      console.log(newMessage.attachments);
-
-      let validAttachments = attachments.filter(att => att.url && att.url.startsWith('http'));
-      let imageUrl = validAttachments.length > 0 ? validAttachments[0].url : null;
+      console.log(imageUrl);
 
       await sendInAppNotification(
         userFCM,
@@ -140,7 +143,6 @@ exports.sendMessage = async (req, res) => {
         imageUrl, // Only pass if valid
         'message',
       );
-
 
     } catch (error) {
       console.log(`error creating notification : ${error}`);
