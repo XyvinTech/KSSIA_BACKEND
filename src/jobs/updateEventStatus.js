@@ -38,7 +38,8 @@ cron.schedule("* * * * *", async () => {
         topic: topic,
         android: {
           notification: {
-            image: event.image,
+            imageUrl: event.image,
+            tag: `event`,
           },
         },
         apns: {
@@ -87,7 +88,8 @@ cron.schedule("* * * * *", async () => {
         topic: topic,
         android: {
           notification: {
-            image: event.image,
+            imageUrl: event.image,
+            tag: `event`,
           },
         },
         apns: {

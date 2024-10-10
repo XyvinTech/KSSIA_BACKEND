@@ -1,6 +1,6 @@
 const { getMessaging } = require("firebase-admin/messaging");
 
-const sendInAppNotification = async (fcmTokens, title, body, media = null) => {
+const sendInAppNotification = async (fcmTokens, title, body, media = null , tag = null) => {
     try {
         if (!fcmTokens || fcmTokens.length === 0) {
             throw new Error("FCM tokens are required");
@@ -16,6 +16,7 @@ const sendInAppNotification = async (fcmTokens, title, body, media = null) => {
                     ...(media && {
                         imageUrl: media
                     }),
+                    ...(tag && { tag }), // Android-specific tag
                 },
             },
             apns: {

@@ -560,7 +560,8 @@ exports.updateProductStatus = async (req, res) => {
           userFCM,
           subject,
           content,
-          file_url
+          file_url,
+          'approvals',
         );
 
       } catch (error) {

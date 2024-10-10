@@ -320,7 +320,9 @@ exports.updatePaymentStatus = async (req, res) => {
             await sendInAppNotification(
                 userFCM,
                 subject,
-                content
+                content,
+                media=null,
+                'approvals',
             );
     
             } catch (error) {
