@@ -38,7 +38,7 @@ cron.schedule("* * * * *", async () => {
         topic: topic,
         android: {
           notification: {
-            imageUrl: event.image,
+            image: event.image,
           },
         },
         apns: {
@@ -48,7 +48,7 @@ cron.schedule("* * * * *", async () => {
             },
           },
           fcm_options: {
-            imageUrl: event.image,
+            image: event.image,
           },
         },
       };
@@ -87,7 +87,7 @@ cron.schedule("* * * * *", async () => {
         topic: topic,
         android: {
           notification: {
-            imageUrl: event.image,
+            image: event.image,
           },
         },
         apns: {
@@ -97,7 +97,7 @@ cron.schedule("* * * * *", async () => {
             },
           },
           fcm_options: {
-            imageUrl: event.image,
+            image: event.image,
           },
         },
       };
