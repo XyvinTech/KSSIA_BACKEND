@@ -8,6 +8,7 @@ const deleteFile = require("../helpers/deleteFiles");
 const {
     RequirementsSchema
 } = require("../validation");
+const sendInAppNotification = require("../utils/sendInAppNotification");
 
 /****************************************************************************************************/
 /*                                Function to create requirements                                   */
@@ -108,34 +109,112 @@ exports.updateRequirement = async (req, res) => {
 /*                                Function to get all requirements                                  */
 /****************************************************************************************************/
 exports.getAllRequirements = async (req, res) => {
-
     const {
-        pageNo = 1, limit = 10
+        pageNo = 1,
+        limit = 10,
+        search = ''
     } = req.query;
-    const skipCount = limit * (pageNo - 1);
 
-    let filter = {};
+    // Convert pageNo and limit to numbers
+    const pageNumber = Number(pageNo);
+    const limitNumber = Number(limit);
+    const skipCount = limitNumber * (pageNumber - 1);
+
+    // Create the aggregation pipeline
+    let pipeline = [
+        {
+            // Lookup to join the author data
+            $lookup: {
+                from: 'users', // Name of the collection for authors
+                localField: 'author', // Field in requirements
+                foreignField: '_id', // Field in users
+                as: 'author'
+            }
+        },
+        {
+            // Unwind the author array
+            $unwind: {
+                path: '$author',
+                preserveNullAndEmptyArrays: true // In case there are requirements without authors
+            }
+        },
+        {
+            // Add full_name field to each document
+            $addFields: {
+                'author.full_name': {
+                    $concat: [
+                        { $ifNull: ['$author.name.first_name', ''] },
+                        { $cond: { if: { $ne: ['$author.name.middle_name', ''] }, then: ' ', else: '' } },
+                        { $ifNull: ['$author.name.middle_name', ''] },
+                        { $cond: { if: { $ne: ['$author.name.last_name', ''] }, then: ' ', else: '' } },
+                        { $ifNull: ['$author.name.last_name', ''] }
+                    ]
+                }
+            }
+        },
+        {
+            // Project the required fields
+            $project: {
+                _id: 1,
+                image: 1,
+                content: 1,
+                status: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                __v: 1,
+                'author.full_name': 1,
+                'author.email': 1,
+                'author._id': 1,
+                'author.profile_picture': 1
+            }
+        }
+    ];
+
+    // Check if there's a search query and add a match stage
+    if (search) {
+        pipeline.push({
+            $match: {
+                $or: [
+                    { content: { $regex: search, $options: 'i' } }, // Search in content
+                    { status: { $regex: search, $options: 'i' } },  // Search in status
+                    { 'author.email': { $regex: search, $options: 'i' } },  // Search in author's email
+                    { 'author.full_name': { $regex: search, $options: 'i' } } // Search in author's full name
+                ]
+            }
+        });
+    }
+
+    // Add pagination and sorting
+    pipeline.push(
+        { $sort: { createdAt: -1 } },
+        { $skip: skipCount },
+        { $limit: limitNumber } // Ensure this is a number
+    );
 
     try {
-        const totalCount = await Requirements.countDocuments(filter);
-        const requirements = await Requirements.find(filter)
-            .populate('author', 'name email')
-            .skip(skipCount)
-            .limit(limit)
-            .sort({
-                createdAt: -1
-            })
-            .lean()
-            .exec();
+        // Get total count before applying pagination
+        const totalCount = await Requirements.countDocuments(search ? {
+            $or: [
+                { content: { $regex: search, $options: 'i' } },
+                { status: { $regex: search, $options: 'i' } },
+                { 'author.email': { $regex: search, $options: 'i' } },
+                { 'author.full_name': { $regex: search, $options: 'i' } }
+            ]
+        } : {});
+
+        // Execute the aggregation
+        const requirements = await Requirements.aggregate(pipeline).exec();
 
         if (requirements.length === 0) {
             return responseHandler(res, 404, "No requirements found");
         }
+
         return responseHandler(res, 200, "Successfully retrieved all requirements", requirements, totalCount);
     } catch (err) {
         return responseHandler(res, 500, `Error retrieving requirements: ${err.message}`);
     }
 };
+
 
 /****************************************************************************************************/
 /*                         Function to get all requirements api for users                           */
@@ -242,11 +321,43 @@ exports.updateRequirementStatus = async (req, res) => {
         return responseHandler(res, 404, "Requirement details do not exist");
     }
 
+    if(status == "approved"){
+        requirement.reason = '';
+    }
+
     requirement.status = status;
     requirement.reason = reason;
 
     try {
         await requirement.save();
+
+        try {
+
+            const user = await User.findById(requirement.author);
+            if (!user) {
+                return responseHandler(res, 404, "User not found");
+            }
+    
+            const userFCM = user.fcm;
+            const subject = `Requirement status update`;
+            let content = `Your requirement has been ${requirement.status}`.trim();
+            const file_url = requirement.image;
+    
+            if((requirement.reason != "") && (requirement.reason != undefined)){
+                content = `Your requirement has been ${requirement.status} beacuse ${requirement.reason}`.trim();
+            }
+    
+            await sendInAppNotification(
+                userFCM,
+                subject,
+                content,
+                file_url
+            );
+    
+            } catch (error) {
+                console.log(`error creating notification : ${error}`);
+            }
+
         return responseHandler(res, 200, "Requirement status updated successfully", requirement);
     } catch (err) {
         return responseHandler(res, 500, `Error saving requirement: ${err.message}`);

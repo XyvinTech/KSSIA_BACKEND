@@ -7,6 +7,7 @@ const Message = require("../models/messages");
 const { productsSchemaval } = require("../validation");
 const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
+const sendInAppNotification = require("../utils/sendInAppNotification");
 
 /****************************************************************************************************/
 /*                                    Function to add product                                       */
@@ -530,17 +531,45 @@ exports.updateProductStatus = async (req, res) => {
     return responseHandler(res, 404, "Product not found");
   }
 
+  if(status == "accepted"){
+    product.reason = '';
+  }
+
   product.status = status;
   product.reason = reason;
 
   try {
-    await product.save();
-    return responseHandler(
-      res,
-      200,
-      "Product status updated successfully",
-      product
-    );
+
+      await product.save();
+
+      try {
+
+        const user = await User.findById(product.seller_id);
+        if (!user) {
+          return responseHandler(res, 404, "User not found");
+        }
+
+        const userFCM = user.fcm;
+        const subject = `${product.name} status update`;
+        let content = `Your product ${product.name} has been ${product.status}`.trim();
+        const file_url = product.image;
+
+        if((product.reason != "") && (product.reason != undefined)){
+          content = `Your product ${product.name} has been ${product.status} beacuse ${product.reason}`.trim();
+        }
+
+        await sendInAppNotification(
+          userFCM,
+          subject,
+          content,
+          file_url
+        );
+
+      } catch (error) {
+        console.log(`error creating notification : ${error}`);
+      }
+
+      return responseHandler(res, 200, "Product status updated successfully", product);
   } catch (err) {
     return responseHandler(res, 500, `Error saving product: ${err.message}`);
   }

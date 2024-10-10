@@ -4,10 +4,12 @@ const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
 const responseHandler = require("../helpers/responseHandler");
 const Event = require("../models/events");
+const User = require("../models/user.js");
 const {
     CreateEventsSchema,
     EditEventsSchema
 } = require("../validation");
+const { getMessaging } = require("firebase-admin/messaging");
 
 /****************************************************************************************************/
 /*                                    Function to add event                                       */
@@ -302,6 +304,13 @@ exports.addRsvp = async (req, res) => {
         }
 
         await event.markrsvp(userId);
+
+        const user = await User.findById(userId).select("fcm");
+        const topic = `event_${id}`;
+        const fcmToken = user.fcm;
+        
+        await getMessaging().subscribeToTopic(fcmToken, topic);
+        
         return responseHandler(res, 200, 'RSVP updated successfully!', event);
     } catch (err) {
         return responseHandler(res, 500, `Server error: ${err.message}`);
