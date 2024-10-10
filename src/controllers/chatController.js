@@ -4,6 +4,8 @@ const responseHandler = require("../helpers/responseHandler");
 const Message = require("../models/messages");
 const ChatThread = require("../models/chats");
 const User = require("../models/user.js");
+const Product = require("../models/products.js")
+const Requirements = require("../models/requirements.js");
 const sendInAppNotification = require("../utils/sendInAppNotification");
 const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
@@ -24,18 +26,6 @@ exports.sendMessage = async (req, res) => {
   } = req.body;
   const to = req.params.id;
   const from = req.userId;
-  let NotificationSubject = "New Message";
-
-  try {
-    const user = await User.findById(from);
-    if (!user) {
-      return responseHandler(res, 404, "User not found");
-    }
-    let full_name = `${user.name.first_name} ${user.name.middle_name || ''} ${user.name.last_name}`.trim();
-    NotificationSubject = `${full_name} sent you a message`;
-  } catch (error) {
-    console.log(error);
-  }
 
   console.log("🚀 ~ exports.sendMessage= ~ from:", from)
 
@@ -71,12 +61,17 @@ exports.sendMessage = async (req, res) => {
       status: "sent",
     });
 
+    let product_sent = '';
+    let requirement_sent = '';
+
     if (product) {
       newMessage.product = product;
+      product_sent = await Product.findById(product);
     }
 
     if (requirement) {
       newMessage.requirement = requirement;
+      requirement_sent = await Requirements.findById(requirement);
     }
 
     if (!chatThread) {
@@ -103,16 +98,52 @@ exports.sendMessage = async (req, res) => {
       console.log("Receiver is not online.");
     }
 
+    let NotificationSubject = "New Message";
+    
+    let validAttachments = attachments.filter(att => att && att.startsWith('http'));
+    let imageUrl = validAttachments.length > 0 ? validAttachments[0].url : null;
+
+
+    try {
+      const user = await User.findById(from);
+      if (!user) {
+        return responseHandler(res, 404, "User not found");
+      }
+      let full_name = `${user.name.first_name} ${user.name.middle_name || ''} ${user.name.last_name}`.trim();
+      NotificationSubject = `${full_name} sent you a message`;
+
+      if (product_sent != '') {
+        NotificationSubject = `${full_name} sent you a message about product ${product_sent.name}`;
+        imageUrl = product_sent.image;
+      }
+
+      if (requirement_sent != '') {
+        NotificationSubject = `${full_name} sent you a message about requirement ${requirement_sent.content}`;
+        imageUrl = requirement_sent.image;
+      }
+
+    } catch (error) {
+      console.log(error);
+    }
+
     try {
       const user = await User.findById(to);
-      const userFCM = user.fcm;
+      let userFCM = [];
+      userFCM.push(user.fcm);
+
+      console.log(userFCM);
+      console.log(NotificationSubject);
+      console.log(newMessage.content);
+      console.log(imageUrl);
 
       await sendInAppNotification(
         userFCM,
         NotificationSubject,
-        content,
-        attachments
+        newMessage.content,
+        imageUrl, // Only pass if valid
+        'message',
       );
+
     } catch (error) {
       console.log(`error creating notification : ${error}`);
     }

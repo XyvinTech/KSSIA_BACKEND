@@ -76,7 +76,8 @@ exports.createInAppNotification = async (req, res) => {
             userFCM,
             data.subject,
             data.content,
-            data.file_url
+            data.file_url,
+            'in-app',
         );
 
         // Create a new in-app notification
