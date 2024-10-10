@@ -306,13 +306,18 @@ exports.addRsvp = async (req, res) => {
         await event.markrsvp(userId);
 
         const user = await User.findById(userId).select("fcm");
-        const topic = `event_${id}`;
+        const topic = `event_${event._id}`;
         const fcmToken = user.fcm;
-        
-        await getMessaging().subscribeToTopic(fcmToken, topic);
-        
+
+        try{
+            await getMessaging().subscribeToTopic(fcmToken, topic);
+        }catch(error){
+            console.log(`error: ${error}`);
+        }
         return responseHandler(res, 200, 'RSVP updated successfully!', event);
+
     } catch (err) {
+        console.log(`Server error: ${err}`)
         return responseHandler(res, 500, `Server error: ${err.message}`);
     }
 };
