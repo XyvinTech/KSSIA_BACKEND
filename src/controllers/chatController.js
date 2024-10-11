@@ -227,7 +227,8 @@ exports.getChatThreads = async (req, res) => {
       .populate("participants", "name profile_picture")
       .populate("lastMessage")
       .sort({
-        updatedAt: -1
+        lastMessage: -1,
+        _id: 1
       })
       .exec();
 
