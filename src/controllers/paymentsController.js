@@ -309,7 +309,9 @@ exports.updatePaymentStatus = async (req, res) => {
                 return responseHandler(res, 404, "User not found");
             }
     
-            const userFCM = user.fcm;
+            let userFCM = [];
+            userFCM.push(user.fcm);
+            
             const subject = `${payment.category} status update`;
             let content = `Your payment for ${payment.category} has been ${payment.status}`.trim();
     

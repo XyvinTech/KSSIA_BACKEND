@@ -574,7 +574,9 @@ exports.updateProductStatus = async (req, res) => {
         return responseHandler(res, 404, "User not found");
       }
 
-      const userFCM = user.fcm;
+      let userFCM = [];
+      userFCM.push(user.fcm);
+      
       const subject = `${product.name} status update`;
       let content =
         `Your product ${product.name} has been ${product.status}`.trim();
