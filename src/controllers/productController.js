@@ -121,41 +121,41 @@ exports.getAllProducts = async (req, res) => {
     // Stage 2: Lookup seller information (equivalent to populate)
     {
       $lookup: {
-        from: 'users', // Assuming 'users' is the collection name for User model
-        localField: 'seller_id',
-        foreignField: '_id',
-        as: 'seller_id'
-      }
+        from: "users", // Assuming 'users' is the collection name for User model
+        localField: "seller_id",
+        foreignField: "_id",
+        as: "seller_id",
+      },
     },
     // Stage 3: Unwind the seller_id array to get a single object
     {
-      $unwind: '$seller_id'
+      $unwind: "$seller_id",
     },
     // Stage 4: Build the search filter (product name, description, seller names)
     {
       $match: {
         $or: [
-          { name: { $regex: search, $options: 'i' } }, // Product name
-          { description: { $regex: search, $options: 'i' } }, // Product description
-          { 'seller_id.name.first_name': { $regex: search, $options: 'i' } }, // Seller first name
-          { 'seller_id.name.middle_name': { $regex: search, $options: 'i' } }, // Seller middle name
-          { 'seller_id.name.last_name': { $regex: search, $options: 'i' } }, // Seller last name
-        ]
-      }
+          { name: { $regex: search, $options: "i" } }, // Product name
+          { description: { $regex: search, $options: "i" } }, // Product description
+          { "seller_id.name.first_name": { $regex: search, $options: "i" } }, // Seller first name
+          { "seller_id.name.middle_name": { $regex: search, $options: "i" } }, // Seller middle name
+          { "seller_id.name.last_name": { $regex: search, $options: "i" } }, // Seller last name
+        ],
+      },
     },
     // Stage 5: Add a full name field for the seller
     {
       $addFields: {
         full_name: {
           $concat: [
-            { $ifNull: ['$seller_id.name.first_name', ''] },
-            ' ',
-            { $ifNull: ['$seller_id.name.middle_name', ''] },
-            ' ',
-            { $ifNull: ['$seller_id.name.last_name', ''] }
-          ]
-        }
-      }
+            { $ifNull: ["$seller_id.name.first_name", ""] },
+            " ",
+            { $ifNull: ["$seller_id.name.middle_name", ""] },
+            " ",
+            { $ifNull: ["$seller_id.name.last_name", ""] },
+          ],
+        },
+      },
     },
     // Stage 6: Sort by creation date (newest first)
     {
@@ -184,25 +184,36 @@ exports.getAllProducts = async (req, res) => {
         createdAt: 1,
         updatedAt: 1,
         full_name: 1,
-        'seller_id.membership_id': 1,
-        'seller_id._id': 1
-      }
-    }
+        "seller_id.membership_id": 1,
+        "seller_id._id": 1,
+      },
+    },
   ];
 
   // Stage 10: Get the total count of products matching the filter
   const totalCountPipeline = [
     { $match: filter },
-    { $lookup: { from: 'users', localField: 'seller_id', foreignField: '_id', as: 'seller_id' } },
-    { $unwind: '$seller_id' },
-    { $match: { $or: [
-      { name: { $regex: search, $options: 'i' } },
-      { description: { $regex: search, $options: 'i' } },
-      { 'seller_id.name.first_name': { $regex: search, $options: 'i' } },
-      { 'seller_id.name.middle_name': { $regex: search, $options: 'i' } },
-      { 'seller_id.name.last_name': { $regex: search, $options: 'i' } }
-    ] } },
-    { $count: "totalCount" }
+    {
+      $lookup: {
+        from: "users",
+        localField: "seller_id",
+        foreignField: "_id",
+        as: "seller_id",
+      },
+    },
+    { $unwind: "$seller_id" },
+    {
+      $match: {
+        $or: [
+          { name: { $regex: search, $options: "i" } },
+          { description: { $regex: search, $options: "i" } },
+          { "seller_id.name.first_name": { $regex: search, $options: "i" } },
+          { "seller_id.name.middle_name": { $regex: search, $options: "i" } },
+          { "seller_id.name.last_name": { $regex: search, $options: "i" } },
+        ],
+      },
+    },
+    { $count: "totalCount" },
   ];
 
   // Execute the aggregation for products
@@ -240,13 +251,18 @@ exports.getAllProductsUser = async (req, res) => {
       const blockedProductSellers = user.blocked_products || [];
 
       // Extract userIds from both lists and remove duplicates
-      const blockedUserIds = blockedUsersList.map((item) => item.userId);
+      const blockedUserIds = blockedUsersList.map(
+        (item) => item.userId
+      );
       const blockedProductUserIds = blockedProductSellers.map(
         (item) => item.userId
       );
+      // Combine both lists into a single array, remove duplicates
       const uniqueBlockedUserIds = [
         ...new Set([...blockedUserIds, ...blockedProductUserIds]),
       ];
+      // Add the requested user ID to the blocked list to avoid fetching the users product
+      uniqueBlockedUserIds.push(user._id);
 
       // Add blocked user ids to the filter to exclude products from these users
       filter.seller_id = { $nin: uniqueBlockedUserIds };
@@ -261,41 +277,41 @@ exports.getAllProductsUser = async (req, res) => {
       // Stage 2: Lookup seller information (equivalent to populate)
       {
         $lookup: {
-          from: 'users', // Assuming 'users' is the collection name for User model
-          localField: 'seller_id',
-          foreignField: '_id',
-          as: 'seller_id'
-        }
+          from: "users", // Assuming 'users' is the collection name for User model
+          localField: "seller_id",
+          foreignField: "_id",
+          as: "seller_id",
+        },
       },
       // Stage 3: Unwind the seller_id array to get a single object
       {
-        $unwind: '$seller_id'
+        $unwind: "$seller_id",
       },
       // Stage 4: Build the search filter (product name, description, seller names)
       {
         $match: {
           $or: [
-            { name: { $regex: search, $options: 'i' } }, // Product name
-            { description: { $regex: search, $options: 'i' } }, // Product description
-            { 'seller_id.name.first_name': { $regex: search, $options: 'i' } }, // Seller first name
-            { 'seller_id.name.middle_name': { $regex: search, $options: 'i' } }, // Seller middle name
-            { 'seller_id.name.last_name': { $regex: search, $options: 'i' } }, // Seller last name
-          ]
-        }
+            { name: { $regex: search, $options: "i" } }, // Product name
+            { description: { $regex: search, $options: "i" } }, // Product description
+            { "seller_id.name.first_name": { $regex: search, $options: "i" } }, // Seller first name
+            { "seller_id.name.middle_name": { $regex: search, $options: "i" } }, // Seller middle name
+            { "seller_id.name.last_name": { $regex: search, $options: "i" } }, // Seller last name
+          ],
+        },
       },
       // Stage 5: Add a full name field for the seller
       {
         $addFields: {
           full_name: {
             $concat: [
-              { $ifNull: ['$seller_id.name.first_name', ''] },
-              ' ',
-              { $ifNull: ['$seller_id.name.middle_name', ''] },
-              ' ',
-              { $ifNull: ['$seller_id.name.last_name', ''] }
-            ]
-          }
-        }
+              { $ifNull: ["$seller_id.name.first_name", ""] },
+              " ",
+              { $ifNull: ["$seller_id.name.middle_name", ""] },
+              " ",
+              { $ifNull: ["$seller_id.name.last_name", ""] },
+            ],
+          },
+        },
       },
       // Stage 6: Sort by creation date (newest first)
       {
@@ -324,25 +340,36 @@ exports.getAllProductsUser = async (req, res) => {
           createdAt: 1,
           updatedAt: 1,
           full_name: 1,
-          'seller_id.membership_id': 1,
-          'seller_id._id': 1
-        }
-      }
+          "seller_id.membership_id": 1,
+          "seller_id._id": 1,
+        },
+      },
     ];
 
     // Stage 10: Get the total count of products matching the filter
     const totalCountPipeline = [
       { $match: filter },
-      { $lookup: { from: 'users', localField: 'seller_id', foreignField: '_id', as: 'seller_id' } },
-      { $unwind: '$seller_id' },
-      { $match: { $or: [
-        { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-        { 'seller_id.name.first_name': { $regex: search, $options: 'i' } },
-        { 'seller_id.name.middle_name': { $regex: search, $options: 'i' } },
-        { 'seller_id.name.last_name': { $regex: search, $options: 'i' } }
-      ] } },
-      { $count: "totalCount" }
+      {
+        $lookup: {
+          from: "users",
+          localField: "seller_id",
+          foreignField: "_id",
+          as: "seller_id",
+        },
+      },
+      { $unwind: "$seller_id" },
+      {
+        $match: {
+          $or: [
+            { name: { $regex: search, $options: "i" } },
+            { description: { $regex: search, $options: "i" } },
+            { "seller_id.name.first_name": { $regex: search, $options: "i" } },
+            { "seller_id.name.middle_name": { $regex: search, $options: "i" } },
+            { "seller_id.name.last_name": { $regex: search, $options: "i" } },
+          ],
+        },
+      },
+      { $count: "totalCount" },
     ];
 
     // Execute the aggregation for products
@@ -531,46 +558,50 @@ exports.updateProductStatus = async (req, res) => {
     return responseHandler(res, 404, "Product not found");
   }
 
-  if(status == "accepted"){
-    product.reason = '';
+  if (status == "accepted") {
+    product.reason = "";
   }
 
   product.status = status;
   product.reason = reason;
 
   try {
+    await product.save();
 
-      await product.save();
-
-      try {
-
-        const user = await User.findById(product.seller_id);
-        if (!user) {
-          return responseHandler(res, 404, "User not found");
-        }
-
-        const userFCM = user.fcm;
-        const subject = `${product.name} status update`;
-        let content = `Your product ${product.name} has been ${product.status}`.trim();
-        const file_url = product.image;
-
-        if((product.reason != "") && (product.reason != undefined)){
-          content = `Your product ${product.name} has been ${product.status} beacuse ${product.reason}`.trim();
-        }
-
-        await sendInAppNotification(
-          userFCM,
-          subject,
-          content,
-          file_url,
-          'approvals',
-        );
-
-      } catch (error) {
-        console.log(`error creating notification : ${error}`);
+    try {
+      const user = await User.findById(product.seller_id);
+      if (!user) {
+        return responseHandler(res, 404, "User not found");
       }
 
-      return responseHandler(res, 200, "Product status updated successfully", product);
+      const userFCM = user.fcm;
+      const subject = `${product.name} status update`;
+      let content =
+        `Your product ${product.name} has been ${product.status}`.trim();
+      const file_url = product.image;
+
+      if (product.reason != "" && product.reason != undefined) {
+        content =
+          `Your product ${product.name} has been ${product.status} beacuse ${product.reason}`.trim();
+      }
+
+      await sendInAppNotification(
+        userFCM,
+        subject,
+        content,
+        file_url,
+        "approvals"
+      );
+    } catch (error) {
+      console.log(`error creating notification : ${error}`);
+    }
+
+    return responseHandler(
+      res,
+      200,
+      "Product status updated successfully",
+      product
+    );
   } catch (err) {
     return responseHandler(res, 500, `Error saving product: ${err.message}`);
   }
