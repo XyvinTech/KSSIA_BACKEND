@@ -303,6 +303,16 @@ exports.updatePaymentStatus = async (req, res) => {
         await payment.save();
 
         try {
+            if( (payment.status == "accepted") && (payment.category == "app")){
+                const user = await User.findById(payment.member);
+                user.subscription = payment.plan;
+                await user.save();
+            }
+        } catch (error) {
+            console.log(`error updating the user subscription : ${error}`);
+        }
+
+        try {
 
             const user = await User.findById(payment.member);
             if (!user) {
