@@ -126,6 +126,54 @@ exports.updatePayment = async (req, res) => {
 
     try {
         await payment.save();
+        try{
+
+            let user = await User.findById(payment.member);
+            
+            if (!user) {
+                    return responseHandler(res, 404, "User not found");
+            }
+
+            if(payment.status == "accepted"){
+                payment.reason = '';
+            }
+
+            try {
+                if((payment.status == "accepted") && (payment.category == "app")){
+                    user.subscription = payment.plan;
+                    await user.save();
+                }
+            } catch (error) {
+                console.log(`error updating the user subscription : ${error}`);
+            }
+    
+            try {
+    
+                let userFCM = [];
+                userFCM.push(user.fcm);
+                
+                const subject = `${payment.category} subscription status update`;
+                let content = `Your payment for ${payment.category} has been ${payment.status}`.trim();
+        
+                if((payment.reason != "") && (payment.reason != undefined)){
+                    content = `Your payment for ${payment.category} has been ${payment.status} beacuse ${payment.reason}`.trim();
+                }
+        
+                await sendInAppNotification(
+                    userFCM,
+                    subject,
+                    content,
+                    media=null,
+                    'approvals',
+                );
+        
+            } catch (error) {
+                console.log(`error creating notification : ${error}`);
+            }
+
+        } catch (error){
+            console.log(`Error featching user: ${error.message}`)
+        }
         return responseHandler(res, 200, "Payment updated successfully!", payment);
     } catch (err) {
         return responseHandler(res, 500, `Error saving payment: ${err.message}`);
@@ -160,9 +208,56 @@ exports.updateSubs = async (req, res) => {
     renewalDate.setDate(renewalDate.getDate() + (365 * year_count));
     payment.renewal = renewalDate;
     payment.days = (365 * year_count);
-
+    
     try {
+
         await payment.save();
+
+        try{
+
+            let user = await User.findById(payment.member);
+
+            if (!user) {
+                    return responseHandler(res, 404, "User not found");
+            }
+
+            if(payment.status == "accepted"){
+                payment.reason = '';
+            }
+
+            try {
+                if((payment.status == "accepted") && (payment.category == "app")){
+                    user.subscription = payment.plan;
+                    await user.save();
+                }
+            } catch (error) {
+                console.log(`error updating the user subscription : ${error}`);
+            }
+    
+            try {
+    
+                let userFCM = [];
+                userFCM.push(user.fcm);
+                
+                const subject = `${payment.category} subscription status update`;
+                let content = `Your subscription for ${payment.category} has been updated to ${payment.renewal}`.trim();
+        
+                await sendInAppNotification(
+                    userFCM,
+                    subject,
+                    content,
+                    media=null,
+                    'approvals',
+                );
+        
+            } catch (error) {
+                console.log(`error creating notification : ${error}`);
+            }
+
+        } catch (error){
+            console.log(`Error featching user: ${error.message}`)
+        }
+
         return responseHandler(res, 200, "Payment updated successfully!", payment);
     } catch (err) {
         return responseHandler(res, 500, `Error saving payment: ${err.message}`);
@@ -287,59 +382,66 @@ exports.updatePaymentStatus = async (req, res) => {
         return responseHandler(res, 400, "Invalid status value");
     }
 
-    const payment = await Payment.findById(paymentID);
+    let payment = await Payment.findById(paymentID);
     if (!payment) {
         return responseHandler(res, 404, "Payment details do not exist");
-    }
-
-    if(status == "accepted"){
-        payment.reason = '';
     }
 
     payment.status = status;
     payment.reason = reason;
 
-    try {
+   try {
+
         await payment.save();
 
-        try {
-            if( (payment.status == "accepted") && (payment.category == "app")){
-                const user = await User.findById(payment.member);
-                user.subscription = payment.plan;
-                await user.save();
-            }
-        } catch (error) {
-            console.log(`error updating the user subscription : ${error}`);
-        }
+        try{
 
-        try {
-
-            const user = await User.findById(payment.member);
-            if (!user) {
-                return responseHandler(res, 404, "User not found");
-            }
-    
-            let userFCM = [];
-            userFCM.push(user.fcm);
+            let user = await User.findById(payment.member);
             
-            const subject = `${payment.category} status update`;
-            let content = `Your payment for ${payment.category} has been ${payment.status}`.trim();
-    
-            if((payment.reason != "") && (payment.reason != undefined)){
-                content = `Your payment for ${payment.category} has been ${payment.status} beacuse ${payment.reason}`.trim();
+            if (!user) {
+                    return responseHandler(res, 404, "User not found");
+            }
+
+            if(status == "accepted"){
+                payment.reason = '';
+            }
+
+            try {
+                if((payment.status == "accepted") && (payment.category == "app")){
+                    user.subscription = payment.plan;
+                    await user.save();
+                }
+            } catch (error) {
+                console.log(`error updating the user subscription : ${error}`);
             }
     
-            await sendInAppNotification(
-                userFCM,
-                subject,
-                content,
-                media=null,
-                'approvals',
-            );
+            try {
     
+                let userFCM = [];
+                userFCM.push(user.fcm);
+                
+                const subject = `${payment.category} subscription status update`;
+                let content = `Your payment for ${payment.category} has been ${payment.status}`.trim();
+        
+                if((payment.reason != "") && (payment.reason != undefined)){
+                    content = `Your payment for ${payment.category} has been ${payment.status} beacuse ${payment.reason}`.trim();
+                }
+        
+                await sendInAppNotification(
+                    userFCM,
+                    subject,
+                    content,
+                    media=null,
+                    'approvals',
+                );
+        
             } catch (error) {
                 console.log(`error creating notification : ${error}`);
             }
+
+        } catch (error){
+            console.log(`Error featching user: ${error.message}`)
+        }
 
         return responseHandler(res, 200, "Payment status updated successfully", payment);
     } catch (err) {
