@@ -65,7 +65,8 @@ const userSchema = new mongoose.Schema(
         },
         is_active: { type: Boolean, default: true },
         is_deleted: { type: Boolean, default: false },
-        selectedTheme: { type: String, default:'white'},
+        selectedTheme: { type: String, default:'white' },
+        subscription: { type: String, default: 'free' },
         reviews: [reviewSchema],
         blocked_users: [{
             userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

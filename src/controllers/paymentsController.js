@@ -303,13 +303,25 @@ exports.updatePaymentStatus = async (req, res) => {
         await payment.save();
 
         try {
+            if( (payment.status == "accepted") && (payment.category == "app")){
+                const user = await User.findById(payment.member);
+                user.subscription = payment.plan;
+                await user.save();
+            }
+        } catch (error) {
+            console.log(`error updating the user subscription : ${error}`);
+        }
+
+        try {
 
             const user = await User.findById(payment.member);
             if (!user) {
                 return responseHandler(res, 404, "User not found");
             }
     
-            const userFCM = user.fcm;
+            let userFCM = [];
+            userFCM.push(user.fcm);
+            
             const subject = `${payment.category} status update`;
             let content = `Your payment for ${payment.category} has been ${payment.status}`.trim();
     

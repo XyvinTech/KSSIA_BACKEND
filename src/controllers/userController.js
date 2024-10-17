@@ -922,3 +922,22 @@ exports.getVersion = async (req, res) => {
     return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
   }
 };
+
+/****************************************************************************************************/
+/*                                 function to get user subscription                                */
+/****************************************************************************************************/
+
+exports.getUserSubscription = async (req, res) => {
+  const userId = req.userId;
+
+  try {
+    const user = await User.findById(userId);
+    const subscription = user.subscription;
+    if (!subscription) {
+      return responseHandler(res, 404, "User subscription not found", 'free');
+    }
+    return responseHandler(res, 200, "User subscription fetched successfully", subscription);
+  } catch (error) {
+    return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
+  }
+}

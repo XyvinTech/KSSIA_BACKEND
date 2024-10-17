@@ -381,7 +381,9 @@ exports.updateRequirementStatus = async (req, res) => {
                 return responseHandler(res, 404, "User not found");
             }
 
-            const userFCM = user.fcm;
+            let userFCM = [];
+            userFCM.push(user.fcm);
+            
             const subject = `Requirement status update`;
             let content = `Your requirement has been ${requirement.status}`.trim();
             const file_url = requirement.image;

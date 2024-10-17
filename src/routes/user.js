@@ -73,4 +73,8 @@ userRoute
   .route('/request/nfc')
   .post(asyncHandler(userController.requestNFC)); // Request NFC 
 
+userRoute
+  .route('/get/subscription')
+  .get(asyncHandler(userController.getUserSubscription)); // Get user subscription
+
 module.exports = userRoute;

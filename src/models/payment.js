@@ -25,7 +25,11 @@ const paymentSchema = new mongoose.Schema({
     invoice_url: { type: String },
     remarks: { type: String },
     reason: { type: String },
-});
+},
+{
+    timestamps: true
+}
+);
 
 const Payment = mongoose.model('Payment', paymentSchema);
 
