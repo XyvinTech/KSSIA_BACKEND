@@ -130,6 +130,7 @@ exports.sendMessage = async (req, res) => {
       const user = await User.findById(to);
       let userFCM = [];
       userFCM.push(user.fcm);
+      const uniqueTag = `chat-${chatThread._id}`; // Group by chat thread
 
       console.log(userFCM);
       console.log(NotificationSubject);
@@ -141,7 +142,7 @@ exports.sendMessage = async (req, res) => {
         NotificationSubject,
         newMessage.content,
         imageUrl, // Only pass if valid
-        'message',
+        uniqueTag,
       );
 
     } catch (error) {
