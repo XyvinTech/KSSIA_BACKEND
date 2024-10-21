@@ -19,6 +19,8 @@ require("dotenv").config();
 // Define the cron job to run every sundays
 cron.schedule("0 0 * * 0", async () => {
 
+    console.log("🚀 ~ Cron job started: Checking AWS S3 bucket files statuses...");
+
     // Batch sizing the query
     const batchSize = 100;
 
@@ -33,6 +35,8 @@ cron.schedule("0 0 * * 0", async () => {
             currentPage++;
         } while (results.length > 0); // Continue while there are still results to process
     }
+
+    console.log("🚀 ~ Cron job processing: Collecting all file links in database...");
 
     async function gatherLinkedFiles() {
         const linkedFiles = [];
@@ -128,8 +132,13 @@ cron.schedule("0 0 * * 0", async () => {
         return linkedFiles;
     }
 
+    console.log("🚀 ~ Cron job processing: Cross checking links in the database and files in aws...");
+
     try {
         const bucketName = process.env.AWS_S3_BUCKET;
+
+        console.log("🚀 ~ Cron job processing: Collecting all files in aws...");
+
         const files = await listFilesInBucket(bucketName);
 
         // Gather linked files from all models
@@ -138,6 +147,8 @@ cron.schedule("0 0 * * 0", async () => {
         const filesToDelete = files.filter(file => !linkedFileKeys.includes(file));
 
         let count = 0;
+
+        console.log("🚀 ~ Cron job processing: Deleting all unlinked files in aws...");
 
         await Promise.all(filesToDelete.map(async fileKey => {
             const result = await deleteFile(bucketName, fileKey);
@@ -158,4 +169,6 @@ cron.schedule("0 0 * * 0", async () => {
     } catch (err) {
         console.error("Error performing check:", err);
     }
+
+    console.log("🚀 ~ Cron job completed: Checking AWS S3 buccket files statuses checked.");
 });

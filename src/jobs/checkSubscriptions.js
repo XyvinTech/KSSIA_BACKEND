@@ -13,10 +13,14 @@ cron.schedule("0 0 * * *", async () => {
         const now = moment().tz("Asia/Kolkata");
         const oneMonthFromNow = moment().tz("Asia/Kolkata").add(1, 'month');
 
+        console.log("🚀 ~ Cron job processing: Collecting all payments...");
+
         // Find all payments with statuses "accepted" or "expiring"
         const payments = await Payment.find({
             status: { $in: ["accepted", "expiring"] }
         }).populate('member'); // Populate the member field (user)
+
+        console.log("🚀 ~ Cron job processing: Checking each payments...");
 
         for (const payment of payments) {
             const renewalDateTime = moment(payment.renewal).tz("Asia/Kolkata"); // Renewal DateTime in "Asia/Kolkata" timezone
