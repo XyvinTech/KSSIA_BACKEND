@@ -39,4 +39,8 @@ paymentRoute.get('/user/:userId', asyncHandler(paymentController.getUserPayments
 // Route to get the active subscription of a user
 paymentRoute.get('/user/:userId/subscriptions', asyncHandler(paymentController.getUserSubscriptionActive));
 
+// Route to get the active subscription of a user for app purpose
+paymentRoute.get('/user/:userId/subscriptions/app', asyncHandler(paymentController.getUserSubscriptionActiveApp));
+
+
 module.exports = paymentRoute;

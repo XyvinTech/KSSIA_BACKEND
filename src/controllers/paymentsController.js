@@ -562,9 +562,63 @@ exports.getUserSubscriptionActive = async (req, res) => {
         {
             member:userId,
             status: { $in: ['pending','accepted']}
-        });
+        }
+    );
     if (!subscriptionsActive) {
         return responseHandler(res, 404, "No pending or active subscriptions found");
     }
     return responseHandler(res, 200, "Subscriptions found", subscriptionsActive);
 };
+
+/****************************************************************************************************/
+/*               Function to get users Subscription Active for app purpose                          */
+/****************************************************************************************************/
+exports.getUserSubscriptionActiveApp = async (req, res) => {
+    
+    const { userId } = req.params;
+  
+    if (!userId) {
+        return responseHandler(res, 400, "Invalid request");
+    }
+  
+    try {
+        const subscriptionsActive = await Payment.find({
+            member: userId,
+            status: { $in: ['pending', 'accepted'] },
+        });
+  
+        if (!subscriptionsActive || subscriptionsActive.length === 0) {
+            return responseHandler(res, 404, "No pending or active subscriptions found");
+        }
+  
+        // Structure the response
+        const structuredResponse = {};
+  
+        subscriptionsActive.forEach((subscription) => {
+            const {
+                category,
+                status,
+                date,
+                renewal,
+            } = subscription;
+  
+            // Modify the structure based on category (membership or app)
+            if (category === "membership") {
+                structuredResponse.Membership = {
+                    lastRenewed: date,
+                    nextRenewal: renewal,
+                    status,
+                };
+            } else if (category === "app") {
+                structuredResponse.App = {
+                    status,
+                };
+            }
+        });
+  
+        return responseHandler(res, 200, "Subscriptions found", structuredResponse);
+    } catch (error) {
+        return responseHandler(res, 500, "Internal Server Error", error.message);
+    }
+};
+  
