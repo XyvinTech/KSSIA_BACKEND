@@ -16,6 +16,7 @@ const sendInAppNotification = require("../utils/sendInAppNotification");
 /****************************************************************************************************/
 exports.createPayment = async (req, res) => {
     const data = req.body;
+    const year_count = req.body.year_count ? req.body.year_count : 1
 
     // Validate the input data using Joi
     const { error } = PaymentSchema.validate(data, { abortEarly: true });
@@ -35,6 +36,7 @@ exports.createPayment = async (req, res) => {
 
     let invoice_url = '';
     let renewal = '';
+    let days = '';
     const bucketName = process.env.AWS_S3_BUCKET;
 
     // Handle file upload if a file is present
@@ -51,14 +53,16 @@ exports.createPayment = async (req, res) => {
     if (isNaN(resultDate.getTime())) {
         return responseHandler(res, 400, "Invalid date provided for payment");
     }
-    resultDate.setDate(resultDate.getDate() + 365); // Adding 365 days for renewal
+    resultDate.setDate(resultDate.getDate() + (365 * year_count)); // Adding 365 days * no of years for renewal
     renewal = resultDate;
+    days = (365 * year_count);
 
     // Create a new payment instance
     const newPayment = new Payment({
         ...data,
         invoice_url,
-        renewal
+        renewal,
+        days
     });
 
     // Save the new payment to the database
@@ -119,6 +123,7 @@ exports.updatePayment = async (req, res) => {
     const resultDate = new Date(data.date);
     resultDate.setDate(resultDate.getDate() + (365 * year_count));
     payment.renewal = resultDate;
+    payment.days = (365 * year_count);
 
     Object.assign(payment, data, {
         invoice_url
@@ -509,7 +514,7 @@ exports.createUserPayment = async (req, res) => {
         {
             category: data.category,
             member: userId,
-            status: { $in: ['pending','accepted'] }
+            status: { $in: ['pending', 'accepted', 'expiring'] }
         }
     )
 
@@ -561,7 +566,7 @@ exports.getUserSubscriptionActive = async (req, res) => {
     const subscriptionsActive = await Payment.find(
         {
             member:userId,
-            status: { $in: ['pending','accepted']}
+            status: { $in: ['pending','accepted', 'expiring']}
         }
     );
     if (!subscriptionsActive) {
@@ -574,7 +579,6 @@ exports.getUserSubscriptionActive = async (req, res) => {
 /*               Function to get users Subscription Active for app purpose                          */
 /****************************************************************************************************/
 exports.getUserSubscriptionActiveApp = async (req, res) => {
-
     const { userId } = req.params;
   
     if (!userId) {
@@ -584,34 +588,68 @@ exports.getUserSubscriptionActiveApp = async (req, res) => {
     try {
         const subscriptionsActive = await Payment.find({
             member: userId,
-            status: { $in: ['pending', 'accepted'] },
-        });
-
+            status: { $in: ['pending', 'accepted', 'expiring', 'expired'] },
+        }).sort({ createdAt: -1 });
+  
         // Structure the response
-        const structuredResponse = {};
+        const structuredResponse = {
+            Membership: null,
+            App: null,
+        };
   
         if (!subscriptionsActive || subscriptionsActive.length === 0) {
-            return responseHandler(res, 200, "No pending or active subscriptions found",structuredResponse);
+            return responseHandler(res, 200, "No pending or active subscriptions found", structuredResponse);
         }
   
+        let appSubscriptionStatus = null; // To track the highest-priority app status ("pending" or "accepted")
+        let membershipSubscriptionStatus = null; // To track the highest-priority membership status ("pending" or "accepted")
+  
         subscriptionsActive.forEach((subscription) => {
-            const {
-                category,
-                status,
-                date,
-                renewal,
-            } = subscription;
+            const { category, status, date, renewal } = subscription;
   
             // Modify the structure based on category (membership or app)
             if (category === "membership") {
-                structuredResponse.Membership = {
-                    lastRenewed: date,
-                    nextRenewal: renewal,
-                    status,
-                };
+                // Priority is: accepted > pending > expired for membership
+                if (status === "accepted" || status == "expiring") {
+                    membershipSubscriptionStatus = "accepted"; // Set to status if found
+                    // Set the lastRenewed and nextRenewal dates for membership
+                    structuredResponse.Membership = {
+                        lastRenewed: date,
+                        nextRenewal: renewal,
+                        status: membershipSubscriptionStatus, // Set the final status after the loop
+                    };
+                } else if (status === "pending" && (membershipSubscriptionStatus !== "accepted" && membershipSubscriptionStatus !== "expiring")) {
+                    membershipSubscriptionStatus = "pending"; // Set to "pending" if no "accepted" is found
+                    // Set the lastRenewed and nextRenewal dates for membership
+                    structuredResponse.Membership = {
+                        lastRenewed: date,
+                        nextRenewal: renewal,
+                        status: membershipSubscriptionStatus, // Set the final status after the loop
+                    };
+                } else if (status === "expired" && !membershipSubscriptionStatus) {
+                    if (!structuredResponse.Membership || new Date(createdAt) > new Date(structuredResponse.Membership.lastRenewed)) {
+                        membershipSubscriptionStatus = "expired"; // Set to "expired" if no "accepted" or "pending" is found
+                        // Set the lastRenewed and nextRenewal dates for the latest expired membership
+                        structuredResponse.Membership = {
+                            lastRenewed: date,
+                            nextRenewal: renewal,
+                            status: membershipSubscriptionStatus, // Set the final status after the loop
+                        };
+                    }
+                }
             } else if (category === "app") {
+                // Priority is: accepted > pending > expired for app
+                if (status === "accepted" || status == "expiring") {
+                    appSubscriptionStatus = "accepted"; // Set to "accepted" if found
+                } else if (status === "pending" && (appSubscriptionStatus !== "accepted" &&  appSubscriptionStatus !== "expiring") ) {
+                    appSubscriptionStatus = "pending"; // Set to "pending" if no "accepted" is found
+                } else if (status === "expired" && !appSubscriptionStatus) {
+                    appSubscriptionStatus = "expired"; // Set to "expired" if no "accepted" or "pending" found
+                }
+  
+                // Set the app status in the structured response
                 structuredResponse.App = {
-                    status,
+                    status: appSubscriptionStatus, // Set the final status after the loop
                 };
             }
         });
@@ -621,3 +659,4 @@ exports.getUserSubscriptionActiveApp = async (req, res) => {
         return responseHandler(res, 500, "Internal Server Error", error.message);
     }
 };
+  
