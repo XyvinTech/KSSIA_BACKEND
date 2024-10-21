@@ -574,7 +574,7 @@ exports.getUserSubscriptionActive = async (req, res) => {
 /*               Function to get users Subscription Active for app purpose                          */
 /****************************************************************************************************/
 exports.getUserSubscriptionActiveApp = async (req, res) => {
-    
+
     const { userId } = req.params;
   
     if (!userId) {
@@ -586,13 +586,13 @@ exports.getUserSubscriptionActiveApp = async (req, res) => {
             member: userId,
             status: { $in: ['pending', 'accepted'] },
         });
-  
-        if (!subscriptionsActive || subscriptionsActive.length === 0) {
-            return responseHandler(res, 404, "No pending or active subscriptions found");
-        }
-  
+
         // Structure the response
         const structuredResponse = {};
+  
+        if (!subscriptionsActive || subscriptionsActive.length === 0) {
+            return responseHandler(res, 200, "No pending or active subscriptions found",structuredResponse);
+        }
   
         subscriptionsActive.forEach((subscription) => {
             const {
@@ -621,4 +621,3 @@ exports.getUserSubscriptionActiveApp = async (req, res) => {
         return responseHandler(res, 500, "Internal Server Error", error.message);
     }
 };
-  
