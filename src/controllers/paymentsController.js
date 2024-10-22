@@ -239,6 +239,10 @@ exports.updateSubs = async (req, res) => {
                     user.subscription = payment.plan;
                     await user.save();
                 }
+                else if((payment.status == "accepted") && (payment.category == "membership")){
+                    user.membership_status = payment.plan;
+                    await user.save();
+                }
             } catch (error) {
                 console.log(`error updating the user subscription : ${error}`);
             }
@@ -418,6 +422,10 @@ exports.updatePaymentStatus = async (req, res) => {
             try {
                 if((payment.status == "accepted") && (payment.category == "app")){
                     user.subscription = payment.plan;
+                    await user.save();
+                }
+                else if((payment.status == "accepted") && (payment.category == "membership")){
+                    user.membership_status = payment.plan;
                     await user.save();
                 }
             } catch (error) {
