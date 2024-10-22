@@ -85,7 +85,7 @@ cron.schedule("0 0 * * *", async () => {
                         await User.findByIdAndUpdate(payment.member._id, { subscription: "free" });
                     }
                     else{
-                        await User.findByIdAndUpdate(payment.member._id, { subscription: payments.subscription });
+                        await User.findByIdAndUpdate(payment.member._id, { subscription: payments.plan });
                     }
                 }
                 
