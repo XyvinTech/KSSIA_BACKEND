@@ -41,7 +41,7 @@ const productsSchema = Joi.object({
 exports.CreateUserSchema = Joi.object({
     name: Joi.object({
         first_name: Joi.string().required(),
-        middle_name: Joi.string().optional(),
+        middle_name: Joi.string().optional().allow(''),
         last_name: Joi.string().required()
     }).required(),
     membership_id: Joi.string().required(),

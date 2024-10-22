@@ -140,7 +140,7 @@ exports.getUnreadInAppNotifications = async (req, res) => {
                 $ne: userId
             },
             type: 'in-app'
-        });
+        }).sort({ createdAt: -1 });
         for (const notification of notifications) {
             await notification.markAsRead(userId);
         }
@@ -171,7 +171,7 @@ exports.getReadInAppNotifications = async (req, res) => {
             to: userId,
             readBy: userId,
             type: 'in-app'
-        });
+        }).sort({ createdAt: -1 });
         return responseHandler(res, 200, 'Read notifications retrieved successfully!', notifications);
     } catch (err) {
         return responseHandler(res, 500, `Server error: ${err.message}`);

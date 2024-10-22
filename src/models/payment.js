@@ -18,7 +18,7 @@ const paymentSchema = new mongoose.Schema({
     status: { 
         type: String,
         default: "pending",
-        enum: ["pending", "accepted", "resubmit", "rejected"],
+        enum: ["pending", "accepted", "expiring", "expired", "resubmit", "rejected"],
     },
     renewal: { type: Date },
     days: { type: Number , default: 365},
