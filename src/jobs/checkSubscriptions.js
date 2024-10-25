@@ -88,6 +88,20 @@ cron.schedule("0 0 * * *", async () => {
                         await User.findByIdAndUpdate(payment.member._id, { subscription: payments.plan });
                     }
                 }
+                else if (payment.category == "membership" && updatedStatus === "expired"){
+                    // Find if any new payments exist
+                    const payments = await Payment.find({
+                        member: payment.member._id,
+                        status: "accepted",
+                        category: "membership"
+                    });
+                    if(!payments){
+                        await User.findByIdAndUpdate(payment.member._id, { membership_status: "expired" });
+                    }
+                    else{
+                        await User.findByIdAndUpdate(payment.member._id, { membership_status: payments.plan })
+                    }
+                }
                 
             }
         }
