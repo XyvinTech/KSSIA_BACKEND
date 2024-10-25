@@ -51,7 +51,7 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION_PROD }}
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID_PROD }}
           API_VERSION: ${{ secrets.API_VERSION }}
-          MONGO_URL: ${{ secrets.MONGO_URL_DEV }}
+          MONGO_URL: ${{ secrets.MONGO_URL }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           EMAIL_ID: ${{ secrets.EMAIL_ID }}
           PASSWORD: ${{ secrets.PASSWORD }}
