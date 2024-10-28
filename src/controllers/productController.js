@@ -133,7 +133,7 @@ exports.getAllProducts = async (req, res) => {
     filter.createdAt.$lte = new Date(to);
   }
 
-  console.log(filter)
+  // console.log(filter);
 
   // Build the aggregation pipeline
   const pipeline = [
@@ -238,8 +238,6 @@ exports.getAllProducts = async (req, res) => {
     },
     { $count: "totalCount" },
   ];
-
-  console.log(filter)
 
   // Execute the aggregation for products
   const products = await Product.aggregate(pipeline);
