@@ -251,9 +251,7 @@ exports.getAllProductsUser = async (req, res) => {
       const blockedProductSellers = user.blocked_products || [];
 
       // Extract userIds from both lists and remove duplicates
-      const blockedUserIds = blockedUsersList.map(
-        (item) => item.userId
-      );
+      const blockedUserIds = blockedUsersList.map((item) => item.userId);
       const blockedProductUserIds = blockedProductSellers.map(
         (item) => item.userId
       );
@@ -576,7 +574,7 @@ exports.updateProductStatus = async (req, res) => {
 
       let userFCM = [];
       userFCM.push(user.fcm);
-      
+
       const subject = `${product.name} status update`;
       let content =
         `Your product ${product.name} has been ${product.status}`.trim();
@@ -626,4 +624,37 @@ exports.getMessageCount = async (req, res) => {
   return responseHandler(res, 200, "Message count for products", {
     messageCount,
   });
+};
+
+exports.downloadProducts = async (req, res) => {
+  try {
+    const products = await Product.find().populate("seller_id", "name");
+    const csvData = products.map((product) => {
+      return {
+        UserName: `${product.seller_id.name.first_name} ${
+          product.seller_id.name.middle_name || ""
+        } ${product.seller_id.name.last_name}`.trim(),
+        ProductName: product.name,
+        Price: product.price,
+        OfferPrice: product.offer_price,
+        MOQ: product.moq,
+        Units: product.units,
+        Status: product.status,
+      };
+    });
+    const headers = [
+      { header: "User Name", key: "UserName" },
+      { header: "Product Name", key: "ProductName" },
+      { header: "Price", key: "Price" },
+      { header: "Offer Price", key: "OfferPrice" },
+      { header: "MOQ", key: "MOQ" },
+      { header: "Status", key: "Status" },
+    ];
+    return responseHandler(res, 200, "Products downloaded successfully", {
+      headers: headers,
+      body: csvData,
+    });
+  } catch (error) {
+    return responseHandler(res, 500, `Internal Server Error ${error.message}`);
+  }
 };

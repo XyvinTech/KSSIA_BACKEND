@@ -36,4 +36,6 @@ productRoute.get('/seller/messages/count', asyncHandler(productController.getMes
 // Route to update the status of a product
 productRoute.patch('/:productId/status', asyncHandler(productController.updateProductStatus));
 
+productRoute.get("/download-products", productController.downloadProducts);
+
 module.exports = productRoute;
