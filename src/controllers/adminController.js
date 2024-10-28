@@ -4,10 +4,7 @@ const User = require("../models/user");
 const Product = require("../models/products");
 const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
-const {
-  CreateUserSchema,
-  EditUserSchema
-} = require("../validation");
+const { CreateUserSchema, EditUserSchema } = require("../validation");
 
 /****************************************************************************************************/
 /*                                 Function to create a new user                                    */
@@ -18,9 +15,7 @@ exports.createUser = async (req, res) => {
   // console.log(`Received data parameter: ${data}`);                                 // Debug line
 
   // Validate the input data
-  const {
-    error
-  } = CreateUserSchema.validate(data, {
+  const { error } = CreateUserSchema.validate(data, {
     abortEarly: true,
   });
 
@@ -66,9 +61,7 @@ exports.createUserBulk = async (req, res) => {
   const errors = [];
 
   for (const user of data) {
-    const {
-      error
-    } = CreateUserSchema.validate(user, {
+    const { error } = CreateUserSchema.validate(user, {
       abortEarly: true,
     });
     if (error) {
@@ -111,21 +104,15 @@ exports.createUserBulk = async (req, res) => {
 /****************************************************************************************************/
 
 exports.editUser = async (req, res) => {
-  const {
-    userId
-  } = req.params;
-  const {
-    membership_id
-  } = req.params;
+  const { userId } = req.params;
+  const { membership_id } = req.params;
   const data = req.body;
   // console.log(`Received userId parameter: ${userId}`);                             // Debug line
   // console.log(`Received membership_id parameter: ${membership_id}`);               // Debug line
   // console.log(`Received data parameter: ${data}`);                                 // Debug line
 
   // Validate the input data
-  const {
-    error
-  } = EditUserSchema.validate(data, {
+  const { error } = EditUserSchema.validate(data, {
     abortEarly: true,
   });
 
@@ -211,12 +198,8 @@ const deleteUserFiles = async (user) => {
 };
 
 exports.deleteUser = async (req, res) => {
-  const {
-    userId
-  } = req.params;
-  const {
-    membership_id
-  } = req.params;
+  const { userId } = req.params;
+  const { membership_id } = req.params;
   // console.log(`Received userId: ${userId}`);                                       // Debug line
   // console.log(`Received membership_id: ${membership_id}`);                         // Debug line
   let user;
@@ -275,50 +258,55 @@ exports.deleteUser = async (req, res) => {
 
 exports.getAllUsers = async (req, res) => {
   try {
-    
     const userId = req.userId;
     const { pageNo = 1, limit = 10, search = "" } = req.query;
 
     let filter = {}; // Initialize the filter object
 
     // Exclude the requesting user from the results
-    if (userId && (userId != "" || userId != undefined)){
+    if (userId && (userId != "" || userId != undefined)) {
       filter._id = { $nin: userId };
     }
 
     // Add search functionality
     if (search) {
-      const regex = new RegExp(search, 'i'); // Case-insensitive regex
+      const regex = new RegExp(search, "i"); // Case-insensitive regex
       filter = {
         ...filter,
         $or: [
-          { 'name.first_name': { $regex: regex } },
-          { 'name.middle_name': { $regex: regex } },
-          { 'name.last_name': { $regex: regex } },
+          { "name.first_name": { $regex: regex } },
+          { "name.middle_name": { $regex: regex } },
+          { "name.last_name": { $regex: regex } },
           { email: { $regex: regex } },
-          { 'phone_numbers.personal': { $regex: regex } }
-        ]
+          { "phone_numbers.personal": { $regex: regex } },
+        ],
       };
     }
 
     if (limit === "full") {
       const users = await User.find(filter).populate({
         path: "reviews.reviewer",
-        select: "name profile_picture"
+        select: "name profile_picture",
       });
 
       // Map the data to include the required fields (full name and mobile)
       const mappedData = users.map((user) => {
         return {
           ...user._doc, // Spread the original user data
-          full_name: `${user.name.first_name} ${user.name.middle_name || ''} ${user.name.last_name}`.trim(),
-          mobile: user.phone_numbers?.personal || 'N/A', // Handle phone number or return 'N/A'
+          full_name: `${user.name.first_name} ${user.name.middle_name || ""} ${
+            user.name.last_name
+          }`.trim(),
+          mobile: user.phone_numbers?.personal || "N/A", // Handle phone number or return 'N/A'
         };
       });
 
       // Return the full data
-      return responseHandler(res, 200, "Users retrieved successfully", mappedData);
-
+      return responseHandler(
+        res,
+        200,
+        "Users retrieved successfully",
+        mappedData
+      );
     } else {
       const skipCount = limit * (pageNo - 1);
 
@@ -329,7 +317,7 @@ exports.getAllUsers = async (req, res) => {
       const users = await User.find(filter)
         .populate({
           path: "reviews.reviewer",
-          select: "name profile_picture"
+          select: "name profile_picture",
         })
         .skip(skipCount)
         .limit(limit)
@@ -340,15 +328,22 @@ exports.getAllUsers = async (req, res) => {
       const mappedData = users.map((user) => {
         return {
           ...user, // Spread the original user data
-          full_name: `${user.name.first_name} ${user.name.middle_name || ''} ${user.name.last_name}`.trim(),
-          mobile: user.phone_numbers?.personal || 'N/A', // Handle phone number or return 'N/A'
+          full_name: `${user.name.first_name} ${user.name.middle_name || ""} ${
+            user.name.last_name
+          }`.trim(),
+          mobile: user.phone_numbers?.personal || "N/A", // Handle phone number or return 'N/A'
         };
       });
 
       // Return the paginated and mapped data
-      return responseHandler(res, 200, "Users retrieved successfully", mappedData, totalCount);
+      return responseHandler(
+        res,
+        200,
+        "Users retrieved successfully",
+        mappedData,
+        totalCount
+      );
     }
-
   } catch (error) {
     return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
   }
@@ -359,9 +354,7 @@ exports.getAllUsers = async (req, res) => {
 /****************************************************************************************************/
 
 exports.getUserById = async (req, res) => {
-  const {
-    userId
-  } = req.params;
+  const { userId } = req.params;
   // console.log(`Received userId: ${userId}`);                                       // Debug line
 
   if (!userId) {
@@ -371,10 +364,9 @@ exports.getUserById = async (req, res) => {
   }
 
   // Check if a user with this id exists
-  const user = await User.findById(userId)
-  .populate({
+  const user = await User.findById(userId).populate({
     path: "reviews.reviewer",
-    select: "name profile_picture"
+    select: "name profile_picture",
   });
   if (!user) {
     // If the user is not found, return a 404 status code with the error message
@@ -383,7 +375,7 @@ exports.getUserById = async (req, res) => {
   }
 
   let products = await Product.find({
-    seller_id: userId
+    seller_id: userId,
   }).exec();
   if (!products.length) {
     products = [];
@@ -401,7 +393,6 @@ exports.getUserById = async (req, res) => {
 };
 
 exports.suspendUser = async (req, res) => {
-
   const userId = req.params.userId;
 
   if (!userId) {
@@ -409,10 +400,12 @@ exports.suspendUser = async (req, res) => {
   }
 
   const user = await User.findByIdAndUpdate(
-    userId, {
+    userId,
+    {
       status: "suspended",
-    }, {
-      new: true
+    },
+    {
+      new: true,
     }
   );
 
@@ -421,4 +414,36 @@ exports.suspendUser = async (req, res) => {
   }
 
   return responseHandler(res, 200, "User suspended successfully");
+};
+
+exports.downloadUsers = async (req, res) => {
+  try {
+    const users = await User.find();
+    const csvData = users.map((user) => {
+      return {
+        Name: `${user.name.first_name} ${user.name.middle_name || ""} ${
+          user.name.last_name
+        }`.trim(),
+        MembershipID: user.membership_id,
+        Email: user.email,
+        Mobile: user.phone_numbers?.personal || "N/A",
+        Company: user.company_name || "N/A",
+        Designation: user.designation || "N/A",
+      };
+    });
+    const headers = [
+      { header: "Name", key: "Name" },
+      { header: "Membership ID", key: "MembershipID" },
+      { header: "Email", key: "Email" },
+      { header: "Mobile", key: "Mobile" },
+      { header: "Company", key: "Company" },
+      { header: "Designation", key: "Designation" },
+    ];
+    return responseHandler(res, 200, "Users downloaded successfully", {
+      headers: headers,
+      body: csvData,
+    });
+  } catch (error) {
+    return responseHandler(res, 500, `Internal Server Error ${error.message}`);
+  }
 };
