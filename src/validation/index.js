@@ -157,7 +157,7 @@ exports.CreateEventsSchema = Joi.object({
 exports.EditEventsSchema = Joi.object({
     name: Joi.string(),
     type: Joi.string(),
-    image: Joi.string().uri(),
+    // image: Joi.string().uri(),
     description: Joi.string(),
     startDate: Joi.date(),
     endDate: Joi.date(),
