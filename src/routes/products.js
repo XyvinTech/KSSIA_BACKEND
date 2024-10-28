@@ -9,6 +9,8 @@ const productRoute = express.Router();
 // Protect all routes with authentication middleware
 productRoute.use(authVerify);
 
+productRoute.get("/download-products", productController.downloadProducts);
+
 // Route to add a new product
 productRoute.post('/', upload.single('image'), asyncHandler(productController.addProduct));
 
@@ -36,6 +38,5 @@ productRoute.get('/seller/messages/count', asyncHandler(productController.getMes
 // Route to update the status of a product
 productRoute.patch('/:productId/status', asyncHandler(productController.updateProductStatus));
 
-productRoute.get("/download-products", productController.downloadProducts);
 
 module.exports = productRoute;
