@@ -631,9 +631,9 @@ exports.downloadProducts = async (req, res) => {
     const products = await Product.find().populate("seller_id", "name");
     const csvData = products.map((product) => {
       return {
-        UserName: `${product.seller_id.name.first_name} ${
-          product.seller_id.name.middle_name || ""
-        } ${product.seller_id.name.last_name}`.trim(),
+        UserName: `${product.seller_id?.name.first_name} ${
+          product.seller_id?.name.middle_name || ""
+        } ${product.seller_id?.name.last_name}`.trim(),
         ProductName: product.name,
         Price: product.price,
         OfferPrice: product.offer_price,
