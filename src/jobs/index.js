@@ -1,3 +1,3 @@
 require("./updateEventStatus"); 
-require("./deleteUnwantedFiles"); 
+// require("./deleteUnwantedFiles"); 
 require("./checkSubscriptions");
