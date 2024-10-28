@@ -88,6 +88,11 @@ eventSchema.methods.markrsvp = function (userId) {
     return Promise.resolve(this); // Return the existing document if no change was made.
 };
 
+eventSchema.methods.unmarkrsvp = function (userId) {
+    this.rsvp = this.rsvp.filter(id => id.toString() !== userId.toString());
+    return this.save();
+};
+
 const Event = mongoose.model("Event", eventSchema);
 
 module.exports = Event;

@@ -2,6 +2,11 @@ require("dotenv").config();
 const responseHandler = require("../helpers/responseHandler");
 const User = require("../models/user");
 const Product = require("../models/products");
+const Requirements = require("../models/requirements");
+const ChatThread = require("../models/chats");
+const Message = require("../models/messages");
+const Event = require("../models/events");
+const path = require("path");
 const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
 const {
@@ -265,6 +270,58 @@ exports.deleteUser = async (req, res) => {
     seller_id: userId,
   });
 
+  // Delete requirements images
+  const requirements = await Requirements.find({author: userId});
+  for (const requirement of requirements) {
+    if (requirement.image) {
+      let oldFileKey = path.basename(requirement.image);
+      await deleteFile(bucketName, oldFileKey);
+    }
+  }
+
+  // Delete requirements
+  await Requirements.deleteMany({
+    author: userId,
+  });
+
+  // Delete chats and chat threads
+  await ChatThread.deleteMany({
+    participants: userId,
+  });
+  await Message.deleteMany({
+    from: userId,
+  });
+  await Message.deleteMany({
+    to: userId,
+  });
+
+  // Remove from rsvps
+  const events = await Event.find({ rsvp: userId });
+  events.forEach(async event => {
+    await event.unmarkrsvp(userId);
+  });
+
+  // Remove user from all blocked lists in other users
+  await User.updateMany(
+      { "blocked_users.userId": userId },
+      { $pull: { blocked_users: { userId: userId } } }
+  );
+  await User.updateMany(
+    { "blocked_products.userId": userId },
+    { $pull: { blocked_products: { userId: userId } } }
+  );
+  await User.updateMany(
+    { "blocked_requirements.userId": userId },
+    { $pull: { blocked_requirements: { userId: userId } } }
+  );
+
+  // Remove all reviews uploaded by the user
+  await User.updateMany(
+    { "reviews.reviewer": userId },
+    { $pull: { reviews: { reviewer: userId } } } 
+  );
+  
+  
   // console.log(`User deleted successfully`);                                        // Debug line
   return responseHandler(res, 200, "User deleted successfully");
 };
@@ -277,13 +334,25 @@ exports.getAllUsers = async (req, res) => {
   try {
     
     const userId = req.userId;
-    const { pageNo = 1, limit = 10, search = "" } = req.query;
+    const { pageNo = 1, limit = 10, search = "", name = "", membershipId = "", designation = "", companyName = ""} = req.query;
 
     let filter = {}; // Initialize the filter object
 
     // Exclude the requesting user from the results
     if (userId && (userId != "" || userId != undefined)){
       filter._id = { $nin: userId };
+    }
+
+    if(membershipId && membershipId !== ""){
+      filter.membership_id = membershipId;
+    }
+
+    if(designation && designation !== ""){
+      filter.designation = designation;
+    }
+
+    if(companyName && companyName !== ""){
+      filter.company_name = companyName;
     }
 
     // Add search functionality
