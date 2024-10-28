@@ -424,7 +424,7 @@ exports.getAllUsers = async (req, res) => {
         })
         .skip(skipCount)
         .limit(limit)
-        .sort({ createdAt: -1 })
+        .sort({ createdAt: -1, _id: 1 })
         .lean();
 
       // Map the data to include the required fields (full name and mobile)
