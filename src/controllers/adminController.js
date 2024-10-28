@@ -332,44 +332,82 @@ exports.deleteUser = async (req, res) => {
 
 exports.getAllUsers = async (req, res) => {
   try {
-    
     const userId = req.userId;
-    const { pageNo = 1, limit = 10, search = "", name = "", membershipId = "", designation = "", companyName = ""} = req.query;
+    const { pageNo = 1, limit = 10, search = "", name = "", membershipId = "", designation = "", companyName = "" } = req.query;
 
     let filter = {}; // Initialize the filter object
 
     // Exclude the requesting user from the results
-    if (userId && (userId != "" || userId != undefined)){
-      filter._id = { $nin: userId };
+    if (userId && (userId !== "" || userId !== undefined)) {
+      filter._id = { $nin: [userId] };
     }
 
-    if(membershipId && membershipId !== ""){
+    // Handle name filtering
+    if (name && name !== "") {
+      const decodedName = decodeURIComponent(name).trim();
+      const nameParts = decodedName.split(" ").filter(Boolean);
+
+      // Initialize filter for names using regex
+      filter.$or = []; // Initialize or condition for name searches
+
+      if (nameParts.length > 0) {
+        filter.$or.push({ 'name.first_name': { $regex: nameParts[0], $options: 'i' } });
+
+        if (nameParts.length > 1) {
+          filter.$or.push({ 'name.last_name': { $regex: nameParts[nameParts.length - 1], $options: 'i' } });
+
+          if (nameParts.length > 2) {
+            filter.$or.push({ 'name.middle_name': { $regex: nameParts.slice(1, -1).join(" "), $options: 'i' } });
+          }
+        }
+      }
+    }
+
+    // Log the filter for debugging
+    console.log("Filter after name processing:", filter);
+
+    // Handle other filters
+    if (membershipId && membershipId !== "") {
       filter.membership_id = membershipId;
     }
 
-    if(designation && designation !== ""){
+    if (designation && designation !== "") {
       filter.designation = designation;
     }
 
-    if(companyName && companyName !== ""){
+    if (companyName && companyName !== "") {
       filter.company_name = companyName;
     }
 
     // Add search functionality
-    if (search) {
+    if (search && search !== "") {
       const regex = new RegExp(search, 'i'); // Case-insensitive regex
+
+      // Decode and split the search string for name parts
+      const decodedSearch = decodeURIComponent(search);
+      const searchParts = decodedSearch.split(" ").filter(Boolean);
+
+      // Create filters for name parts if they exist
+      const nameFilters = searchParts.map(part => ({
+        $or: [
+          { 'name.first_name': { $regex: part, $options: 'i' } },
+          { 'name.middle_name': { $regex: part, $options: 'i' } },
+          { 'name.last_name': { $regex: part, $options: 'i' } },
+        ]
+      }));
+
+      // Combine the name filters with other filters
       filter = {
         ...filter,
         $or: [
-          { 'name.first_name': { $regex: regex } },
-          { 'name.middle_name': { $regex: regex } },
-          { 'name.last_name': { $regex: regex } },
+          ...nameFilters,
           { email: { $regex: regex } },
           { 'phone_numbers.personal': { $regex: regex } }
         ]
       };
     }
 
+    // Check if the limit is set to 'full' for retrieving all users
     if (limit === "full") {
       const users = await User.find(filter).populate({
         path: "reviews.reviewer",
@@ -387,7 +425,6 @@ exports.getAllUsers = async (req, res) => {
 
       // Return the full data
       return responseHandler(res, 200, "Users retrieved successfully", mappedData);
-
     } else {
       const skipCount = limit * (pageNo - 1);
 
@@ -422,6 +459,7 @@ exports.getAllUsers = async (req, res) => {
     return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
   }
 };
+
 
 /****************************************************************************************************/
 /*                                   Function to get user by ID                                     */
