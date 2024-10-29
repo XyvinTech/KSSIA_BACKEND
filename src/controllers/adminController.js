@@ -328,7 +328,7 @@ exports.getAllUsers = async (req, res) => {
     // Handle name filtering
     if (name && name !== "") {
       const decodedName = decodeURIComponent(name).trim();
-      const nameParts = decodedName.split(" ").filter(Boolean);
+      const nameParts = decodedName.split("+").filter(Boolean);
 
       // Initialize filter for names using regex
       filter.$or = []; // Initialize or condition for name searches
@@ -339,15 +339,18 @@ exports.getAllUsers = async (req, res) => {
         if (nameParts.length > 1) {
           filter.$or.push({ 'name.last_name': { $regex: nameParts[nameParts.length - 1], $options: 'i' } });
 
-          if (nameParts.length > 2) {
+          if (nameParts.length === 3) {
+            filter.$or.push({ 'name.middle_name': { $regex: nameParts[1], $options: 'i' } });
+          } else if (nameParts.length > 3) {
             filter.$or.push({ 'name.middle_name': { $regex: nameParts.slice(1, -1).join(" "), $options: 'i' } });
           }
+          
         }
       }
     }
 
     // Log the filter for debugging
-    console.log("Filter after name processing:", filter);
+    // console.log("Filter after name processing:", filter);
 
     // Handle other filters
     if (membershipId && membershipId !== "") {

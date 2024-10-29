@@ -108,7 +108,7 @@ exports.editProduct = async (req, res) => {
 /*                                  Function to get all products                                    */
 /****************************************************************************************************/
 exports.getAllProducts = async (req, res) => {
-  const { pageNo = 1, limit = 10, search = "", name = "",status = "", date = "" } = req.query;
+  const { pageNo = 1, limit = 10, search = "", name = "",status = "", date = "", from = "", to = "" } = req.query;
   const skipCount = limit * (pageNo - 1);
   let filter = {};
 
@@ -121,8 +121,19 @@ exports.getAllProducts = async (req, res) => {
   }
 
   if(date && date !== ""){
-    filter.createdAt = date;
+    filter.createdAt = new Date(date);
   }
+
+  if (from && from !== "") {
+    filter.createdAt = { $gte: new Date(from) };
+  }
+  
+  if (to && to !== "") {
+    filter.createdAt = filter.createdAt || {};
+    filter.createdAt.$lte = new Date(to);
+  }
+
+  // console.log(filter);
 
   // Build the aggregation pipeline
   const pipeline = [

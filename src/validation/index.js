@@ -125,6 +125,7 @@ exports.EditAdminSchema = Joi.object({
     is_deleted: Joi.boolean().default(false),
     updatedAt: Joi.date().default(Date.now)
 });
+
 // events array validation
 const speakerSchema = Joi.object({
     speaker_name: Joi.string().required(),
@@ -137,7 +138,7 @@ const speakerSchema = Joi.object({
 exports.CreateEventsSchema = Joi.object({
     name: Joi.string().required(),
     type: Joi.string().required(),
-    // image: Joi.string().uri(),
+    image: Joi.string(),
     description: Joi.string(),
     startDate: Joi.date(),
     endDate: Joi.date(),
@@ -148,7 +149,7 @@ exports.CreateEventsSchema = Joi.object({
     meeting_link: Joi.string(),
     organiser_name: Joi.string().required(),
     organiser_company_name: Joi.string().required(),
-    // guest_image: Joi.string().uri(),
+    guest_image: Joi.string(),
     organiser_role: Joi.string().required(),
     speakers: Joi.array().items(speakerSchema),
     activate: Joi.boolean()
@@ -157,7 +158,7 @@ exports.CreateEventsSchema = Joi.object({
 exports.EditEventsSchema = Joi.object({
     name: Joi.string(),
     type: Joi.string(),
-    // image: Joi.string().uri(),
+    image: Joi.string(),
     description: Joi.string(),
     startDate: Joi.date(),
     endDate: Joi.date(),
@@ -168,7 +169,7 @@ exports.EditEventsSchema = Joi.object({
     meeting_link: Joi.string(),
     organiser_name: Joi.string(),
     organiser_company_name: Joi.string(),
-    guest_image: Joi.string().uri(),
+    guest_image: Joi.string(),
     organiser_role: Joi.string(),
     speakers: Joi.array().items(speakerSchema),
     activate: Joi.boolean()

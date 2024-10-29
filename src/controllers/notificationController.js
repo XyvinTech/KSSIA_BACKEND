@@ -50,12 +50,15 @@ exports.createInAppNotification = async (req, res) => {
     let userFCM = [];
 
     if (data.to[0] == "*"){
-        const users = await User.find().select('fcm').exec();
+        let userIds = [];
+        const users = await User.find().select('_id fcm').exec();
         users.forEach(user => {
+            userIds.push(user._id);
             if (user.fcm != "" && user.fcm != undefined){
                 userFCM.push(user.fcm);
             }
         }); 
+        data.to = userIds;
     }
     
     else{
@@ -85,7 +88,9 @@ exports.createInAppNotification = async (req, res) => {
             ...data,
             type: 'in-app'
         });
+
         await newNotification.save();
+
         return responseHandler(res, 201, 'Notification saved successfully!', newNotification);
     } catch (err) {
         return responseHandler(res, 500, `Server error: ${err.message}`);
@@ -376,12 +381,12 @@ exports.deleteInAppNotification = async (req, res) => {
 const formatNotificationEmails = async (notification) => {
     try {
         // Populate the `to` field with user data
-        const users = await User.find({
+        users = await User.find({
             '_id': {
                 $in: notification.to
             }
         }).select('email');
-
+       
         // Extract emails from the user documents
         const emailAddresses = users.map(user => user.email).filter(email => email);
 
@@ -431,6 +436,16 @@ exports.createAndSendEmailNotification = async (req, res) => {
             return responseHandler(res, 500, `Error uploading file: ${err.message}`);
         }
     }
+
+    if (data.to[0] == "*"){
+        let userIds = [];
+        const users = await User.find().select('_id email').exec();
+        users.forEach(user => {
+            userIds.push(user._id);
+        }); 
+        data.to = userIds;
+    }
+
 
     const {
         to,
