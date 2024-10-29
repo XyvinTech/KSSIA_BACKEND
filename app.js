@@ -5,7 +5,6 @@ const volleyball = require("volleyball");
 const clc = require("cli-color");
 const admin = require("firebase-admin");
 const { serviceAccount } = require("./src/config/firebase");
-
 const responseHandler = require("./src/helpers/responseHandler");
 const userRoute = require("./src/routes/user");
 const adminRoute = require("./src/routes/admin");
