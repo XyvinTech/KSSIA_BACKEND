@@ -1,7 +1,6 @@
 const Joi = require("joi");
 
 // User arrays Schema validation
-
 const phoneSchema = Joi.object({
     personal: Joi.string().required(),
     landline: Joi.string().allow(''),
