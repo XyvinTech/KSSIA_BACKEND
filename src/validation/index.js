@@ -14,6 +14,7 @@ const schemaUrl = Joi.object({
     url: Joi.string().allow('')
 });
 
+
 const otherSchema = Joi.object({
     name: Joi.string().allow(''),
     url: Joi.string().allow(''),
