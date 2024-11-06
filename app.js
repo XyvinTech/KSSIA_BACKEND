@@ -33,10 +33,10 @@ console.log(PORT, API_VERSION, NODE_ENV);
 app.use(cors());
 
 // Increase the limit for JSON requests
-app.use(express.json({ limit: '50mb' })); // Set the limit to 50 MB
+app.use(express.json({ limit: '200mb' })); // Set the limit to 50 MB
 
 // Increase the limit for URL-encoded requests
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.urlencoded({ limit: '200mb', extended: true }));
 
 // Set the base path for API routes
 const BASE_PATH = `/api/${API_VERSION}`;
