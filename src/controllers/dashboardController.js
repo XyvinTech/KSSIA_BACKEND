@@ -99,7 +99,7 @@ exports.getMonthlyRevenue = async (req, res) => {
 
         // Extract the total revenue from the result
         const totalRevenue = totalRevenueData.length > 0 ? totalRevenueData[0].totalRevenue : 0;
-        return responseHandler(res, 200, `Total combined revenue for the month` ,userCount);
+        return responseHandler(res, 200, `Total combined revenue for the month` ,totalRevenue);
 
     } 
     
@@ -137,7 +137,7 @@ exports.getMonthlyRevenueIndividual = async (req, res) => {
 
         // Extract the total revenue from the result
         const totalRevenue = totalRevenueData.length > 0 ? totalRevenueData[0].totalRevenue : 0;
-        return responseHandler(res, 200, `Total combined revenue for the month` ,userCount);
+        return responseHandler(res, 200, `Total combined revenue for the month` ,totalRevenue);
 
     } 
     
