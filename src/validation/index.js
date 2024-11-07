@@ -42,7 +42,7 @@ exports.CreateUserSchema = Joi.object({
     name: Joi.object({
         first_name: Joi.string().required(),
         middle_name: Joi.string().optional().allow(''),
-        last_name: Joi.string().required()
+        last_name: Joi.string().optional().allow('')
     }).required(),
     membership_id: Joi.string().required(),
     blood_group: Joi.string(),
@@ -70,7 +70,7 @@ exports.EditUserSchema = Joi.object({
     name: Joi.object({
         first_name: Joi.string().required(),
         middle_name: Joi.string().optional().allow(''),
-        last_name: Joi.string().required()
+        last_name: Joi.string().optional().allow('')
     }).required(),
     blood_group: Joi.string().allow(''),
     email: Joi.string().email().required(),
