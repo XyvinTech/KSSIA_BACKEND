@@ -6,6 +6,9 @@ const dashboardRoute = express.Router();
 
 dashboardRoute.use(authVerify);
 
+dashboardRoute.route('/statistics').get(asyncHandler(dashboardController.getAllStatistics));
+dashboardRoute.route('/statistics/:year/:month').get(asyncHandler(dashboardController.getAllStatistics));
+
 dashboardRoute.route('/users/total').get(asyncHandler(dashboardController.countUsers));
 dashboardRoute.route('/users/total/active').get(asyncHandler(dashboardController.countActiveUsers));
 dashboardRoute.route('/users/total/suspended').get(asyncHandler(dashboardController.countSuspendedUsers));

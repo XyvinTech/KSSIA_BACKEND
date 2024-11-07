@@ -216,3 +216,112 @@ exports.getNumberOfPromotions = async (req, res) => {
         return responseHandler(res, 500, `Error counting promotions: ${err.message}`);
     }
 }
+
+exports.getAllStatistics = async (req, res) => {
+    try {
+
+        let year;
+        let month;
+
+        if(req.params.year && req.params.month){
+            year = req.params.year;
+            month = req.params.month;
+        }
+
+        else{
+            // Use the current date for the year and month
+            const currentDate = new Date();
+            month = currentDate.getMonth() + 1; // Get current month (1-based)
+            year = currentDate.getFullYear(); // Get current year
+        }
+
+        // Start and end of the month (used for monthly revenue calculations)
+        const startDate = new Date(year, month - 1, 1); // Month is 0-based in JavaScript
+        const endDate = new Date(year, month, 0); // The last day of the month
+
+        // Create an array of promises to fetch all required counts and data concurrently
+        const results = await Promise.all([
+            // Count users
+            User.countDocuments({ status: { $in: ['active', 'suspended', 'inactive', 'notice'] } }),
+
+            // Count active users
+            User.countDocuments({ status: { $in: ['active', 'notice'] } }),
+
+            // Count active premium users
+            User.countDocuments({ status: { $in: ['active', 'notice'] }, subscription: 'premium' }),
+
+            // Count suspended users
+            User.countDocuments({ status: { $in: ['suspended'] } }),
+
+            // Get monthly revenue (total)
+            Payment.aggregate([
+                { $match: { date: { $gte: startDate, $lt: endDate }, status: { $in: ['accepted', 'expiring', 'expired'] } } },
+                { $group: { _id: null, totalRevenue: { $sum: '$amount' } } }
+            ]).then(data => (data.length > 0 ? data[0].totalRevenue : 0)),
+
+            // Get monthly revenue by category membership
+            Payment.aggregate([
+                { $match: { date: { $gte: startDate, $lt: endDate }, status: { $in: ['accepted', 'expiring', 'expired'] }, category: 'membership' } },
+                { $group: { _id: null, totalRevenue: { $sum: '$amount' } } }
+            ]).then(data => (data.length > 0 ? data[0].totalRevenue : 0)),
+            
+            // Get monthly revenue by category app
+            Payment.aggregate([
+                { $match: { date: { $gte: startDate, $lt: endDate }, status: { $in: ['accepted', 'expiring', 'expired'] }, category: 'app' } },
+                { $group: { _id: null, totalRevenue: { $sum: '$amount' } } }
+            ]).then(data => (data.length > 0 ? data[0].totalRevenue : 0)),
+
+            // Count accepted products
+            Product.countDocuments({ status: 'accepted' }),
+
+            // Count approved requirements
+            Requirements.countDocuments({ status: 'approved' }),
+
+            // Count events with specific statuses
+            Event.countDocuments({ status: { $in: ['upcoming', 'postponded', 'live'] } }),
+
+            // Count published news
+            News.countDocuments({ published: true }),
+
+            // Count active promotions
+            Promotion.countDocuments({ status: true })
+        ]);
+
+        // Destructure the results array
+        const [
+            userCount,
+            activeUserCount,
+            activePremiumUserCount,
+            suspendedUserCount,
+            totalRevenue,
+            totalCategoryMembershipRevenue,
+            totalCategoryAppRevenue,
+            productCount,
+            requirementCount,
+            eventCount,
+            newsCount,
+            promotionCount
+        ] = results;
+
+        // Create the response data in a structured format
+        const responseData = {
+            userCount,
+            activeUserCount,
+            activePremiumUserCount,
+            suspendedUserCount,
+            totalRevenue,
+            totalCategoryMembershipRevenue,
+            totalCategoryAppRevenue,
+            productCount,
+            requirementCount,
+            eventCount,
+            newsCount,
+            promotionCount
+        };
+
+        // Return the results in a single response
+        return responseHandler(res, 200, "Statistics fetched successfully", responseData);
+    } catch (err) {
+        return responseHandler(res, 500, `Error fetching statistics: ${err.message}`);
+    }
+};
