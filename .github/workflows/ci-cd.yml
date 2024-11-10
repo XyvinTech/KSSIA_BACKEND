@@ -1,4 +1,4 @@
-name: Deploy kssia-backend
+name: Deploy AKCAF-Backend to AWS Lightsail
 
 on:
   push:
@@ -15,10 +15,10 @@ jobs:
         node-version: [20.x]
 
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
-      AWS_REGION: ${{ secrets.AWS_REGION_PROD }}
-      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID_PROD }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       ECR_REPOSITORY: kssia
       IMAGE_TAG: latest
 
@@ -44,58 +44,51 @@ jobs:
           docker build -t ${{env.ECR_REGISTRY}}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} .
           docker push ${{env.ECR_REGISTRY}}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
 
-      - name: Deploy to EC2
+      - name: Deploy to Lightsail
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
-          AWS_REGION: ${{ secrets.AWS_REGION_PROD }}
-          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID_PROD }}
-          API_VERSION: ${{ secrets.API_VERSION }}
-          MONGO_URL: ${{ secrets.MONGO_URL }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          EMAIL_ID: ${{ secrets.EMAIL_ID }}
-          PASSWORD: ${{ secrets.PASSWORD }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: kssia
           IMAGE_TAG: latest
-          EC2_INSTANCE_IP: ${{ secrets.EC2_INSTANCE_IP_PROD }}
-          SSH_KEY: ${{ secrets.EC2_PRIVATE_KEY_PROD }}
-          USERNAME: ec2-user
-          PORT: 3000
+          LIGHTSAIL_INSTANCE_IP: ${{ secrets.LIGHTSAIL_INSTANCE_IP }}
+          SSH_KEY: ${{ secrets.LIGHTSAIL_PRIVATE_KEY }}
+          USERNAME: ubuntu
+          PORT: 3003
           CONTAINER_NAME: KSSIA_BACKEND
+          ENV_FILE_PATH: /home/ubuntu/kssia/.env/.env.production
 
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ env.EC2_INSTANCE_IP }}
+          host: ${{ env.LIGHTSAIL_INSTANCE_IP }}
           username: ${{ env.USERNAME }}
-          key: ${{ env.SSH_KEY}}
+          key: ${{ env.SSH_KEY }}
 
           script: |
+            # Update system and install Docker if not installed
+            sudo apt-get update
+            sudo apt-get install -y docker.io
 
-            # Refresh ECR login
-            aws ecr get-login-password --region ${{ env.AWS_REGION }} | sudo docker login --username AWS --password-stdin ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+            # Login to Amazon ECR
+            aws ecr get-login-password --region ${{ env.AWS_REGION }} | sudo docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
 
             # Pull Docker Image
-            sudo docker pull ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+            sudo docker pull ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
 
+            # Stop and remove the existing container if running
             sudo docker stop ${{ env.CONTAINER_NAME }} || true
             sudo docker rm ${{ env.CONTAINER_NAME }} || true
 
+            # Check if the .env.production file exists
+            if [ ! -f ${{ env.ENV_FILE_PATH }} ]; then
+              echo ".env.production file is missing at ${{ env.ENV_FILE_PATH }}."
+              exit 1
+            fi
+
+            # Run the new container with the .env.production file
             sudo docker run -d \
-              -p ${{ env.PORT }}:${{ env.PORT }}\
+              -p ${{ env.PORT }}:${{ env.PORT }} \
               --name ${{ env.CONTAINER_NAME }} \
-              -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
-              -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
-              -e AWS_REGION=${{ secrets.AWS_REGION }} \
-              -e AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }} \
-              -e API_VERSION=${{ env.API_VERSION }} \
-              -e MONGO_URL=${{ env.MONGO_URL }} \
-              -e JWT_SECRET=${{ env.JWT_SECRET }} \
-              -e NODE_MAILER_USER=${{ env.EMAIL_ID }} \
-              -e NODE_MAILER_PASS=${{ env.PASSWORD }} \
-              -e PORT=${{ env.PORT }} \
-              -e ENVIRONMENT=production \
-                ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
-
-
-
+              --env-file ${{ env.ENV_FILE_PATH }} \
+              ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
