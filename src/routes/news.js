@@ -7,11 +7,11 @@ const newsRoute = express.Router();
 
 newsRoute.use(authVerify);
 
-newsRoute.post('/', upload.single('image'), asyncHandler(newsController.createNews));
+newsRoute.post('/', asyncHandler(newsController.createNews));
 newsRoute.get('/', asyncHandler(newsController.getAllNews));
 
 newsRoute.get('/:newsId', asyncHandler(newsController.getNewsById));
-newsRoute.put('/:newsId', upload.single('image'), asyncHandler(newsController.editNews));
+newsRoute.put('/:newsId', asyncHandler(newsController.editNews));
 newsRoute.delete('/:newsId', asyncHandler(newsController.deleteNews));
 
 module.exports = newsRoute;

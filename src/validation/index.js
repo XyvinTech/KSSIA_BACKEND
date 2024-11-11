@@ -199,6 +199,7 @@ exports.NewsSchema = Joi.object({
   category: Joi.string().required(),
   title: Joi.string().required(),
   content: Joi.string().optional(),
+  image: Joi.string(),
   published: Joi.boolean().default(false), // Add published field with a default value
 });
 
