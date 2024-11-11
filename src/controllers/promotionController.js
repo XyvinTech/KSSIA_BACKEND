@@ -113,34 +113,17 @@ exports.editPromotion = async (req, res) => {
   const promotion = await Promotion.findById(promotionId);
 
   if (!promotion) return responseHandler(res, 404, "Promotion not found");
-  // Handle file upload if present
-  const bucketName = process.env.AWS_S3_BUCKET;
-  let banner_image_url = promotion.banner_image_url;
-  let upload_video = promotion.upload_video;
-  let poster_image_url = promotion.poster_image_url;
+
   try {
-    if (req.file) {
-      // Delete old file
-      if (promotion.type === "banner" && promotion.banner_image_url) {
-        let oldImageKey = path.basename(promotion.banner_image_url);
-        await deleteFile(bucketName, oldImageKey);
-      } else if (promotion.type === "video" && promotion.upload_video) {
-        let oldImageKey = path.basename(promotion.upload_video);
-        await deleteFile(bucketName, oldImageKey);
-      } else if (promotion.type === "poster" && promotion.poster_image_url) {
-        let oldImageKey = path.basename(promotion.poster_image_url);
-        await deleteFile(bucketName, oldImageKey);
-      }
 
       // Handle new file upload
       if (data.type === "banner") {
-        banner_image_url = await handleFileUpload(req.file, bucketName);
+        banner_image_url = req.body.file_url;
       } else if (data.type === "video") {
-        upload_video = await handleFileUpload(req.file, bucketName);
+        upload_video = req.body.file_url;
       } else if (data.type === "poster") {
-        poster_image_url = await handleFileUpload(req.file, bucketName);
+        poster_image_url = req.body.file_url;
       }
-    }
   } catch (err) {
     return responseHandler(res, 500, `Error updating file: ${err.message}`);
   }

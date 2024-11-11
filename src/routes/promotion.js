@@ -19,7 +19,7 @@ promotionRoute.get('/:type', asyncHandler(promotionController.getPromotionsByTyp
 
 promotionRoute.get('/:type/:promotionId', asyncHandler(promotionController.getPromotionsByTypeAndId));
 
-promotionRoute.put('/:promotionId', upload.single("file"), asyncHandler(promotionController.editPromotion));
+promotionRoute.put('/:promotionId', asyncHandler(promotionController.editPromotion));
 promotionRoute.delete('/:promotionId', asyncHandler(promotionController.deletePromotion));
 
 module.exports = promotionRoute;
