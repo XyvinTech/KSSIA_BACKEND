@@ -19,19 +19,19 @@ exports.createInAppNotification = async (req, res) => {
   let data = req.body;
 
   // Handle file uploads if present
-  if (req.file) {
-    try {
-      const bucketName = process.env.AWS_S3_BUCKET;
-      data.file_url = await handleFileUpload(req.file, bucketName);
-    } catch (err) {
-      return responseHandler(res, 500, `Error uploading file: ${err.message}`);
-    }
-  }
+  // if (req.file) {
+  //   try {
+  //     const bucketName = process.env.AWS_S3_BUCKET;
+  //     data.file_url = await handleFileUpload(req.file, bucketName);
+  //   } catch (err) {
+  //     return responseHandler(res, 500, `Error uploading file: ${err.message}`);
+  //   }
+  // }
 
-  // Ensure the `to` field is an array
-  if (!Array.isArray(data.to)) {
-    data.to = [data.to];
-  }
+  // // Ensure the `to` field is an array
+  // if (!Array.isArray(data.to)) {
+  //   data.to = [data.to];
+  // }
 
   // Validate the input data
   const { error } = inAppNotificationSchema.validate(data, {
@@ -413,10 +413,10 @@ const formatNotificationEmails = async (notification) => {
 exports.createAndSendEmailNotification = async (req, res) => {
   const data = req.body;
 
-  // Ensure the `to` field is an array
-  if (!Array.isArray(data.to)) {
-    data.to = [data.to];
-  }
+  // // Ensure the `to` field is an array
+  // if (!Array.isArray(data.to)) {
+  //   data.to = [data.to];
+  // }
 
   // Validate the input data
   const { error } = emailNotificationSchema.validate(data, {
@@ -426,24 +426,24 @@ exports.createAndSendEmailNotification = async (req, res) => {
     return responseHandler(res, 400, `Invalid input: ${error.message}`);
   }
 
-  const mediaFile = req.files["media_url"] ? req.files["media_url"][0] : null;
-  const bucketName = process.env.AWS_S3_BUCKET;
-  let mediaImage = "";
+  // const mediaFile = req.files["media_url"] ? req.files["media_url"][0] : null;
+  // const bucketName = process.env.AWS_S3_BUCKET;
+  // let mediaImage = "";
 
-  if (mediaFile) {
-    try {
-      mediaImage = await handleFileUpload(mediaFile, bucketName);
-    } catch (err) {
-      return responseHandler(res, 500, `Error uploading file: ${err.message}`);
-    }
-  }
+  // if (mediaFile) {
+  //   try {
+  //     mediaImage = await handleFileUpload(mediaFile, bucketName);
+  //   } catch (err) {
+  //     return responseHandler(res, 500, `Error uploading file: ${err.message}`);
+  //   }
+  // }
 
   if (data.to[0] === "*") {
     const users = await User.find().select("_id email").exec();
     data.to = users.map((user) => user._id);
   }
 
-  const { to, subject, content, link_url } = data;
+  const { to, subject, content, link_url, media_url } = data;
 
   try {
     // Create email notification
@@ -451,7 +451,7 @@ exports.createAndSendEmailNotification = async (req, res) => {
       to,
       subject,
       content,
-      media_url: mediaImage ? mediaImage : null,
+      media_url,
       link_url,
       type: "email",
     });
@@ -469,21 +469,21 @@ exports.createAndSendEmailNotification = async (req, res) => {
     });
 
     for (const email of emailAddresses) {
+      const attachments = media_url
+        ? [
+            {
+              filename: media_url.split("/").pop(),
+              path: media_url,
+            },
+          ]
+        : [];
       const mailOptions = {
         from: process.env.NODE_MAILER_USER,
         to: email,
         subject,
         text: content,
-        attachments: [],
+        attachments: attachments,
       };
-
-      if (mediaImage) {
-        mailOptions.attachments.push({
-          filename: mediaFile.originalname,
-          path: encodeURI(mediaImage),
-          contentType: mediaFile.mimetype,
-        });
-      }
 
       try {
         await transporter.sendMail(mailOptions);
