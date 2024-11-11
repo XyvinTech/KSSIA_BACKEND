@@ -33,17 +33,6 @@ exports.addProduct = async (req, res) => {
     return responseHandler(res, 400, "Product already exists");
   }
 
-  // Handle file upload if present
-  let image = "";
-  const bucketName = process.env.AWS_S3_BUCKET;
-  if (req.file) {
-    try {
-      image = await handleFileUpload(req.file, bucketName);
-    } catch (err) {
-      return responseHandler(res, 500, err.message);
-    }
-  }
-
   // Create a new product
   const newProduct = new Product({
     ...data,
@@ -80,25 +69,6 @@ exports.editProduct = async (req, res) => {
     return responseHandler(res, 404, "Product not found");
   }
 
-  // Handle file upload if present
-  const bucketName = process.env.AWS_S3_BUCKET;
-  let image = product.image;
-  if (req.file) {
-    if (product.image) {
-      let oldImageKey = path.basename(product.image);
-      await deleteFile(bucketName, oldImageKey);
-    }
-    try {
-      image = await handleFileUpload(req.file, bucketName);
-    } catch (err) {
-      return responseHandler(res, 500, err.message);
-    }
-  }
-
-  // Update the product
-  Object.assign(product, data, {
-    image,
-  });
   await product.save();
 
   return responseHandler(res, 200, "Product updated successfully!", product);
