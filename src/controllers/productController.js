@@ -65,9 +65,16 @@ exports.editProduct = async (req, res) => {
     return responseHandler(res, 404, "Product not found");
   }
 
-  await product.save();
+  const updatedProduct = await Product.findByIdAndUpdate(productId, data, {
+    new: true,
+  });
 
-  return responseHandler(res, 200, "Product updated successfully!", product);
+  return responseHandler(
+    res,
+    200,
+    "Product updated successfully!",
+    updatedProduct
+  );
 };
 
 /****************************************************************************************************/

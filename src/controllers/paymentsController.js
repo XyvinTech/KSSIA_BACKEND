@@ -34,19 +34,8 @@ exports.createPayment = async (req, res) => {
         return responseHandler(res, 400, "Payment details already exist");
     }
 
-    let invoice_url = '';
     let renewal = '';
     let days = '';
-    const bucketName = process.env.AWS_S3_BUCKET;
-
-    // Handle file upload if a file is present
-    if (req.file) {
-        try {
-            invoice_url = await handleFileUpload(req.file, bucketName);
-        } catch (err) {
-            return responseHandler(res, 500, `File upload failed: ${err.message}`);
-        }
-    }
 
     // Calculate the renewal date
     const resultDate = new Date(data.date);
@@ -60,7 +49,6 @@ exports.createPayment = async (req, res) => {
     // Create a new payment instance
     const newPayment = new Payment({
         ...data,
-        invoice_url,
         renewal,
         days
     });
@@ -105,30 +93,10 @@ exports.updatePayment = async (req, res) => {
         return responseHandler(res, 404, "Payment details do not exist");
     }
 
-    let invoice_url = payment.invoice_url;
-    const bucketName = process.env.AWS_S3_BUCKET;
-
-    if (req.file) {
-        try {
-            if (payment.invoice_url) {
-                const oldImageKey = path.basename(payment.invoice_url);
-                await deleteFile(bucketName, oldImageKey);
-            }
-            invoice_url = await handleFileUpload(req.file, bucketName);
-        } catch (err) {
-            return responseHandler(res, 500, err.message);
-        }
-    }
-
     const resultDate = new Date(data.date);
     resultDate.setDate(resultDate.getDate() + (365 * year_count));
     payment.renewal = resultDate;
     payment.days = (365 * year_count);
-
-    Object.assign(payment, data, {
-        invoice_url
-    });
-
     try {
         await payment.save();
         try{

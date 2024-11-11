@@ -10,7 +10,7 @@ const paymentRoute = express.Router();
 paymentRoute.use(authVerify);
 
 // Route to create a new payment
-paymentRoute.post('/', upload.single('file'), asyncHandler(paymentController.createPayment));
+paymentRoute.post('/', asyncHandler(paymentController.createPayment));
 
 // Route to create a new payment (user)
 paymentRoute.post('/user', upload.single('file'), asyncHandler(paymentController.createUserPayment));
@@ -22,7 +22,7 @@ paymentRoute.get('/', asyncHandler(paymentController.getAllPayments));
 paymentRoute.get('/:paymentID', asyncHandler(paymentController.getPaymentById));
 
 // Route to update a payment
-paymentRoute.put('/:paymentID', upload.single('file'), asyncHandler(paymentController.updatePayment));
+paymentRoute.put('/:paymentID', asyncHandler(paymentController.updatePayment));
 
 // Route to update a payment
 paymentRoute.put('/:paymentID/subscription', asyncHandler(paymentController.updateSubs));
