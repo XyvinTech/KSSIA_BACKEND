@@ -34,11 +34,7 @@ exports.addProduct = async (req, res) => {
   }
 
   // Create a new product
-  const newProduct = new Product({
-    ...data,
-    image,
-  });
-  await newProduct.save();
+  const newProduct = await Product.create(data);
 
   return responseHandler(res, 201, "Product added successfully!", newProduct);
 };
@@ -78,26 +74,35 @@ exports.editProduct = async (req, res) => {
 /*                                  Function to get all products                                    */
 /****************************************************************************************************/
 exports.getAllProducts = async (req, res) => {
-  const { pageNo = 1, limit = 10, search = "", name = "",status = "", date = "", from = "", to = "" } = req.query;
+  const {
+    pageNo = 1,
+    limit = 10,
+    search = "",
+    name = "",
+    status = "",
+    date = "",
+    from = "",
+    to = "",
+  } = req.query;
   const skipCount = limit * (pageNo - 1);
   let filter = {};
 
-  if(name && name !== ""){
+  if (name && name !== "") {
     filter.name = name;
   }
 
-  if(status && status !== ""){
+  if (status && status !== "") {
     filter.status = status;
   }
 
-  if(date && date !== ""){
+  if (date && date !== "") {
     filter.createdAt = new Date(date);
   }
 
   if (from && from !== "") {
     filter.createdAt = { $gte: new Date(from) };
   }
-  
+
   if (to && to !== "") {
     filter.createdAt = filter.createdAt || {};
     filter.createdAt.$lte = new Date(to);
