@@ -133,6 +133,12 @@ exports.editPromotion = async (req, res) => {
       req.body,
       { new: true }
     );
+    return responseHandler(
+        res,
+        200,
+        "Promotion updated successfully!",
+        updatedPromotion
+      );
   } catch (err) {
     return responseHandler(
       res,
@@ -140,13 +146,6 @@ exports.editPromotion = async (req, res) => {
       `Error updating promotion: ${err.message}`
     );
   }
-
-  return responseHandler(
-    res,
-    200,
-    "Promotion updated successfully!",
-    updatedPromotion
-  );
 };
 
 /****************************************************************************************************/
