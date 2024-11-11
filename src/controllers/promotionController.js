@@ -115,27 +115,24 @@ exports.editPromotion = async (req, res) => {
   if (!promotion) return responseHandler(res, 404, "Promotion not found");
 
   try {
-
-      // Handle new file upload
-      if (data.type === "banner") {
-        banner_image_url = req.body.file_url;
-      } else if (data.type === "video") {
-        upload_video = req.body.file_url;
-      } else if (data.type === "poster") {
-        poster_image_url = req.body.file_url;
-      }
+    // Handle new file upload
+    if (data.type === "banner") {
+      req.body.banner_image_url = req.body.file_url;
+    } else if (data.type === "video") {
+      req.body.upload_video = req.body.file_url;
+    } else if (data.type === "poster") {
+      req.body.poster_image_url = req.body.file_url;
+    }
   } catch (err) {
     return responseHandler(res, 500, `Error updating file: ${err.message}`);
   }
 
   try {
-    // Update the promotion
-    Object.assign(promotion, data, {
-      banner_image_url,
-      upload_video,
-      poster_image_url,
-    });
-    await promotion.save();
+    const updatedPromotion = await Promotion.findByIdAndUpdate(
+      promotionId,
+      req.body,
+      { new: true }
+    );
   } catch (err) {
     return responseHandler(
       res,
@@ -148,7 +145,7 @@ exports.editPromotion = async (req, res) => {
     res,
     200,
     "Promotion updated successfully!",
-    promotion
+    updatedPromotion
   );
 };
 
