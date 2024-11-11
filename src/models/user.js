@@ -51,6 +51,7 @@ const userSchema = new mongoose.Schema(
       {
         platform: { type: String },
         url: { type: String },
+        visibility: { type: Boolean, default: true },
       },
     ],
     websites: [Subschema],
