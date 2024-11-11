@@ -21,23 +21,9 @@ exports.createRequirement = async (req, res) => {
         return responseHandler(res, 400, `Invalid input: ${error.message}`);
     }
 
-    let image = "";
-    const bucketName = process.env.AWS_S3_BUCKET;
-    if (req.file) {
-        try {
-            image = await handleFileUpload(req.file, bucketName);
-        } catch (err) {
-            return responseHandler(res, 500, err.message);
-        }
-    }
-
-    const newRequirement = new Requirements({
-        ...data,
-        image,
-    });
+    const newRequirement = await Requirements.create(data);
 
     try {
-        await newRequirement.save();
         return responseHandler(
             res,
             201,
@@ -89,32 +75,18 @@ exports.updateRequirement = async (req, res) => {
         return responseHandler(res, 404, "Requirement details do not exist");
     }
 
-    let image = requirement.image;
-    const bucketName = process.env.AWS_S3_BUCKET;
-
-    if (req.file) {
-        try {
-            if (requirement.image) {
-                const oldImageKey = path.basename(requirement.image);
-                await deleteFile(bucketName, oldImageKey);
-            }
-            image = await handleFileUpload(req.file, bucketName);
-        } catch (err) {
-            return responseHandler(res, 500, err.message);
-        }
-    }
-
-    Object.assign(requirement, data, {
-        image,
-    });
 
     try {
-        await requirement.save();
+        const updatedRequirement = await Requirements.findByIdAndUpdate(
+            requirementID,
+            data,
+            { new: true }
+        )
         return responseHandler(
             res,
             200,
             "Requirement updated successfully!",
-            requirement
+            updatedRequirement
         );
     } catch (err) {
         return responseHandler(

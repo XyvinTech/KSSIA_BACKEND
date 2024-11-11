@@ -10,7 +10,7 @@ const requirementsRoute = express.Router();
 requirementsRoute.use(authVerify);
 
 // Route to create a new requirement
-requirementsRoute.post('/', upload.single('file'), asyncHandler(requirementsController.createRequirement));
+requirementsRoute.post('/', asyncHandler(requirementsController.createRequirement));
 
 // Route to get all requirements
 requirementsRoute.get('/', asyncHandler(requirementsController.getAllRequirementsUser));
@@ -19,7 +19,7 @@ requirementsRoute.get('/', asyncHandler(requirementsController.getAllRequirement
 requirementsRoute.get('/admin', asyncHandler(requirementsController.getAllRequirements));
 
 // Route to update a requirement
-requirementsRoute.put('/:requirementID', upload.single('file'), asyncHandler(requirementsController.updateRequirement));
+requirementsRoute.put('/:requirementID', asyncHandler(requirementsController.updateRequirement));
 
 // Route to delete a requirement
 requirementsRoute.delete('/:requirementID', asyncHandler(requirementsController.deleteRequirement));
