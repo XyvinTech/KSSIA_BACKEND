@@ -206,6 +206,7 @@ exports.EditPromotionSchema = Joi.object({
   type: Joi.string().valid("banner", "video", "poster", "notice").required(),
   banner_image_url: Joi.string(),
   upload_video: Joi.string(),
+  file_url: Joi.string(),
   yt_link: Joi.string().when("type", {
     is: "video",
     then: Joi.required(),
