@@ -9,7 +9,7 @@ const promotionRoute = express.Router();
 promotionRoute.use(authVerify);
 
 
-promotionRoute.post('/', upload.single("file"), asyncHandler(promotionController.createPromotion));
+promotionRoute.post('/', asyncHandler(promotionController.createPromotion));
 
 promotionRoute.get('/', asyncHandler(promotionController.getAllPromotions));
 
