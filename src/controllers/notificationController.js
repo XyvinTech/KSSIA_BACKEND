@@ -102,7 +102,7 @@ exports.createInAppNotification = async (req, res) => {
 exports.getallInAppNotifications = async (req, res) => {
   const { pageNo = 1, limit = 10 } = req.query;
   const skipCount = limit * (pageNo - 1);
-  const filter = { type: "in-app" };
+  const filter = {};
 
   const totalCount = await Notification.countDocuments(filter);
   const notifications = await Notification.find(filter)
