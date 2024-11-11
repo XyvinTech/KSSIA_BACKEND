@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema(
     },
     membership_id: { type: String, unique: true },
     blood_group: { type: String },
-    email: { type: String, unique: true },
+    email: { type: String, unique: true, trim: true },
     profile_picture: { type: String },
     phone_numbers: {
       personal: { type: String, trim: true },
