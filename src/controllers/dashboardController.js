@@ -219,7 +219,6 @@ exports.getNumberOfPromotions = async (req, res) => {
 
 exports.getAllStatistics = async (req, res) => {
     try {
-
         let year;
         let month;
 
@@ -227,7 +226,6 @@ exports.getAllStatistics = async (req, res) => {
             year = req.params.year;
             month = req.params.month;
         }
-
         else{
             // Use the current date for the year and month
             const currentDate = new Date();
@@ -235,9 +233,21 @@ exports.getAllStatistics = async (req, res) => {
             year = currentDate.getFullYear(); // Get current year
         }
 
-        // Start and end of the month (used for monthly revenue calculations)
+        // Start and end of the current month
         const startDate = new Date(year, month - 1, 1); // Month is 0-based in JavaScript
         const endDate = new Date(year, month, 0); // The last day of the month
+
+        // Handle the previous month correctly across year boundaries
+        let prevMonth = month - 1;
+        let prevYear = year;
+        if (prevMonth === 0) { // If current month is January, go to December of previous year
+            prevMonth = 12; // December
+            prevYear = year - 1; // Previous year
+        }
+
+        // Start and end of the previous month
+        const prevStartDate = new Date(prevYear, prevMonth - 1, 1); // Previous month start
+        const prevEndDate = new Date(prevYear, prevMonth, 0); // Previous month end
 
         // Create an array of promises to fetch all required counts and data concurrently
         const results = await Promise.all([
@@ -253,21 +263,39 @@ exports.getAllStatistics = async (req, res) => {
             // Count suspended users
             User.countDocuments({ status: { $in: ['suspended'] } }),
 
-            // Get monthly revenue (total)
+            // Get monthly revenue (total) for current month
             Payment.aggregate([
                 { $match: { date: { $gte: startDate, $lt: endDate }, status: { $in: ['accepted', 'expiring', 'expired'] } } },
                 { $group: { _id: null, totalRevenue: { $sum: '$amount' } } }
             ]).then(data => (data.length > 0 ? data[0].totalRevenue : 0)),
 
-            // Get monthly revenue by category membership
+            // Get monthly revenue by category membership for current month
             Payment.aggregate([
                 { $match: { date: { $gte: startDate, $lt: endDate }, status: { $in: ['accepted', 'expiring', 'expired'] }, category: 'membership' } },
                 { $group: { _id: null, totalRevenue: { $sum: '$amount' } } }
             ]).then(data => (data.length > 0 ? data[0].totalRevenue : 0)),
-            
-            // Get monthly revenue by category app
+
+            // Get monthly revenue by category app for current month
             Payment.aggregate([
                 { $match: { date: { $gte: startDate, $lt: endDate }, status: { $in: ['accepted', 'expiring', 'expired'] }, category: 'app' } },
+                { $group: { _id: null, totalRevenue: { $sum: '$amount' } } }
+            ]).then(data => (data.length > 0 ? data[0].totalRevenue : 0)),
+
+            // Get monthly revenue (total) for previous month
+            Payment.aggregate([
+                { $match: { date: { $gte: prevStartDate, $lt: prevEndDate }, status: { $in: ['accepted', 'expiring', 'expired'] } } },
+                { $group: { _id: null, totalRevenue: { $sum: '$amount' } } }
+            ]).then(data => (data.length > 0 ? data[0].totalRevenue : 0)),
+
+            // Get monthly revenue by category membership for previous month
+            Payment.aggregate([
+                { $match: { date: { $gte: prevStartDate, $lt: prevEndDate }, status: { $in: ['accepted', 'expiring', 'expired'] }, category: 'membership' } },
+                { $group: { _id: null, totalRevenue: { $sum: '$amount' } } }
+            ]).then(data => (data.length > 0 ? data[0].totalRevenue : 0)),
+
+            // Get monthly revenue by category app for previous month
+            Payment.aggregate([
+                { $match: { date: { $gte: prevStartDate, $lt: prevEndDate }, status: { $in: ['accepted', 'expiring', 'expired'] }, category: 'app' } },
                 { $group: { _id: null, totalRevenue: { $sum: '$amount' } } }
             ]).then(data => (data.length > 0 ? data[0].totalRevenue : 0)),
 
@@ -296,6 +324,9 @@ exports.getAllStatistics = async (req, res) => {
             totalRevenue,
             totalCategoryMembershipRevenue,
             totalCategoryAppRevenue,
+            prevTotalRevenue,
+            prevCategoryMembershipRevenue,
+            prevCategoryAppRevenue,
             productCount,
             requirementCount,
             eventCount,
@@ -303,15 +334,38 @@ exports.getAllStatistics = async (req, res) => {
             promotionCount
         ] = results;
 
-        // Create the response data in a structured format
+        // Calculate the differences and percentage changes
+        const calculatePercentageChange = (current, previous) => {
+            if (previous === 0) return current === 0 ? 0 : 100; // Prevent division by zero
+            return ((current - previous) / previous) * 100;
+        };
+
+        const totalRevenueDiff = totalRevenue - prevTotalRevenue;
+        const totalCategoryMembershipRevenueDiff = totalCategoryMembershipRevenue - prevCategoryMembershipRevenue;
+        const totalCategoryAppRevenueDiff = totalCategoryAppRevenue - prevCategoryAppRevenue;
+
+        const totalRevenuePct = calculatePercentageChange(totalRevenue, prevTotalRevenue);
+        const totalCategoryMembershipRevenuePct = calculatePercentageChange(totalCategoryMembershipRevenue, prevCategoryMembershipRevenue);
+        const totalCategoryAppRevenuePct = calculatePercentageChange(totalCategoryAppRevenue, prevCategoryAppRevenue);
+
+        // Create the response data in a structured format with differences and percentages
         const responseData = {
             userCount,
             activeUserCount,
             activePremiumUserCount,
             suspendedUserCount,
             totalRevenue,
+            prevTotalRevenue,
+            totalRevenueDiff, // Difference between current and previous month's total revenue
+            totalRevenuePct, // Percentage change in total revenue
             totalCategoryMembershipRevenue,
+            prevCategoryMembershipRevenue,
+            totalCategoryMembershipRevenueDiff, // Difference in category 'membership' revenue
+            totalCategoryMembershipRevenuePct, // Percentage change in category 'membership' revenue
             totalCategoryAppRevenue,
+            prevCategoryAppRevenue,
+            totalCategoryAppRevenueDiff, // Difference in category 'app' revenue
+            totalCategoryAppRevenuePct, // Percentage change in category 'app' revenue
             productCount,
             requirementCount,
             eventCount,
