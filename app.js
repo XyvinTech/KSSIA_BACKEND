@@ -54,7 +54,6 @@ admin.initializeApp({
   storageBucket: process.env.BUCKET_URL,
 });
 
-
 // Configure routes for the API
 app.use(`${BASE_PATH}/user`, userRoute);
 app.use(`${BASE_PATH}/admin`, adminRoute);
