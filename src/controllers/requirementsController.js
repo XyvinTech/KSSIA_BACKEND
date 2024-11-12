@@ -21,6 +21,8 @@ exports.createRequirement = async (req, res) => {
         return responseHandler(res, 400, `Invalid input: ${error.message}`);
     }
 
+    req.body.author = req.userId;
+
     const newRequirement = await Requirements.create(data);
 
     try {

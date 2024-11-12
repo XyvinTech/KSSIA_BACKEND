@@ -266,7 +266,7 @@ exports.ReviewSchema = Joi.object({
 });
 
 exports.RequirementsSchema = Joi.object({
-  author: Joi.string().hex().length(24).required(),
+  author: Joi.string(),
   content: Joi.string().required(),
   status: Joi.string()
     .valid("pending", "approved", "rejected", "reported")
