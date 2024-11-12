@@ -997,7 +997,7 @@ exports.updateSubscription = async (req, res) => {
     const subscription = await User.findByIdAndUpdate(
       id,
       {
-        subscription: subscription,
+        subscription: req.body.subscription,
       },
       {
         new: true,
