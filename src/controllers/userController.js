@@ -992,10 +992,10 @@ exports.getUserSubscription = async (req, res) => {
 };
 
 exports.updateSubscription = async (req, res) => {
-  const userId = req.userId;
+  const id = req.params.id;
   try {
     const subscription = await User.findByIdAndUpdate(
-      userId,
+      id,
       {
         subscription: subscription,
       },

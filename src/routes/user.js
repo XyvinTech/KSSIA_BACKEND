@@ -77,6 +77,6 @@ userRoute
   .route('/get/subscription')
   .get(asyncHandler(userController.getUserSubscription)); // Get user subscription
 
-userRoute.put("/subscription", asyncHandler(userController.updateSubscription));
+userRoute.put("/subscription/:id", asyncHandler(userController.updateSubscription));
 
 module.exports = userRoute;
