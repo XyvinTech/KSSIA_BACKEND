@@ -5,7 +5,7 @@ const path = require("path");
 const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
 const responseHandler = require("../helpers/responseHandler");
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 const User = require("../models/user");
 const Product = require("../models/products");
 const Setting = require("../models/settings");
@@ -14,9 +14,7 @@ const {
   ReviewSchema,
   EditUserSchema,
 } = require("../validation");
-const {
-  generateToken
-} = require("../utils/generateToken");
+const { generateToken } = require("../utils/generateToken");
 
 /****************************************************************************************************/
 /*                               Function to generate a 6-digit OTP                                 */
@@ -35,7 +33,7 @@ const sendOtp = async (mobile, otp) => {
   console.log(`Sending OTP ${otp} to mobile number ${mobile}`);
   // Simulate sending OTP
   return {
-    status: "success"
+    status: "success",
   }; // Replace with actual status from your SMS service
 };
 
@@ -44,9 +42,7 @@ const sendOtp = async (mobile, otp) => {
 /****************************************************************************************************/
 
 exports.sendOtp = async (req, res) => {
-  const {
-    mobile
-  } = req.params;
+  const { mobile } = req.params;
   // console.log(`Received mobile parameter: ${mobile}`);                             // Debug line
 
   // Validate the presence of the mobile field in the request body
@@ -57,7 +53,7 @@ exports.sendOtp = async (req, res) => {
 
   // Check if the user exists in the database
   const user = await User.findOne({
-    "phone_numbers.personal": mobile
+    "phone_numbers.personal": mobile,
   });
   if (!user) {
     // console.log(`User not found`);                                               // Debug line
@@ -87,10 +83,7 @@ exports.sendOtp = async (req, res) => {
 /****************************************************************************************************/
 
 exports.verifyOtp = async (req, res) => {
-  const {
-    mobile,
-    otp
-  } = req.body;
+  const { mobile, otp } = req.body;
   // console.log(`Received mobile and OTP parameters: ${mobile} ${otp}`);             // Debug line
 
   // Validate the presence of the mobile and otp fields in the request body
@@ -101,7 +94,7 @@ exports.verifyOtp = async (req, res) => {
 
   // Check if the user exists in the database
   const user = await User.findOne({
-    "phone_numbers.personal": mobile
+    "phone_numbers.personal": mobile,
   });
   if (!user) {
     // console.log(`User not found`);                                               // Debug line
@@ -119,10 +112,12 @@ exports.verifyOtp = async (req, res) => {
   const token = generateToken(user._id);
 
   // console.log(`OTP verified successfully`);                                        // Debug line
-  return responseHandler(res, 200, "User OTP verified successfully", [{
-    token: token,
-    userId: user._id
-  }]);
+  return responseHandler(res, 200, "User OTP verified successfully", [
+    {
+      token: token,
+      userId: user._id,
+    },
+  ]);
 };
 
 /****************************************************************************************************/
@@ -130,9 +125,7 @@ exports.verifyOtp = async (req, res) => {
 /****************************************************************************************************/
 
 exports.getUserById = async (req, res) => {
-  const {
-    userId
-  } = req.params;
+  const { userId } = req.params;
   // console.log(`Received userId: ${userId}`);                                       // Debug line
 
   if (!userId) {
@@ -142,10 +135,9 @@ exports.getUserById = async (req, res) => {
   }
 
   // Check if a user with this id exists
-  const user = await User.findById(userId)
-  .populate({
+  const user = await User.findById(userId).populate({
     path: "reviews.reviewer",
-    select: "name profile_picture"
+    select: "name profile_picture",
   });
   if (!user) {
     // If the user is not found, return a 404 status code with the error message
@@ -154,7 +146,7 @@ exports.getUserById = async (req, res) => {
   }
 
   let products = await Product.find({
-    seller_id: userId
+    seller_id: userId,
   }).exec();
   if (!products.length) {
     products = "Seller has no products";
@@ -163,7 +155,7 @@ exports.getUserById = async (req, res) => {
   // Prepare response with user data and products
   const userData = {
     ...user._doc,
-    products: products
+    products: products,
   };
 
   // console.log(`User retrieved successfully`);                                      // Debug line
@@ -175,9 +167,7 @@ exports.getUserById = async (req, res) => {
 /****************************************************************************************************/
 
 exports.editProfile = async (req, res) => {
-  const {
-    userId
-  } = req.params;
+  const { userId } = req.params;
   const data = req.body;
 
   // Validate the presence of the userId in the request body
@@ -186,10 +176,8 @@ exports.editProfile = async (req, res) => {
   }
 
   // Validate the input data
-  const {
-    error
-  } = EditUserSchema.validate(data, {
-    abortEarly: true
+  const { error } = EditUserSchema.validate(data, {
+    abortEarly: true,
   });
 
   // Check if an error exists in the validation
@@ -266,7 +254,7 @@ exports.editProfile = async (req, res) => {
   // Update products if any changes exist in the data
   if (data.products) {
     const currentProducts = await Product.find({
-      seller_id: userId
+      seller_id: userId,
     });
     const currentProductsMap = new Map(
       currentProducts.map((product) => [product._id.toString(), product])
@@ -284,7 +272,7 @@ exports.editProfile = async (req, res) => {
         } else {
           const newProduct = new Product({
             ...productData,
-            seller_id: userId
+            seller_id: userId,
           });
           await newProduct.save();
         }
@@ -316,9 +304,7 @@ exports.editProfile = async (req, res) => {
 /****************************************************************************************************/
 
 exports.findUserByName = async (req, res) => {
-  const {
-    name
-  } = req.params;
+  const { name } = req.params;
   // console.log(`Received name parameter: ${name}`);                                 // Debug line
 
   // Validate the presence of the name in the request parameter
@@ -339,11 +325,12 @@ exports.findUserByName = async (req, res) => {
   let matchQuery = {};
   if (nameParts.length > 0) {
     matchQuery = {
-      $or: [{
+      $or: [
+        {
           "name.first_name": {
             $regex: nameParts[0],
-            $options: "i"
-          }
+            $options: "i",
+          },
         },
         {
           "name.middle_name": {
@@ -363,9 +350,11 @@ exports.findUserByName = async (req, res) => {
   // console.log(`Match Query: ${JSON.stringify(matchQuery)}`);                       // Debug line
 
   // Find users using aggregation
-  const initialResults = await User.aggregate([{
-    $match: matchQuery
-  }]);
+  const initialResults = await User.aggregate([
+    {
+      $match: matchQuery,
+    },
+  ]);
   // console.log(`Initial Results: ${JSON.stringify(initialResults)}`);               // Debug line
 
   // Check if initial results are empty
@@ -403,9 +392,7 @@ exports.findUserByName = async (req, res) => {
 /****************************************************************************************************/
 
 exports.findUserByMembershipId = async (req, res) => {
-  const {
-    membershipId
-  } = req.params;
+  const { membershipId } = req.params;
   // console.log(`Received membershipId parameter: ${membershipId}`);                 // Debug line
 
   // Check if the membership id is present in the request
@@ -416,7 +403,7 @@ exports.findUserByMembershipId = async (req, res) => {
 
   // Check if the membership id exist in the database
   const user = await User.findOne({
-    membership_id: membershipId
+    membership_id: membershipId,
   });
   if (!user) {
     // console.log('User not found in database');                                   // Debug line
@@ -431,9 +418,7 @@ exports.findUserByMembershipId = async (req, res) => {
 /****************************************************************************************************/
 
 exports.addReview = async (req, res) => {
-  const {
-    userId
-  } = req.params;
+  const { userId } = req.params;
   const reviewData = req.body;
 
   if (!userId || !reviewData) {
@@ -446,10 +431,8 @@ exports.addReview = async (req, res) => {
   }
 
   // Validate the input data
-  const {
-    error
-  } = ReviewSchema.validate(reviewData, {
-    abortEarly: true
+  const { error } = ReviewSchema.validate(reviewData, {
+    abortEarly: true,
   });
 
   // Check if an error exists in the validation
@@ -470,10 +453,7 @@ exports.addReview = async (req, res) => {
 /****************************************************************************************************/
 
 exports.deleteReview = async (req, res) => {
-  const {
-    userId,
-    reviewId
-  } = req.params;
+  const { userId, reviewId } = req.params;
 
   if (!userId || !reviewId) {
     return responseHandler(res, 400, "Invalid request");
@@ -498,16 +478,16 @@ exports.deleteReview = async (req, res) => {
 
 exports.blockUser = async (req, res) => {
   const userId = req.userId;
-  const {
-    blockUserId
-  } = req.params;
-  const {
-    reason
-  } = req.body;
+  const { blockUserId } = req.params;
+  const { reason } = req.body;
 
   // Validate input
   if (!blockUserId || !reason || reason.trim() === "") {
-    return responseHandler(res, 400, "Invalid request. Please provide a valid user to block and a reason.");
+    return responseHandler(
+      res,
+      400,
+      "Invalid request. Please provide a valid user to block and a reason."
+    );
   }
 
   // Prevent a user from blocking themselves
@@ -529,7 +509,9 @@ exports.blockUser = async (req, res) => {
     }
 
     // block the user if they are not in the blocked list
-    const isBlocked = user.blocked_users.some(blockedUser => blockedUser.userId.toString() === blockUserId.toString());
+    const isBlocked = user.blocked_users.some(
+      (blockedUser) => blockedUser.userId.toString() === blockUserId.toString()
+    );
 
     if (!isBlocked) {
       // Block the user with the provided reason
@@ -538,10 +520,13 @@ exports.blockUser = async (req, res) => {
     }
 
     return responseHandler(res, 400, "User is already blocked.");
-
   } catch (error) {
     console.error(error);
-    return responseHandler(res, 500, "An error occurred while blocking the user.");
+    return responseHandler(
+      res,
+      500,
+      "An error occurred while blocking the user."
+    );
   }
 };
 
@@ -551,13 +536,15 @@ exports.blockUser = async (req, res) => {
 
 exports.unblockUser = async (req, res) => {
   const userId = req.userId;
-  const {
-    blockedUserId
-  } = req.params;
+  const { blockedUserId } = req.params;
 
   // Validate input
   if (!blockedUserId) {
-    return responseHandler(res, 400, "Invalid request. Please provide a valid user to unblock.");
+    return responseHandler(
+      res,
+      400,
+      "Invalid request. Please provide a valid user to unblock."
+    );
   }
 
   // Prevent a user from unblocking themselves
@@ -579,7 +566,10 @@ exports.unblockUser = async (req, res) => {
     }
 
     // Unblock the user if they are in the blocked list
-    const isBlocked = user.blocked_users.some(blockedUser => blockedUser.userId.toString() === blockedUserId.toString());
+    const isBlocked = user.blocked_users.some(
+      (blockedUser) =>
+        blockedUser.userId.toString() === blockedUserId.toString()
+    );
 
     if (!isBlocked) {
       return responseHandler(res, 400, "User is not currently blocked.");
@@ -592,7 +582,11 @@ exports.unblockUser = async (req, res) => {
   } catch (error) {
     // Handle any errors
     console.error(error);
-    return responseHandler(res, 500, "An error occurred while unblocking the user.");
+    return responseHandler(
+      res,
+      500,
+      "An error occurred while unblocking the user."
+    );
   }
 };
 
@@ -602,16 +596,16 @@ exports.unblockUser = async (req, res) => {
 
 exports.blockProduct = async (req, res) => {
   const userId = req.userId;
-  const {
-    blockUserId
-  } = req.params;
-  const {
-    reason
-  } = req.body;
+  const { blockUserId } = req.params;
+  const { reason } = req.body;
 
   // Validate input
   if (!blockUserId || !reason || reason.trim() === "") {
-    return responseHandler(res, 400, "Invalid request. Please provide a valid seller to block and a reason.");
+    return responseHandler(
+      res,
+      400,
+      "Invalid request. Please provide a valid seller to block and a reason."
+    );
   }
 
   // Prevent a user from blocking themselves
@@ -633,19 +627,29 @@ exports.blockProduct = async (req, res) => {
     }
 
     // block the seller if they are not in the blocked list
-    const isBlocked = user.blocked_products.some(blockedUser => blockedUser.userId.toString() === blockUserId.toString());
+    const isBlocked = user.blocked_products.some(
+      (blockedUser) => blockedUser.userId.toString() === blockUserId.toString()
+    );
 
     if (!isBlocked) {
       // Block the seller with the provided reason
       await user.blockProducts(blockUserId, reason);
-      return responseHandler(res, 200, "products by seller blocked successfully.", user);
+      return responseHandler(
+        res,
+        200,
+        "products by seller blocked successfully.",
+        user
+      );
     }
 
     return responseHandler(res, 400, "Products by seller is already blocked.");
-
   } catch (error) {
     console.error(error);
-    return responseHandler(res, 500, "An error occurred while blocking the products by the seller.");
+    return responseHandler(
+      res,
+      500,
+      "An error occurred while blocking the products by the seller."
+    );
   }
 };
 
@@ -655,13 +659,15 @@ exports.blockProduct = async (req, res) => {
 
 exports.unblockProduct = async (req, res) => {
   const userId = req.userId;
-  const {
-    blockedUserId
-  } = req.params;
+  const { blockedUserId } = req.params;
 
   // Validate input
   if (!blockedUserId) {
-    return responseHandler(res, 400, "Invalid request. Please provide a valid seller to unblock.");
+    return responseHandler(
+      res,
+      400,
+      "Invalid request. Please provide a valid seller to unblock."
+    );
   }
 
   // Prevent a user from unblocking themselves
@@ -683,20 +689,36 @@ exports.unblockProduct = async (req, res) => {
     }
 
     // Unblock the user if they are in the blocked list
-    const isBlocked = user.blocked_products.some(blockedUser => blockedUser.userId.toString() === blockedUserId.toString());
+    const isBlocked = user.blocked_products.some(
+      (blockedUser) =>
+        blockedUser.userId.toString() === blockedUserId.toString()
+    );
 
     if (!isBlocked) {
-      return responseHandler(res, 400, "Products by the seller is not currently blocked.");
+      return responseHandler(
+        res,
+        400,
+        "Products by the seller is not currently blocked."
+      );
     }
 
     // Unblock the user
     await user.unblockProducts(blockedUserId);
 
-    return responseHandler(res, 200, "Products by seller unblocked successfully.", user);
+    return responseHandler(
+      res,
+      200,
+      "Products by seller unblocked successfully.",
+      user
+    );
   } catch (error) {
     // Handle any errors
     console.error(error);
-    return responseHandler(res, 500, "An error occurred while unblocking products by the seller.");
+    return responseHandler(
+      res,
+      500,
+      "An error occurred while unblocking products by the seller."
+    );
   }
 };
 
@@ -706,16 +728,16 @@ exports.unblockProduct = async (req, res) => {
 
 exports.blockRequirement = async (req, res) => {
   const userId = req.userId;
-  const {
-    blockUserId
-  } = req.params;
-  const {
-    reason
-  } = req.body;
+  const { blockUserId } = req.params;
+  const { reason } = req.body;
 
   // Validate input
   if (!blockUserId || !reason || reason.trim() === "") {
-    return responseHandler(res, 400, "Invalid request. Please provide a valid user to block and a reason.");
+    return responseHandler(
+      res,
+      400,
+      "Invalid request. Please provide a valid user to block and a reason."
+    );
   }
 
   // Prevent a user from blocking themselves
@@ -737,19 +759,33 @@ exports.blockRequirement = async (req, res) => {
     }
 
     // block the user if they are not in the blocked list
-    const isBlocked = user.blocked_requirements.some(blockedUser => blockedUser.userId.toString() === blockUserId.toString());
+    const isBlocked = user.blocked_requirements.some(
+      (blockedUser) => blockedUser.userId.toString() === blockUserId.toString()
+    );
 
     if (!isBlocked) {
       // Block the user with the provided reason
       await user.blockRequirements(blockUserId, reason);
-      return responseHandler(res, 200, "Requirements by user blocked successfully.", user);
+      return responseHandler(
+        res,
+        200,
+        "Requirements by user blocked successfully.",
+        user
+      );
     }
 
-    return responseHandler(res, 400, "Requirements by user is already blocked.");
-
+    return responseHandler(
+      res,
+      400,
+      "Requirements by user is already blocked."
+    );
   } catch (error) {
     console.error(error);
-    return responseHandler(res, 500, "An error occurred while blocking the requirements by the user.");
+    return responseHandler(
+      res,
+      500,
+      "An error occurred while blocking the requirements by the user."
+    );
   }
 };
 
@@ -759,13 +795,15 @@ exports.blockRequirement = async (req, res) => {
 
 exports.unblockRequirement = async (req, res) => {
   const userId = req.userId;
-  const {
-    blockedUserId
-  } = req.params;
+  const { blockedUserId } = req.params;
 
   // Validate input
   if (!blockedUserId) {
-    return responseHandler(res, 400, "Invalid request. Please provide a valid user to unblock.");
+    return responseHandler(
+      res,
+      400,
+      "Invalid request. Please provide a valid user to unblock."
+    );
   }
 
   // Prevent a user from unblocking themselves
@@ -787,20 +825,36 @@ exports.unblockRequirement = async (req, res) => {
     }
 
     // Unblock the user if they are in the blocked list
-    const isBlocked = user.blocked_requirements.some(blockedUser => blockedUser.userId.toString() === blockedUserId.toString());
+    const isBlocked = user.blocked_requirements.some(
+      (blockedUser) =>
+        blockedUser.userId.toString() === blockedUserId.toString()
+    );
 
     if (!isBlocked) {
-      return responseHandler(res, 400, "Requirements by the user is not currently blocked.");
+      return responseHandler(
+        res,
+        400,
+        "Requirements by the user is not currently blocked."
+      );
     }
 
     // Unblock the user
     await user.unblockRequirements(blockedUserId);
 
-    return responseHandler(res, 200, "Requirements by user unblocked successfully.", user);
+    return responseHandler(
+      res,
+      200,
+      "Requirements by user unblocked successfully.",
+      user
+    );
   } catch (error) {
     // Handle any errors
     console.error(error);
-    return responseHandler(res, 500, "An error occurred while unblocking Requirements by the user.");
+    return responseHandler(
+      res,
+      500,
+      "An error occurred while unblocking Requirements by the user."
+    );
   }
 };
 
@@ -809,11 +863,8 @@ exports.unblockRequirement = async (req, res) => {
 /****************************************************************************************************/
 
 exports.loginUser = async (req, res) => {
-
   const id = req.body.clientToken;
-  const {
-    fcm
-  } = req.body;
+  const { fcm } = req.body;
   if (!id) {
     return responseHandler(res, 400, "Client Token is required");
   }
@@ -823,7 +874,7 @@ exports.loginUser = async (req, res) => {
     .verifyIdToken(id)
     .then(async (decodedToken) => {
       user = await User.findOne({
-        "phone_numbers.personal": decodedToken.phone_number
+        "phone_numbers.personal": decodedToken.phone_number,
       });
       if (!user) {
         return responseHandler(res, 404, "User not found");
@@ -831,27 +882,19 @@ exports.loginUser = async (req, res) => {
         user.fcm = fcm;
         user.save();
         const token = generateToken(user._id);
-        return responseHandler(
-          res,
-          200,
-          "User logged in successfully", {
-            token: token,
-            userId: user._id
-          }
-        );
+        return responseHandler(res, 200, "User logged in successfully", {
+          token: token,
+          userId: user._id,
+        });
       } else {
         user.uid = decodedToken.uid;
         user.fcm = fcm;
         user.save();
         const token = generateToken(user._id);
-        return responseHandler(
-          res,
-          200,
-          "User logged in successfully", {
-            token: token,
-            userId: user._id
-          }
-        );
+        return responseHandler(res, 200, "User logged in successfully", {
+          token: token,
+          userId: user._id,
+        });
       }
     });
 };
@@ -866,21 +909,23 @@ exports.requestNFC = async (req, res) => {
   const user = await User.findById(userId);
 
   if (!user) {
-    return res.status(404).send('User not found');
+    return res.status(404).send("User not found");
   }
 
   // Send email
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    service: "gmail",
     auth: {
       user: process.env.NODE_MAILER_USER,
-      pass: process.env.NODE_MAILER_PASS
-    }
+      pass: process.env.NODE_MAILER_PASS,
+    },
   });
 
   // Prepare user details for the email
   const userDetails = `
-   Name: ${user.name.first_name} ${user.name.middle_name ? user.name.middle_name + ' ' : ''}${user.name.last_name}
+   Name: ${user.name.first_name} ${
+    user.name.middle_name ? user.name.middle_name + " " : ""
+  }${user.name.last_name}
    Email: ${user.email}
    Membership ID: ${user.membership_id}
    Phone Number: ${user.phone_numbers.personal}
@@ -889,19 +934,18 @@ exports.requestNFC = async (req, res) => {
 
   const mailOptions = {
     from: process.env.NODE_MAILER_USER,
-    to: 'brightymct@gmail.com',
-    subject: 'User Details for NFC (NFC request)',
-    text: `Hello,\n\nHere are your details:\n\n${userDetails}`
+    to: "brightymct@gmail.com",
+    subject: "User Details for NFC (NFC request)",
+    text: `Hello,\n\nHere are your details:\n\n${userDetails}`,
   };
 
   try {
     await transporter.sendMail(mailOptions);
   } catch (error) {
-    console.log("🚀 ~ exports.requestNFC= ~ error:", error)
+    console.log("🚀 ~ exports.requestNFC= ~ error:", error);
   }
 
-  return responseHandler(res, 201, 'Request NFC sent successfully!');
-
+  return responseHandler(res, 201, "Request NFC sent successfully!");
 };
 
 /****************************************************************************************************/
@@ -934,10 +978,38 @@ exports.getUserSubscription = async (req, res) => {
     const user = await User.findById(userId);
     const subscription = user.subscription;
     if (!subscription) {
-      return responseHandler(res, 404, "User subscription not found", 'free');
+      return responseHandler(res, 404, "User subscription not found", "free");
     }
-    return responseHandler(res, 200, "User subscription fetched successfully", subscription);
+    return responseHandler(
+      res,
+      200,
+      "User subscription fetched successfully",
+      subscription
+    );
   } catch (error) {
     return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
   }
-}
+};
+
+exports.updateSubscription = async (req, res) => {
+  const userId = req.userId;
+  try {
+    const subscription = await User.findByIdAndUpdate(
+      userId,
+      {
+        subscription: subscription,
+      },
+      {
+        new: true,
+      }
+    );
+    return responseHandler(
+      res,
+      200,
+      "User subscription updated successfully",
+      subscription
+    );
+  } catch (error) {
+    return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
+  }
+};
