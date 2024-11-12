@@ -383,7 +383,7 @@ exports.getAllStatistics = async (req, res) => {
     };
 
     const formatPercentage = (value) => {
-      const formatted = value;
+      const formatted = value.toFixed(1);
       return value > 0 ? `+${formatted}%` : `${formatted}%`;
     };
 
