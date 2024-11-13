@@ -21,7 +21,7 @@ const requirementsRoute = require('./src/routes/requirements');
 const authRoute = require('./src/routes/auth');
 const dashboardRoute = require('./src/routes/dashboard');
 const { specs, swaggerUi } = require('./src/middlewares/swagger/swagger');
-const { app, server } = require("./src/socket/socket.js"); // Import server and io from socket file
+const { app, server } = require("./src/socket/socket.js"); //! Import server and io from socket file
 const reportRoute = require("./src/routes/report");
 
 app.use(volleyball);
