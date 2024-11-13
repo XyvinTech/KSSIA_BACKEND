@@ -91,7 +91,6 @@ app.all('*', (req, res) => {
   );
 });
 
-
 // Start the server and listen on the specified port
 server.listen(PORT, () => {
   const portMessage = clc.redBright(`✓ App is running on port: ${PORT}`);
