@@ -272,21 +272,19 @@ exports.getAllStatistics = async (req, res) => {
     // Create an array of promises to fetch all required counts and data concurrently
     const results = await Promise.all([
       // Count users
-      User.countDocuments({
-        status: { $in: ["active", "suspended", "inactive", "notice"] },
-      }),
+      User.countDocuments({}),
 
       // Count active users
-      User.countDocuments({ status: { $in: ["active", "notice"] } }),
+      User.countDocuments({ status: { $in: ["active"] } }),
 
       // Count active premium users
       User.countDocuments({
-        status: { $in: ["active", "notice"] },
+        status: { $in: ["active"] },
         subscription: "premium",
       }),
 
       // Count suspended users
-      User.countDocuments({ status: { $in: ["suspended"] } }),
+      User.countDocuments({ status: { $in: ["suspended", "inactive"] } }),
 
       // Get monthly revenue (total)
       Payment.aggregate([
