@@ -37,7 +37,6 @@ const promotionSchema = new mongoose.Schema({
     },
     notice_link:{ 
         type: String, 
-        required: function() { return this.type === 'notice';} 
     },
     status : { type: Boolean , default: false },
     startDate: { type: Date },
