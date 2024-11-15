@@ -295,6 +295,7 @@ exports.getAllProductsUser = async (req, res) => {
         $match: {
           $or: [
             { name: { $regex: search, $options: "i" } }, // Product name
+            { tags: { $regex: search, $options: "i" } },
             { description: { $regex: search, $options: "i" } }, // Product description
             { "seller_id.name.first_name": { $regex: search, $options: "i" } }, // Seller first name
             { "seller_id.name.middle_name": { $regex: search, $options: "i" } }, // Seller middle name
@@ -369,7 +370,6 @@ exports.getAllProductsUser = async (req, res) => {
             { "seller_id.name.first_name": { $regex: search, $options: "i" } },
             { "seller_id.name.middle_name": { $regex: search, $options: "i" } },
             { "seller_id.name.last_name": { $regex: search, $options: "i" } },
-            { tags: { $regex: search, $options: "i" } },
           ],
         },
       },
