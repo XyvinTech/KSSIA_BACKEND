@@ -389,6 +389,8 @@ exports.getAllUsers = async (req, res) => {
           ...nameFilters,
           { email: { $regex: regex } },
           { "phone_numbers.personal": { $regex: regex } },
+          { company_name: { $regex: regex } },
+          { membership_id: { $regex: regex } },
         ],
       };
     }
