@@ -361,8 +361,8 @@ exports.getAllUsers = async (req, res) => {
       filter.designation = designation;
     }
 
-    if (companyName && companyName !== "") {
-      filter.company_name = companyName;
+    if (companyName) {
+      filter.$or.push({ company_name: { $regex: companyName, $options: 'i' } });
     }
 
     // Add search functionality
@@ -391,7 +391,6 @@ exports.getAllUsers = async (req, res) => {
           { "phone_numbers.personal": { $regex: regex } },
           { company_name: { $regex: regex } },
           { membership_id: { $regex: regex } },
-          { company_name: { $regex: companyName } },
         ],
       };
     }
