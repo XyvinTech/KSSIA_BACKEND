@@ -391,6 +391,7 @@ exports.getAllUsers = async (req, res) => {
           { "phone_numbers.personal": { $regex: regex } },
           { company_name: { $regex: regex } },
           { membership_id: { $regex: regex } },
+          { company_name: { $regex: companyName } },
         ],
       };
     }
