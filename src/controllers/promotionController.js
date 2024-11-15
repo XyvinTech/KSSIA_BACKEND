@@ -14,11 +14,11 @@ exports.createPromotion = async (req, res) => {
   const data = req.body;
 
   // Validate the input data
-  const { error } = EditPromotionSchema.validate(data, {
-    abortEarly: true,
-  });
-  if (error)
-    return responseHandler(res, 400, `Invalid input: ${error.message}`);
+  // const { error } = EditPromotionSchema.validate(data, {
+  //   abortEarly: true,
+  // });
+  // if (error)
+  //   return responseHandler(res, 400, `Invalid input: ${error.message}`);
 
   if (data.type !== "banner") {
     const query = {
