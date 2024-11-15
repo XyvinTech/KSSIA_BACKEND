@@ -362,6 +362,7 @@ exports.getAllUsers = async (req, res) => {
     }
 
     if (companyName) {
+      filter.$or = [];
       filter.$or.push({ company_name: { $regex: companyName, $options: 'i' } });
     }
 
