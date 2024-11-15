@@ -225,7 +225,6 @@ exports.EditPromotionSchema = Joi.object({
     is: "notice",
     then: Joi.required(),
   }),
-  notice_link: Joi.string().allow(""),
   status: Joi.boolean().default(false),
   startDate: Joi.date(),
   endDate: Joi.date(),
