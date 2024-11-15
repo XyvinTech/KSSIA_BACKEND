@@ -33,7 +33,7 @@ const productsSchema = Joi.object({
   units: Joi.string(),
   moq: Joi.number().min(0),
   status: Joi.string(),
-  tags: Joi.array().items(Joi.string()),
+  tags: Joi.array().items(),
 });
 
 // Create a new user function validation
@@ -225,10 +225,7 @@ exports.EditPromotionSchema = Joi.object({
     is: "notice",
     then: Joi.required(),
   }),
-  notice_link: Joi.string().when("type", {
-    is: "notice",
-    then: Joi.required(),
-  }),
+  notice_link: Joi.string(),
   status: Joi.boolean().default(false),
   startDate: Joi.date(),
   endDate: Joi.date(),
