@@ -369,6 +369,7 @@ exports.getAllProductsUser = async (req, res) => {
             { "seller_id.name.first_name": { $regex: search, $options: "i" } },
             { "seller_id.name.middle_name": { $regex: search, $options: "i" } },
             { "seller_id.name.last_name": { $regex: search, $options: "i" } },
+            { tags: { $regex: search, $options: "i" } },
           ],
         },
       },
