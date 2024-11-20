@@ -109,7 +109,7 @@ exports.sendMessage = async (req, res) => {
       if (!user) {
         return responseHandler(res, 404, "User not found");
       }
-      let full_name = `${user.name.first_name} ${user.name.middle_name || ''} ${user.name.last_name}`.trim();
+      let full_name = `${user.name}`.trim();
       NotificationSubject = `${full_name} sent you a message`;
 
       if (product_sent != '') {
