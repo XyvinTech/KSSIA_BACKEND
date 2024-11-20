@@ -18,7 +18,7 @@ const reviewSchema = new mongoose.Schema({
 
 const userSchema = new mongoose.Schema(
   {
-    abbreviation: { type: String },
+    abbreviation: { type: String, trim: true, lowercase: true },
     name: { type: String, trim: true },
     membership_id: { type: String, unique: true },
     blood_group: { type: String },
