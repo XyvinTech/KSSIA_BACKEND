@@ -327,26 +327,7 @@ exports.getAllUsers = async (req, res) => {
 
     // Handle name filtering
     if (name && name !== "") {
-      const decodedName = decodeURIComponent(name).trim();
-      const nameParts = decodedName.split("+").filter(Boolean);
-
-      // Initialize filter for names using regex
-      filter.$or = []; // Initialize or condition for name searches
-
-      if (nameParts.length > 0) {
-        filter.$or.push({ 'name.first_name': { $regex: nameParts[0], $options: 'i' } });
-
-        if (nameParts.length > 1) {
-          filter.$or.push({ 'name.last_name': { $regex: nameParts[nameParts.length - 1], $options: 'i' } });
-
-          if (nameParts.length === 3) {
-            filter.$or.push({ 'name.middle_name': { $regex: nameParts[1], $options: 'i' } });
-          } else if (nameParts.length > 3) {
-            filter.$or.push({ 'name.middle_name': { $regex: nameParts.slice(1, -1).join(" "), $options: 'i' } });
-          }
-          
-        }
-      }
+      filter.name = { $regex: name, $options: 'i' };
     }
 
     // Log the filter for debugging
@@ -368,26 +349,11 @@ exports.getAllUsers = async (req, res) => {
 
     // Add search functionality
     if (search && search !== "") {
-      const regex = new RegExp(search, 'i'); // Case-insensitive regex
-
-      // Decode and split the search string for name parts
-      const decodedSearch = decodeURIComponent(search);
-      const searchParts = decodedSearch.split(" ").filter(Boolean);
-
-      // Create filters for name parts if they exist
-      const nameFilters = searchParts.map(part => ({
-        $or: [
-          { 'name.first_name': { $regex: part, $options: 'i' } },
-          { 'name.middle_name': { $regex: part, $options: 'i' } },
-          { 'name.last_name': { $regex: part, $options: 'i' } },
-        ]
-      }));
 
       // Combine the name filters with other filters
       filter = {
         ...filter,
         $or: [
-          ...nameFilters,
           { email: { $regex: regex } },
           { "phone_numbers.personal": { $regex: regex } },
           { company_name: { $regex: regex } },
@@ -407,9 +373,7 @@ exports.getAllUsers = async (req, res) => {
       const mappedData = users.map((user) => {
         return {
           ...user._doc, // Spread the original user data
-          full_name: `${user.name.first_name} ${user.name.middle_name || ""} ${
-            user.name.last_name
-          }`.trim(),
+          full_name: `${user.name}`.trim(),
           mobile: user.phone_numbers?.personal || "N/A", // Handle phone number or return 'N/A'
         };
       });
@@ -437,9 +401,7 @@ exports.getAllUsers = async (req, res) => {
       const mappedData = users.map((user) => {
         return {
           ...user, // Spread the original user data
-          full_name: `${user.name.first_name} ${user.name.middle_name || ""} ${
-            user.name.last_name
-          }`.trim(),
+          full_name: `${user.name}`.trim(),
           mobile: user.phone_numbers?.personal || "N/A", // Handle phone number or return 'N/A'
         };
       });
@@ -493,7 +455,7 @@ exports.getUserById = async (req, res) => {
 
   const mappedData = {
     ...user._doc,
-    full_name: `${user.name.first_name} ${user.name.middle_name} ${user.name.last_name}`,
+    full_name: `${user.name}`,
     mobile: user.phone_numbers.personal,
     products: products,
   };
@@ -531,9 +493,7 @@ exports.downloadUsers = async (req, res) => {
     const users = await User.find();
     const csvData = users.map((user) => {
       return {
-        Name: `${user.name.first_name} ${user.name.middle_name || ""} ${
-          user.name.last_name
-        }`.trim(),
+        Name: `${user.name}`.trim(),
         MembershipID: user.membership_id,
         Email: user.email,
         Mobile: user.phone_numbers?.personal || "N/A",

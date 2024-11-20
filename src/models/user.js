@@ -18,11 +18,8 @@ const reviewSchema = new mongoose.Schema({
 
 const userSchema = new mongoose.Schema(
   {
-    name: {
-      first_name: { type: String },
-      middle_name: { type: String },
-      last_name: { type: String },
-    },
+    abbreviation: { type: String },
+    name: { type: String, trim: true },
     membership_id: { type: String, unique: true },
     blood_group: { type: String },
     email: { type: String, unique: true, trim: true },

@@ -39,11 +39,8 @@ const productsSchema = Joi.object({
 // Create a new user function validation
 
 exports.CreateUserSchema = Joi.object({
-  name: Joi.object({
-    first_name: Joi.string().required(),
-    middle_name: Joi.string().optional().allow(""),
-    last_name: Joi.string().optional().allow(""),
-  }).required(),
+  abbreviation: Joi.string().required(),
+  name: Joi.string.required(),
   membership_id: Joi.string().required(),
   blood_group: Joi.string(),
   email: Joi.string().email().required(),
@@ -67,11 +64,8 @@ exports.CreateUserSchema = Joi.object({
 // Edit user function validation
 
 exports.EditUserSchema = Joi.object({
-  name: Joi.object({
-    first_name: Joi.string().required(),
-    middle_name: Joi.string().optional().allow(""),
-    last_name: Joi.string().optional().allow(""),
-  }).required(),
+  abbreviation: Joi.string(),
+  name: Joi.string(),
   blood_group: Joi.string().allow(""),
   email: Joi.string().email().required(),
   profile_picture: Joi.string().uri().allow(""),
