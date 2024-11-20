@@ -364,6 +364,10 @@ exports.getAllStatistics = async (req, res) => {
       Notification.countDocuments({}),
 
       Promotion.countDocuments({}),
+
+      Product.countDocuments({}),
+
+      Requirements.countDocuments({}),
     ]);
 
     // Destructure the results array
@@ -382,6 +386,8 @@ exports.getAllStatistics = async (req, res) => {
       newsCount,
       notificationCount,
       promotionCount,
+      productCount,
+      requirementCount,
     ] = results;
 
     // Calculate percentages
@@ -427,6 +433,8 @@ exports.getAllStatistics = async (req, res) => {
       newsCount,
       notificationCount,
       promotionCount,
+      productCount,
+      requirementCount,
     };
 
     // Return the results
