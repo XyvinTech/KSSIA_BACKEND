@@ -4,6 +4,7 @@ const Product = require("../models/products");
 const News = require("../models/news");
 const Promotion = require("../models/promotions");
 const Payment = require("../models/payment");
+const Notification = require("../models/notifications");
 const Requirements = require("../models/requirements");
 const responseHandler = require("../helpers/responseHandler");
 
@@ -355,6 +356,14 @@ exports.getAllStatistics = async (req, res) => {
         },
         { $group: { _id: null, totalRevenue: { $sum: "$amount" } } },
       ]).then((data) => (data.length > 0 ? data[0].totalRevenue : 0)),
+
+      Event.countDocuments({}),
+
+      News.countDocuments({}),
+
+      Notification.countDocuments({}),
+
+      Promotion.countDocuments({}),
     ]);
 
     // Destructure the results array
@@ -369,6 +378,10 @@ exports.getAllStatistics = async (req, res) => {
       prevTotalRevenue,
       prevTotalCategoryMembershipRevenue,
       prevTotalCategoryAppRevenue,
+      eventCount,
+      newsCount,
+      notificationCount,
+      promotionCount,
     ] = results;
 
     // Calculate percentages
@@ -410,6 +423,10 @@ exports.getAllStatistics = async (req, res) => {
       totalRevenuePercentage,
       membershipRevenuePercentage,
       appRevenuePercentage,
+      eventCount,
+      newsCount,
+      notificationCount,
+      promotionCount,
     };
 
     // Return the results
