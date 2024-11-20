@@ -40,7 +40,7 @@ const productsSchema = Joi.object({
 
 exports.CreateUserSchema = Joi.object({
   abbreviation: Joi.string().required(),
-  name: Joi.string.required(),
+  name: Joi.string().required(),
   membership_id: Joi.string().required(),
   blood_group: Joi.string(),
   email: Joi.string().email().required(),
