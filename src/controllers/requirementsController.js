@@ -105,78 +105,77 @@ exports.updateRequirement = async (req, res) => {
 exports.getAllRequirements = async (req, res) => {
     const { pageNo = 1, limit = 10, search = "" } = req.query;
 
-    // Convert pageNo and limit to numbers
-    const pageNumber = Number(pageNo);
-    const limitNumber = Number(limit);
+    const pageNumber = parseInt(pageNo, 10);
+    const limitNumber = parseInt(limit, 10);
     const skipCount = limitNumber * (pageNumber - 1);
 
-    // Create the aggregation pipeline
-    let pipeline = [
-        {
-            // Lookup to join the author data
-            $lookup: {
-                from: "users", // Name of the collection for authors
-                localField: "author", // Field in requirements
-                foreignField: "_id", // Field in users
-                as: "author",
-            },
-        },
-        {
-            // Project the required fields
-            $project: {
-                _id: 1,
-                image: 1,
-                content: 1,
-                status: 1,
-                createdAt: 1,
-                updatedAt: 1,
-                __v: 1,
-                "author.name": 1,
-                "author.email": 1,
-                "author._id": 1,
-                "author.profile_picture": 1,
-            },
-        },
-    ];
-
-    // Check if there's a search query and add a match stage
-    if (search) {
-        pipeline.push({
-            $match: {
-                $or: [
-                    { content: { $regex: search, $options: "i" } }, // Search in content
-                    { status: { $regex: search, $options: "i" } }, // Search in status
-                    { "author.email": { $regex: search, $options: "i" } }, // Search in author's email
-                    { "author.name": { $regex: search, $options: "i" } }, // Search in author's full name
-                ],
-            },
-        });
-    }
-
-    // Add pagination and sorting
-    pipeline.push(
-        { $sort: { createdAt: -1 } },
-        { $skip: skipCount },
-        { $limit: limitNumber } // Ensure this is a number
-    );
-
     try {
-        // Get total count before applying pagination
-        const totalCount = await Requirements.countDocuments(
-            search
-                ? {
+        // Base pipeline
+        const pipeline = [
+            {
+                $lookup: {
+                    from: "users", // Join with the users collection
+                    localField: "author",
+                    foreignField: "_id",
+                    as: "author",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$author",
+                    preserveNullAndEmptyArrays: true, // Keep documents without authors
+                },
+            },
+        ];
+
+        // Add search functionality
+        if (search) {
+            pipeline.push({
+                $match: {
                     $or: [
                         { content: { $regex: search, $options: "i" } },
                         { status: { $regex: search, $options: "i" } },
                         { "author.email": { $regex: search, $options: "i" } },
                         { "author.name": { $regex: search, $options: "i" } },
                     ],
-                }
-                : {}
+                },
+            });
+        }
+
+        // Add sorting, pagination, and projection
+        pipeline.push(
+            { $sort: { createdAt: -1 } },
+            { $skip: skipCount },
+            { $limit: limitNumber },
+            {
+                $project: {
+                    _id: 1,
+                    image: 1,
+                    content: 1,
+                    status: 1,
+                    createdAt: 1,
+                    updatedAt: 1,
+                    __v: 1,
+                    "author.name": 1,
+                    "author.email": 1,
+                    "author._id": 1,
+                    "author.profile_picture": 1,
+                },
+            }
         );
 
+        // Count documents matching the search query
+        const countPipeline = [...pipeline]; // Clone the pipeline
+        countPipeline.pop(); // Remove pagination stages
+        const [countResult] = await Requirements.aggregate([
+            ...countPipeline,
+            { $count: "totalCount" },
+        ]);
+
+        const totalCount = countResult?.totalCount || 0;
+
         // Execute the aggregation
-        const requirements = await Requirements.aggregate(pipeline).exec();
+        const requirements = await Requirements.aggregate(pipeline);
 
         if (requirements.length === 0) {
             return responseHandler(res, 404, "No requirements found");
@@ -190,6 +189,7 @@ exports.getAllRequirements = async (req, res) => {
             totalCount
         );
     } catch (err) {
+        console.error("Error in getAllRequirements:", err);
         return responseHandler(
             res,
             500,
@@ -197,6 +197,7 @@ exports.getAllRequirements = async (req, res) => {
         );
     }
 };
+
 
 /****************************************************************************************************/
 /*                         Function to get all requirements api for users                           */
