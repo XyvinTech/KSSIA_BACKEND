@@ -261,7 +261,7 @@ exports.getAllStatistics = async (req, res) => {
     // Start and end of the month (used for monthly revenue calculations)
     const startDate = new Date(year, month - 1, 1); // Month is 0-based in JavaScript
     const endDate = new Date(year, month, 0); // The last day of the month
-
+    const oneYearBackDate = new Date(year - 1, month - 1, 1);
     // Calculate the previous month
     const adjustedYear = month === 1 ? year - 1 : year; // Handle January (roll back to December of the previous year)
     const adjustedMonth = month === 1 ? 12 : month - 1; // Roll back to December if January, otherwise subtract 1
@@ -370,6 +370,17 @@ exports.getAllStatistics = async (req, res) => {
       Requirements.countDocuments({}),
     ]);
 
+    const revenueRate = 1000;
+
+    const appRevenue = await User.countDocuments({
+      subscription: "premium",
+      updatedAt: { $gte: oneYearBackDate, $lt: prevStartDate },
+    }).then((count) => count * revenueRate);
+
+    const membershipRevenue = await User.countDocuments({
+      updatedAt: { $gte: oneYearBackDate, $lt: prevStartDate },
+    }).then((count) => count * revenueRate);
+
     // Destructure the results array
     const [
       userCount,
@@ -435,6 +446,8 @@ exports.getAllStatistics = async (req, res) => {
       promotionCount,
       productCount,
       requirementCount,
+      appRevenue,
+      membershipRevenue,
     };
 
     // Return the results
