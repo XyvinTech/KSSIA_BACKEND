@@ -154,7 +154,7 @@ exports.getAllRequirements = async (req, res) => {
                     { content: { $regex: search, $options: "i" } }, // Search in content
                     { status: { $regex: search, $options: "i" } }, // Search in status
                     { "author.email": { $regex: search, $options: "i" } }, // Search in author's email
-                    { "author.full_name": { $regex: search, $options: "i" } }, // Search in author's full name
+                    { "author.name": { $regex: search, $options: "i" } }, // Search in author's full name
                 ],
             },
         });
@@ -176,7 +176,7 @@ exports.getAllRequirements = async (req, res) => {
                         { content: { $regex: search, $options: "i" } },
                         { status: { $regex: search, $options: "i" } },
                         { "author.email": { $regex: search, $options: "i" } },
-                        { "author.full_name": { $regex: search, $options: "i" } },
+                        { "author.name": { $regex: search, $options: "i" } },
                     ],
                 }
                 : {}
