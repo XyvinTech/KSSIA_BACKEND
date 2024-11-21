@@ -129,32 +129,6 @@ exports.getAllRequirements = async (req, res) => {
             },
         },
         {
-            // Add full_name field to each document
-            $addFields: {
-                "author.full_name": {
-                    $concat: [
-                        { $ifNull: ["$author.name.first_name", ""] },
-                        {
-                            $cond: {
-                                if: { $ne: ["$author.name.middle_name", ""] },
-                                then: " ",
-                                else: "",
-                            },
-                        },
-                        { $ifNull: ["$author.name.middle_name", ""] },
-                        {
-                            $cond: {
-                                if: { $ne: ["$author.name.last_name", ""] },
-                                then: " ",
-                                else: "",
-                            },
-                        },
-                        { $ifNull: ["$author.name.last_name", ""] },
-                    ],
-                },
-            },
-        },
-        {
             // Project the required fields
             $project: {
                 _id: 1,
@@ -164,7 +138,7 @@ exports.getAllRequirements = async (req, res) => {
                 createdAt: 1,
                 updatedAt: 1,
                 __v: 1,
-                "author.full_name": 1,
+                "author.name": 1,
                 "author.email": 1,
                 "author._id": 1,
                 "author.profile_picture": 1,
