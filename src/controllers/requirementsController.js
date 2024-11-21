@@ -122,13 +122,6 @@ exports.getAllRequirements = async (req, res) => {
             },
         },
         {
-            // Unwind the author array
-            $unwind: {
-                path: "$author",
-                preserveNullAndEmptyArrays: true, // In case there are requirements without authors
-            },
-        },
-        {
             // Project the required fields
             $project: {
                 _id: 1,
