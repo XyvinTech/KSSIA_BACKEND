@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema(
     otp: { type: Number },
     uid: { type: String },
     fcm: { type: String },
-    designation: { type: String },
+    designation: { type: String, trim: true, lowercase: true },
     company_name: { type: String },
     company_address: { type: String },
     company_logo: { type: String },

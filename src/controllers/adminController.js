@@ -71,7 +71,7 @@ exports.createUserBulk = async (req, res) => {
     });
     if (error) {
       errors.push(
-        `Invalid user data: ${error.message} for user ${user.name?.first_name} ${user.name?.last_name} membership ID: ${user.membership_id}`
+        `Invalid user data: ${error.message} for user ${user.name} membership ID: ${user.membership_id}`
       );
     } else {
       // Check if the user already exists
