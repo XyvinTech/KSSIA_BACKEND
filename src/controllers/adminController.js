@@ -316,7 +316,7 @@ exports.deleteUser = async (req, res) => {
 exports.getAllUsers = async (req, res) => {
   try {
     const userId = req.userId;
-    const { pageNo = 1, limit = 10, search = "", name = "", membershipId = "", designation = "", companyName = "" } = req.query;
+    const { pageNo = 1, limit = 10, search = "", name = "", membershipId = "", designation = "", companyName = "", status = "" } = req.query;
 
     let filter = {}; // Initialize the filter object
 
@@ -360,6 +360,10 @@ exports.getAllUsers = async (req, res) => {
           { membership_id: { $regex: search } },
         ],
       };
+    }
+
+    if(status){
+      filter.status = status
     }
 
     // Check if the limit is set to 'full' for retrieving all users
