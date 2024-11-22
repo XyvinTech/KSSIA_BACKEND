@@ -354,10 +354,10 @@ exports.getAllUsers = async (req, res) => {
       filter = {
         ...filter,
         $or: [
-          { email: { $regex: regex } },
-          { "phone_numbers.personal": { $regex: regex } },
-          { company_name: { $regex: regex } },
-          { membership_id: { $regex: regex } },
+          { email: { $regex: search } },
+          { "phone_numbers.personal": { $regex: search } },
+          { company_name: { $regex: search } },
+          { membership_id: { $regex: search } },
         ],
       };
     }
