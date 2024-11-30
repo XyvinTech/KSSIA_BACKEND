@@ -360,19 +360,16 @@ exports.getAllUsers = async (req, res) => {
       // Escape special characters in the search string for regex
       const escapedSearch = search.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
 
-      // Use RegExp constructor for creating regex safely
-      const regex = new RegExp(escapedSearch, "i");
-
       // Combine the name filters with other filters
       filter = {
         ...filter,
         $or: [
-          { email: { $regex: regex } },
+          { email: { $regex: escapedSearch } },
           {
-            "phone_numbers.personal": { $regex: regex, $options: "i" },
+            "phone_numbers.personal": { $regex: escapedSearch, $options: "i" },
           },
-          { company_name: { $regex: regex } },
-          { membership_id: { $regex: regex } },
+          { company_name: { $regex: escapedSearch } },
+          { membership_id: { $regex: escapedSearch } },
         ],
       };
     }
