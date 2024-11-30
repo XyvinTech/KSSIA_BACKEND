@@ -254,7 +254,7 @@ exports.deleteUser = async (req, res) => {
   });
 
   // Delete requirements images
-  const requirements = await Requirements.find({author: userId});
+  const requirements = await Requirements.find({ author: userId });
   for (const requirement of requirements) {
     if (requirement.image) {
       let oldFileKey = path.basename(requirement.image);
@@ -280,14 +280,14 @@ exports.deleteUser = async (req, res) => {
 
   // Remove from rsvps
   const events = await Event.find({ rsvp: userId });
-  events.forEach(async event => {
+  events.forEach(async (event) => {
     await event.unmarkrsvp(userId);
   });
 
   // Remove user from all blocked lists in other users
   await User.updateMany(
-      { "blocked_users.userId": userId },
-      { $pull: { blocked_users: { userId: userId } } }
+    { "blocked_users.userId": userId },
+    { $pull: { blocked_users: { userId: userId } } }
   );
   await User.updateMany(
     { "blocked_products.userId": userId },
@@ -301,10 +301,9 @@ exports.deleteUser = async (req, res) => {
   // Remove all reviews uploaded by the user
   await User.updateMany(
     { "reviews.reviewer": userId },
-    { $pull: { reviews: { reviewer: userId } } } 
+    { $pull: { reviews: { reviewer: userId } } }
   );
-  
-  
+
   // console.log(`User deleted successfully`);                                        // Debug line
   return responseHandler(res, 200, "User deleted successfully");
 };
@@ -316,7 +315,16 @@ exports.deleteUser = async (req, res) => {
 exports.getAllUsers = async (req, res) => {
   try {
     const userId = req.userId;
-    const { pageNo = 1, limit = 10, search = "", name = "", membershipId = "", designation = "", companyName = "", status = "" } = req.query;
+    const {
+      pageNo = 1,
+      limit = 10,
+      search = "",
+      name = "",
+      membershipId = "",
+      designation = "",
+      companyName = "",
+      status = "",
+    } = req.query;
 
     let filter = {}; // Initialize the filter object
 
@@ -327,7 +335,7 @@ exports.getAllUsers = async (req, res) => {
 
     // Handle name filtering
     if (name && name !== "") {
-      filter.name = { $regex: name, $options: 'i' };
+      filter.name = { $regex: name, $options: "i" };
     }
 
     // Log the filter for debugging
@@ -344,26 +352,33 @@ exports.getAllUsers = async (req, res) => {
 
     if (companyName) {
       filter.$or = [];
-      filter.$or.push({ company_name: { $regex: companyName, $options: 'i' } });
+      filter.$or.push({ company_name: { $regex: companyName, $options: "i" } });
     }
 
     // Add search functionality
     if (search && search !== "") {
+      // Escape special characters in the search string for regex
       const escapedSearch = search.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+
+      // Use RegExp constructor for creating regex safely
+      const regex = new RegExp(escapedSearch, "i");
+
       // Combine the name filters with other filters
       filter = {
         ...filter,
         $or: [
           { email: { $regex: search } },
-          { "phone_numbers.personal": { $regex: escapedSearch, $options: "i" } },
+          {
+            "phone_numbers.personal": { $regex: regex, $options: "i" },
+          },
           { company_name: { $regex: search } },
           { membership_id: { $regex: search } },
         ],
       };
     }
 
-    if(status){
-      filter.status = status
+    if (status) {
+      filter.status = status;
     }
 
     // Check if the limit is set to 'full' for retrieving all users
@@ -383,7 +398,12 @@ exports.getAllUsers = async (req, res) => {
       });
 
       // Return the full data
-      return responseHandler(res, 200, "Users retrieved successfully", mappedData);
+      return responseHandler(
+        res,
+        200,
+        "Users retrieved successfully",
+        mappedData
+      );
     } else {
       const skipCount = limit * (pageNo - 1);
 
@@ -423,7 +443,6 @@ exports.getAllUsers = async (req, res) => {
     return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
   }
 };
-
 
 /****************************************************************************************************/
 /*                                   Function to get user by ID                                     */
