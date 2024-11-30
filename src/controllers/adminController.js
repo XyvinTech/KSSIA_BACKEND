@@ -349,7 +349,7 @@ exports.getAllUsers = async (req, res) => {
 
     // Add search functionality
     if (search && search !== "") {
-      const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const escapedSearch = search.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
       // Combine the name filters with other filters
       filter = {
         ...filter,
