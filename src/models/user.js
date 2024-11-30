@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema(
     name: { type: String, trim: true },
     membership_id: { type: String, unique: true },
     blood_group: { type: String },
-    email: { type: String, unique: true, trim: true },
+    email: { type: String, trim: true },
     profile_picture: { type: String },
     phone_numbers: {
       personal: { type: String, trim: true },

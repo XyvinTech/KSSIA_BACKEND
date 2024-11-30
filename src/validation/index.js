@@ -43,7 +43,7 @@ exports.CreateUserSchema = Joi.object({
   name: Joi.string().required(),
   membership_id: Joi.string().required(),
   blood_group: Joi.string(),
-  email: Joi.string().email().required(),
+  email: Joi.string().email(),
   profile_picture: Joi.string().uri().allow(""),
   bio: Joi.string().allow(""),
   phone_numbers: phoneSchema.required(),
