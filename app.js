@@ -97,3 +97,4 @@ server.listen(PORT, () => {
   const envMessage = clc.yellowBright(`✓ Environment: ${NODE_ENV || "development"}`);
   console.log(`${portMessage}\n${envMessage}`);
 });
+
