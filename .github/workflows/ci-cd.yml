@@ -58,6 +58,7 @@ jobs:
           PORT: 3003
           CONTAINER_NAME: KSSIA_BACKEND
           ENV_FILE_PATH: /home/ubuntu/kssia/.env/.env.production
+          HEALTH_CHECK_URL: http://localhost:3003/health
 
         uses: appleboy/ssh-action@master
         with:
@@ -92,3 +93,27 @@ jobs:
               --name ${{ env.CONTAINER_NAME }} \
               --env-file ${{ env.ENV_FILE_PATH }} \
               ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+
+            # Wait for the container to initialize
+            echo "Waiting for the container to start..."
+            sleep 10
+
+            # Perform health check
+            echo "Performing health check..."
+            STATUS=1
+            for i in {1..5}; do
+              HTTP_CODE=$(curl -o /dev/null -s -w "%{http_code}" ${{ env.HEALTH_CHECK_URL }})
+              if [ "$HTTP_CODE" -eq 200 ]; then
+                echo "Health check passed! The application is running correctly."
+                STATUS=0
+                break
+              else
+                echo "Health check failed. HTTP Code: $HTTP_CODE. Retrying in 5 seconds..."
+                sleep 5
+              fi
+            done
+
+            if [ "$STATUS" -ne 0 ]; then
+              echo "Health check failed after multiple attempts."
+              exit 1
+            fi
