@@ -20,7 +20,7 @@ jobs:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       ECR_REPOSITORY: kssia
-      IMAGE_TAG: latest
+      IMAGE_TAG: ${{ github.sha }}
 
     steps:
       - name: Checkout repository
@@ -38,8 +38,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: kssia
-          IMAGE_TAG: latest
-
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -t ${{env.ECR_REGISTRY}}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} .
           docker push ${{env.ECR_REGISTRY}}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
@@ -51,7 +50,7 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: kssia
-          IMAGE_TAG: latest
+          IMAGE_TAG: ${{ github.sha }}
           LIGHTSAIL_INSTANCE_IP: ${{ secrets.LIGHTSAIL_INSTANCE_IP }}
           SSH_KEY: ${{ secrets.LIGHTSAIL_PRIVATE_KEY }}
           USERNAME: ubuntu
@@ -73,7 +72,10 @@ jobs:
             # Login to Amazon ECR
             aws ecr get-login-password --region ${{ env.AWS_REGION }} | sudo docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
 
-            # Pull Docker Image
+            # Remove any old cached images
+            sudo docker rmi -f ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} || true
+
+            # Pull the latest Docker Image
             sudo docker pull ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
 
             # Stop and remove the existing container if running
