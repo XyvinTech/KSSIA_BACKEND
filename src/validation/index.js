@@ -36,8 +36,6 @@ const productsSchema = Joi.object({
   tags: Joi.array().items(),
 });
 
-// Create a new user function validation
-
 exports.CreateUserSchema = Joi.object({
   abbreviation: Joi.string().required(),
   name: Joi.string().required(),
