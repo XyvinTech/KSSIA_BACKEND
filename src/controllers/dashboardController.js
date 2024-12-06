@@ -315,7 +315,7 @@ exports.getAllStatistics = async (req, res) => {
         { $count: "activeCount" },
         {
           $project: {
-            result: { $multiply: ["$activeCount", 1050] },
+            totalCategoryMembershipRevenue: { $multiply: ["$activeCount", 1050] },
           },
         },
       ]),
@@ -336,7 +336,7 @@ exports.getAllStatistics = async (req, res) => {
         { $count: "activeCount" },
         {
           $project: {
-            result: { $multiply: ["$activeCount", 999] },
+            totalCategoryAppRevenue: { $multiply: ["$activeCount", 999] },
           },
         },
       ]),
