@@ -339,9 +339,6 @@ exports.getAllUsers = async (req, res) => {
       filter.name = { $regex: name, $options: "i" };
     }
 
-    // Log the filter for debugging
-    // console.log("Filter after name processing:", filter);
-
     // Handle other filters
     if (membershipId && membershipId !== "") {
       filter.membership_id = membershipId;
