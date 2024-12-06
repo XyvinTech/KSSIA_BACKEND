@@ -64,13 +64,13 @@ exports.createAdmin = async (req, res) => {
      Regards,
      KSSIA Team
       `;
-    const mailData = {
-      to: data.email,
-      subject: subject,
-      text: text,
-    }
+  const mailData = {
+    to: data.email,
+    subject: subject,
+    text: text,
+  };
 
-    await sendMail(mailData);
+  await sendMail(mailData);
 
   // Create and save the new admin
   const newAdmin = await Admin.create(req.body);
@@ -106,7 +106,9 @@ exports.editAdmin = async (req, res) => {
 exports.getAllAdmins = async (req, res) => {
   const { pageNo = 1, limit = 10, search = "" } = req.query;
   const skipCount = limit * (pageNo - 1);
-  let filter = {};
+  let filter = {
+    _id: { $ne: "66f65644bdc60df7dd75d4b7" },
+  };
 
   // Add search functionality
   if (search) {
