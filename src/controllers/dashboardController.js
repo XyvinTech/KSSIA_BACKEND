@@ -299,28 +299,47 @@ exports.getAllStatistics = async (req, res) => {
       ]).then((data) => (data.length > 0 ? data[0].totalRevenue : 0)),
 
       // Get monthly revenue by category membership
-      Payment.aggregate([
+      // Payment.aggregate([
+      //   {
+      //     $match: {
+      //       date: { $gte: startDate, $lt: endDate },
+      //       status: { $in: ["accepted", "expiring", "expired"] },
+      //       category: "membership",
+      //     },
+      //   },
+      //   { $group: { _id: null, totalRevenue: { $sum: "$amount" } } },
+      // ]).then((data) => (data.length > 0 ? data[0].totalRevenue : 0)),
+
+      User.aggregate([
+        { $match: { status: "active" } },
+        { $count: "activeCount" },
         {
-          $match: {
-            date: { $gte: startDate, $lt: endDate },
-            status: { $in: ["accepted", "expiring", "expired"] },
-            category: "membership",
+          $project: {
+            result: { $multiply: ["$activeCount", 1050] },
           },
         },
-        { $group: { _id: null, totalRevenue: { $sum: "$amount" } } },
-      ]).then((data) => (data.length > 0 ? data[0].totalRevenue : 0)),
+      ]),
 
       // Get monthly revenue by category app
-      Payment.aggregate([
+      // Payment.aggregate([
+      //   {
+      //     $match: {
+      //       date: { $gte: startDate, $lt: endDate },
+      //       status: { $in: ["accepted", "expiring", "expired"] },
+      //       category: "app",
+      //     },
+      //   },
+      //   { $group: { _id: null, totalRevenue: { $sum: "$amount" } } },
+      // ]).then((data) => (data.length > 0 ? data[0].totalRevenue : 0)),
+      User.aggregate([
+        { $match: { status: "active", subscription: "premium" } },
+        { $count: "activeCount" },
         {
-          $match: {
-            date: { $gte: startDate, $lt: endDate },
-            status: { $in: ["accepted", "expiring", "expired"] },
-            category: "app",
+          $project: {
+            result: { $multiply: ["$activeCount", 999] },
           },
         },
-        { $group: { _id: null, totalRevenue: { $sum: "$amount" } } },
-      ]).then((data) => (data.length > 0 ? data[0].totalRevenue : 0)),
+      ]),
 
       // Get previous month's total revenue
       Payment.aggregate([
