@@ -299,47 +299,28 @@ exports.getAllStatistics = async (req, res) => {
       ]).then((data) => (data.length > 0 ? data[0].totalRevenue : 0)),
 
       // Get monthly revenue by category membership
-      // Payment.aggregate([
-      //   {
-      //     $match: {
-      //       date: { $gte: startDate, $lt: endDate },
-      //       status: { $in: ["accepted", "expiring", "expired"] },
-      //       category: "membership",
-      //     },
-      //   },
-      //   { $group: { _id: null, totalRevenue: { $sum: "$amount" } } },
-      // ]).then((data) => (data.length > 0 ? data[0].totalRevenue : 0)),
-
-      User.aggregate([
-        { $match: { status: "active" } },
-        { $count: "activeCount" },
+      Payment.aggregate([
         {
-          $project: {
-            totalCategoryMembershipRevenue: { $multiply: ["$activeCount", 1050] },
+          $match: {
+            date: { $gte: startDate, $lt: endDate },
+            status: { $in: ["accepted", "expiring", "expired"] },
+            category: "membership",
           },
         },
-      ]),
+        { $group: { _id: null, totalRevenue: { $sum: "$amount" } } },
+      ]).then((data) => (data.length > 0 ? data[0].totalRevenue : 0)),
 
       // Get monthly revenue by category app
-      // Payment.aggregate([
-      //   {
-      //     $match: {
-      //       date: { $gte: startDate, $lt: endDate },
-      //       status: { $in: ["accepted", "expiring", "expired"] },
-      //       category: "app",
-      //     },
-      //   },
-      //   { $group: { _id: null, totalRevenue: { $sum: "$amount" } } },
-      // ]).then((data) => (data.length > 0 ? data[0].totalRevenue : 0)),
-      User.aggregate([
-        { $match: { status: "active", subscription: "premium" } },
-        { $count: "activeCount" },
+      Payment.aggregate([
         {
-          $project: {
-            totalCategoryAppRevenue: { $multiply: ["$activeCount", 999] },
+          $match: {
+            date: { $gte: startDate, $lt: endDate },
+            status: { $in: ["accepted", "expiring", "expired"] },
+            category: "app",
           },
         },
-      ]),
+        { $group: { _id: null, totalRevenue: { $sum: "$amount" } } },
+      ]).then((data) => (data.length > 0 ? data[0].totalRevenue : 0)),
 
       // Get previous month's total revenue
       Payment.aggregate([
@@ -389,16 +370,14 @@ exports.getAllStatistics = async (req, res) => {
       Requirements.countDocuments({}),
     ]);
 
-    const revenueRate = 1000;
-
     const appRevenue = await User.countDocuments({
+      status: "active",
       subscription: "premium",
-      updatedAt: { $gte: oneYearBackDate, $lt: prevStartDate },
-    }).then((count) => count * revenueRate);
+    }).then((count) => count * 999);
 
     const membershipRevenue = await User.countDocuments({
-      updatedAt: { $gte: oneYearBackDate, $lt: prevStartDate },
-    }).then((count) => count * revenueRate);
+      status: "active",
+    }).then((count) => count * 1050);
 
     // Destructure the results array
     const [
