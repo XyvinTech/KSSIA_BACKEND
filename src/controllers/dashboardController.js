@@ -379,6 +379,8 @@ exports.getAllStatistics = async (req, res) => {
       status: "active",
     }).then((count) => count * 1050);
 
+    const total = appRevenue + membershipRevenue;
+
     // Destructure the results array
     const [
       userCount,
@@ -432,7 +434,7 @@ exports.getAllStatistics = async (req, res) => {
       activeUserCount,
       activePremiumUserCount,
       suspendedUserCount,
-      totalRevenue,
+      totalRevenue: total,
       totalCategoryMembershipRevenue,
       totalCategoryAppRevenue,
       totalRevenuePercentage,
