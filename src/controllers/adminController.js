@@ -327,9 +327,8 @@ exports.getAllUsers = async (req, res) => {
       subscription = "",
     } = req.query;
 
-    let filter = {}; // Initialize the filter object
+    let filter = {};
 
-    // Exclude the requesting user from the results
     if (userId && (userId !== "" || userId !== undefined)) {
       filter._id = { $nin: [userId] };
     }
