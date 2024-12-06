@@ -324,6 +324,7 @@ exports.getAllUsers = async (req, res) => {
       designation = "",
       companyName = "",
       status = "",
+      subscription = "",
     } = req.query;
 
     let filter = {}; // Initialize the filter object
@@ -353,6 +354,10 @@ exports.getAllUsers = async (req, res) => {
     if (companyName) {
       filter.$or = [];
       filter.$or.push({ company_name: { $regex: companyName, $options: "i" } });
+    }
+
+    if (subscription) {
+      filter.subscription = subscription;
     }
 
     // Add search functionality
