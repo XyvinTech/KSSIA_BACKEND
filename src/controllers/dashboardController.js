@@ -373,7 +373,7 @@ exports.getAllStatistics = async (req, res) => {
     const appRevenue = await User.countDocuments({
       status: "active",
       subscription: "premium",
-    }).then((count) => count * 999);
+    }).then((count) => count * 1000);
 
     const membershipRevenue = await User.countDocuments({
       status: "active",
