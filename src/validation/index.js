@@ -227,7 +227,6 @@ exports.PaymentSchema = Joi.object({
   status: Joi.string(),
   amount: Joi.number().min(0).required(),
   category: Joi.string().required().valid("app", "membership"),
-  lastRenewDate: Joi.date().required(),
   expiryDate: Joi.date().required(),
 });
 

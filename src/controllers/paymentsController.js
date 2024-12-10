@@ -17,6 +17,9 @@ exports.createPayment = async (req, res) => {
     return responseHandler(res, 400, `Invalid input: ${error.message}`);
   }
 
+  const lastRenewDate = new Date();
+  req.body.lastRenewDate = lastRenewDate;
+
   const newPayment = await Payment.create(req.body);
 
   try {
@@ -41,11 +44,16 @@ exports.updatePayment = async (req, res) => {
       return responseHandler(res, 400, `Invalid input: ${error.message}`);
     }
     const { id } = req.params;
-    const data = req.body;
 
-    await Payment.findByIdAndUpdate(id, { status: "expired" }, { new: true });
+    const oldPayment = await Payment.findByIdAndUpdate(
+      id,
+      { status: "expired" },
+      { new: true }
+    );
 
-    const payment = await Payment.create(data);
+    req.body.lastRenewDate = oldPayment.createdAt;
+
+    const payment = await Payment.create(req.body);
 
     return responseHandler(res, 200, "Payment updated successfully!", payment);
   } catch (err) {
