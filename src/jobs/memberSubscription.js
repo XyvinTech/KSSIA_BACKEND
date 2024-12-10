@@ -1,6 +1,5 @@
 const cron = require("node-cron");
 const moment = require("moment-timezone");
-const Notification = require("../models/notificationModel");
 const sendInAppNotification = require("../utils/sendInAppNotification");
 const Payment = require("../models/payment");
 const User = require("../models/user");
