@@ -22,6 +22,16 @@ exports.createPayment = async (req, res) => {
 
   const newPayment = await Payment.create(req.body);
 
+  if (!newPayment) {
+    return responseHandler(res, 500, "Error saving payment");
+  } else {
+    await User.findOneAndUpdate(
+      { _id: req.body.user },
+      { subscription: "premium" },
+      { new: true }
+    );
+  }
+
   try {
     return responseHandler(
       res,
@@ -54,6 +64,16 @@ exports.updatePayment = async (req, res) => {
     req.body.lastRenewDate = oldPayment.createdAt;
 
     const payment = await Payment.create(req.body);
+
+    if (!payment) {
+      return responseHandler(res, 500, "Error saving payment");
+    } else {
+      await User.findOneAndUpdate(
+        { _id: req.body.user },
+        { subscription: "premium" },
+        { new: true }
+      );
+    }
 
     return responseHandler(res, 200, "Payment updated successfully!", payment);
   } catch (err) {
