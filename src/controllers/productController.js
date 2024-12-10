@@ -244,7 +244,13 @@ exports.getAllProducts = async (req, res) => {
 exports.getAllProductsUser = async (req, res) => {
   try {
     const reqUser = req.userId;
-    const { pageNo = 1, limit = 10, search = "" } = req.query;
+    const {
+      pageNo = 1,
+      limit = 10,
+      search = "",
+      category = "",
+      subcategory = "",
+    } = req.query;
     const skipCount = limit * (pageNo - 1);
 
     let filter = { status: "accepted" };
@@ -293,17 +299,38 @@ exports.getAllProductsUser = async (req, res) => {
       // Stage 4: Build the search filter (product name, description, seller names)
       {
         $match: {
-          $or: [
-            { name: { $regex: search, $options: "i" } }, // Product name
-            { category: { $regex: search, $options: "i" } },
-            { category: { $regex: search, $options: "i" } },
-            { description: { $regex: search, $options: "i" } }, // Product description
-            { "seller_id.name.first_name": { $regex: search, $options: "i" } }, // Seller first name
-            { "seller_id.name.middle_name": { $regex: search, $options: "i" } }, // Seller middle name
-            { "seller_id.name.last_name": { $regex: search, $options: "i" } }, // Seller last name
+          $and: [
+            {
+              $or: [
+                { name: { $regex: search, $options: "i" } },
+                { description: { $regex: search, $options: "i" } },
+                { category: { $regex: search, $options: "i" } },
+                { subcategory: { $regex: search, $options: "i" } },
+                {
+                  "seller_id.name.first_name": {
+                    $regex: search,
+                    $options: "i",
+                  },
+                },
+                {
+                  "seller_id.name.middle_name": {
+                    $regex: search,
+                    $options: "i",
+                  },
+                },
+                {
+                  "seller_id.name.last_name": { $regex: search, $options: "i" },
+                },
+              ],
+            },
+            category ? { category: { $regex: category, $options: "i" } } : {},
+            subcategory
+              ? { subcategory: { $regex: subcategory, $options: "i" } }
+              : {},
           ],
         },
       },
+
       // Stage 5: Add a full name field for the seller
       {
         $addFields: {
@@ -366,14 +393,34 @@ exports.getAllProductsUser = async (req, res) => {
       { $unwind: "$seller_id" },
       {
         $match: {
-          $or: [
-            { name: { $regex: search, $options: "i" } },
-            { description: { $regex: search, $options: "i" } },
-            { category: { $regex: search, $options: "i" } },
-            { subcategory: { $regex: search, $options: "i" } },
-            { "seller_id.name.first_name": { $regex: search, $options: "i" } },
-            { "seller_id.name.middle_name": { $regex: search, $options: "i" } },
-            { "seller_id.name.last_name": { $regex: search, $options: "i" } },
+          $and: [
+            {
+              $or: [
+                { name: { $regex: search, $options: "i" } },
+                { description: { $regex: search, $options: "i" } },
+                { category: { $regex: search, $options: "i" } },
+                { subcategory: { $regex: search, $options: "i" } },
+                {
+                  "seller_id.name.first_name": {
+                    $regex: search,
+                    $options: "i",
+                  },
+                },
+                {
+                  "seller_id.name.middle_name": {
+                    $regex: search,
+                    $options: "i",
+                  },
+                },
+                {
+                  "seller_id.name.last_name": { $regex: search, $options: "i" },
+                },
+              ],
+            },
+            category ? { category: { $regex: category, $options: "i" } } : {},
+            subcategory
+              ? { subcategory: { $regex: subcategory, $options: "i" } }
+              : {},
           ],
         },
       },
