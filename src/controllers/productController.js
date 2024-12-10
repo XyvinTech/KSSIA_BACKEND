@@ -249,7 +249,7 @@ exports.getAllProductsUser = async (req, res) => {
       limit = 10,
       search = "",
       category = "",
-      subcategory = [],
+      subcategory = "",
     } = req.query;
     const skipCount = limit * (pageNo - 1);
 
@@ -324,12 +324,8 @@ exports.getAllProductsUser = async (req, res) => {
               ],
             },
             category ? { category: { $regex: category, $options: "i" } } : {},
-            subcategory.length > 0
-              ? {
-                  subcategory: {
-                    $in: subcategory.map((item) => new RegExp(item, "i")),
-                  },
-                }
+            subcategory
+              ? { subcategory: { $regex: subcategory, $options: "i" } }
               : {},
           ],
         },
@@ -422,12 +418,8 @@ exports.getAllProductsUser = async (req, res) => {
               ],
             },
             category ? { category: { $regex: category, $options: "i" } } : {},
-            subcategory.length > 0
-              ? {
-                  subcategory: {
-                    $in: subcategory.map((item) => new RegExp(item, "i")),
-                  },
-                }
+            subcategory
+              ? { subcategory: { $regex: subcategory, $options: "i" } }
               : {},
           ],
         },
