@@ -223,21 +223,12 @@ exports.EditPromotionSchema = Joi.object({
 });
 
 exports.PaymentSchema = Joi.object({
-  member: Joi.string().hex().length(24).required(),
-  membership_id: Joi.string(),
-  date: Joi.date().required(),
-  plan: Joi.string(),
-  time: Joi.date().required(),
-  amount: Joi.number().positive().required(),
-  mode_of_payment: Joi.string().required(),
+  user: Joi.string().required(),
+  status: Joi.string(),
+  amount: Joi.number().min(0).required(),
   category: Joi.string().required().valid("app", "membership"),
-  invoice_id: Joi.string(),
-  status: Joi.string()
-    .valid("pending", "accepted", "resubmit", "rejected")
-    .default("pending"),
-  invoice_url: Joi.string().uri().allow(""),
-  remarks: Joi.string().allow(""),
-  year_count: Joi.number(),
+  lastRenewDate: Joi.date().required(),
+  expiryDate: Joi.date().required(),
 });
 
 exports.UserPaymentSchema = Joi.object({

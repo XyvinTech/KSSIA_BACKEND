@@ -12,47 +12,14 @@ const sendInAppNotification = require("../utils/sendInAppNotification");
 /*                                  Function to create payments                                     */
 /****************************************************************************************************/
 exports.createPayment = async (req, res) => {
-  const data = req.body;
-  const year_count = req.body.year_count ? req.body.year_count : 1;
-
-  // Validate the input data using Joi
-  const { error } = PaymentSchema.validate(data, { abortEarly: true });
+  const { error } = PaymentSchema.validate(req.body, { abortEarly: true });
   if (error) {
     return responseHandler(res, 400, `Invalid input: ${error.message}`);
   }
 
-  // Check if a payment with the same details already exists
-  const paymentExist = await Payment.findOne({
-    member: data.member,
-    category: data.category,
-    status: { $in: ["pending", "accepted"] },
-  });
-  if (paymentExist) {
-    return responseHandler(res, 400, "Payment details already exist");
-  }
+  const newPayment = await Payment.create(req.body);
 
-  let renewal = "";
-  let days = "";
-
-  // Calculate the renewal date
-  const resultDate = new Date(data.date);
-  if (isNaN(resultDate.getTime())) {
-    return responseHandler(res, 400, "Invalid date provided for payment");
-  }
-  resultDate.setDate(resultDate.getDate() + 365 * year_count); // Adding 365 days * no of years for renewal
-  renewal = resultDate;
-  days = 365 * year_count;
-
-  // Create a new payment instance
-  const newPayment = new Payment({
-    ...data,
-    renewal,
-    days,
-  });
-
-  // Save the new payment to the database
   try {
-    await newPayment.save();
     return responseHandler(
       res,
       201,
@@ -68,115 +35,19 @@ exports.createPayment = async (req, res) => {
 /*                                   Function to edit payments                                      */
 /****************************************************************************************************/
 exports.updatePayment = async (req, res) => {
-  const { paymentID } = req.params;
-  const data = req.body;
-  const year_count = req.body.year_count ? req.body.year_count : 1;
-
-  const { error } = PaymentSchema.validate(data, {
-    abortEarly: false,
-  });
-  if (error) {
-    return responseHandler(
-      res,
-      400,
-      `Invalid input: ${error.details
-        .map((detail) => detail.message)
-        .join(", ")}`
-    );
-  }
-
-  let payment;
   try {
-    payment = await Payment.findById(paymentID);
-  } catch (err) {
-    return responseHandler(res, 500, `Error finding payment: ${err.message}`);
-  }
-
-  if (!payment) {
-    return responseHandler(res, 404, "Payment details do not exist");
-  }
-
-  let invoice_url = payment.invoice_url;
-  const bucketName = process.env.AWS_S3_BUCKET;
-
-  if (req.file) {
-    try {
-      if (payment.invoice_url) {
-        const oldImageKey = path.basename(payment.invoice_url);
-        await deleteFile(bucketName, oldImageKey);
-      }
-      invoice_url = await handleFileUpload(req.file, bucketName);
-    } catch (err) {
-      return responseHandler(res, 500, err.message);
+    const { error } = PaymentSchema.validate(req.body, { abortEarly: true });
+    if (error) {
+      return responseHandler(res, 400, `Invalid input: ${error.message}`);
     }
-  }
+    const { id } = req.params;
+    const data = req.body;
 
-  const resultDate = new Date(data.date);
-  resultDate.setDate(resultDate.getDate() + 365 * year_count);
-  req.body.renewal = resultDate;
-  req.body.days = 365 * year_count;
+    await Payment.findByIdAndUpdate(id, { status: "expired" }, { new: true });
 
-  try {
-    const updatedPayment = await Payment.findByIdAndUpdate(
-      paymentID,
-      req.body,
-      {
-        new: true,
-      }
-    );
-    try {
-      let user = await User.findById(payment.member);
+    const payment = await Payment.create(data);
 
-      if (!user) {
-        return responseHandler(res, 404, "User not found");
-      }
-
-      if (payment.status == "accepted") {
-        payment.reason = "";
-      }
-
-      try {
-        if (payment.status == "accepted" && payment.category == "app") {
-          user.subscription = payment.plan;
-          await user.save();
-        } else if (
-          payment.status == "accepted" &&
-          payment.category == "membership"
-        ) {
-          user.membership_status = payment.plan;
-          await user.save();
-        }
-      } catch (error) {
-        console.log(`error updating the user subscription : ${error}`);
-      }
-
-      try {
-        let userFCM = [];
-        userFCM.push(user.fcm);
-
-        const subject = `${payment.category} subscription status update`;
-        let content =
-          `Your payment for ${payment.category} has been ${payment.status}`.trim();
-
-        if (payment.reason != "" && payment.reason != undefined) {
-          content =
-            `Your payment for ${payment.category} has been ${payment.status} beacuse ${payment.reason}`.trim();
-        }
-
-        await sendInAppNotification(
-          userFCM,
-          subject,
-          content,
-          (media = null),
-          "approvals"
-        );
-      } catch (error) {
-        console.log(`error creating notification : ${error}`);
-      }
-    } catch (error) {
-      console.log(`Error featching user: ${error.message}`);
-    }
-    return responseHandler(res, 200, "Payment updated successfully!", updatedPayment);
+    return responseHandler(res, 200, "Payment updated successfully!", payment);
   } catch (err) {
     return responseHandler(res, 500, `Error saving payment: ${err.message}`);
   }
@@ -276,34 +147,29 @@ exports.getAllPayments = async (req, res) => {
   const skipCount = limit * (pageNo - 1);
 
   try {
-    // Count total payments for pagination
     const totalCount = await Payment.countDocuments();
 
-    // Fetch payments with pagination and populate member details
     const payments = await Payment.find()
-      .populate({ path: "member", select: "name membership_id" })
+      .populate({ path: "user", select: "name membership_id" })
       .skip(skipCount)
       .limit(limit)
       .sort({ createdAt: -1 })
       .lean()
       .exec();
 
-    // Check if no payments were found
     if (payments.length === 0) {
       return responseHandler(res, 404, "No payments found");
     }
 
-    // Map the payments and include member's full name
     const mappedPayments = payments.map((payment) => {
       return {
-        ...payment, // Spread the original payment data
+        ...payment,
         full_name: `${payment.member?.name.first_name || ""} ${
           payment.member?.name.middle_name || ""
         } ${payment.member?.name.last_name || ""}`.trim(), // Construct full name
       };
     });
 
-    // Send response with mapped payments and total count
     return responseHandler(
       res,
       200,
@@ -480,29 +346,10 @@ exports.updatePaymentStatus = async (req, res) => {
 exports.getUserPayments = async (req, res) => {
   const { userId } = req.params;
 
-  const { pageNo = 1, limit = 10 } = req.query;
-  const skipCount = limit * (pageNo - 1);
+  const filter = { user: userId };
 
-  if (!userId) {
-    return responseHandler(res, 400, "Invalid request");
-  }
-
-  const user = await User.findById(userId);
-  if (!user) {
-    return responseHandler(res, 404, "User not found");
-  }
-
-  const totalCount = await Payment.find({ member: userId });
-  const payments = await Payment.find({ member: userId })
-    .skip(skipCount)
-    .limit(limit)
-    .sort({ createdAt: -1 })
-    .lean()
-    .exec();
-
-  if (payments.length === 0) {
-    return responseHandler(res, 404, "No payments found");
-  }
+  const totalCount = await Payment.countDocuments(filter);
+  const payments = await Payment.find(filter);
 
   return responseHandler(
     res,

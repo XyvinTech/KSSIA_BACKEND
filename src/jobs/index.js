@@ -1,3 +1,5 @@
-require("./updateEventStatus"); 
-// require("./deleteUnwantedFiles"); 
+require("./updateEventStatus");
+// require("./deleteUnwantedFiles");
 require("./checkSubscriptions");
+require("./memberSubscription");
+require("./appSubscription");
