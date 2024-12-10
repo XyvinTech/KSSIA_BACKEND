@@ -25,11 +25,19 @@ exports.createPayment = async (req, res) => {
   if (!newPayment) {
     return responseHandler(res, 500, "Error saving payment");
   } else {
-    await User.findOneAndUpdate(
-      { _id: req.body.user },
-      { subscription: "premium" },
-      { new: true }
-    );
+    if (req.body.category === "app") {
+      await User.findOneAndUpdate(
+        { _id: req.body.user },
+        { subscription: "premium" },
+        { new: true }
+      );
+    } else if (req.body.category === "membership") {
+      await User.findOneAndUpdate(
+        { _id: req.body.user },
+        { status: "inactive" },
+        { new: true }
+      );
+    }
   }
 
   try {
@@ -68,11 +76,19 @@ exports.updatePayment = async (req, res) => {
     if (!payment) {
       return responseHandler(res, 500, "Error saving payment");
     } else {
-      await User.findOneAndUpdate(
-        { _id: req.body.user },
-        { subscription: "premium" },
-        { new: true }
-      );
+      if (req.body.category === "app") {
+        await User.findOneAndUpdate(
+          { _id: req.body.user },
+          { subscription: "premium" },
+          { new: true }
+        );
+      } else if (req.body.category === "membership") {
+        await User.findOneAndUpdate(
+          { _id: req.body.user },
+          { status: "inactive" },
+          { new: true }
+        );
+      }
     }
 
     return responseHandler(res, 200, "Payment updated successfully!", payment);
