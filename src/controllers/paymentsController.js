@@ -172,9 +172,7 @@ exports.getAllPayments = async (req, res) => {
     const mappedPayments = payments.map((payment) => {
       return {
         ...payment,
-        full_name: `${payment.member?.name.first_name || ""} ${
-          payment.member?.name.middle_name || ""
-        } ${payment.member?.name.last_name || ""}`.trim(), // Construct full name
+        full_name: `${payment.user?.name || ""}`,
       };
     });
 
