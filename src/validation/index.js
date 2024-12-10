@@ -224,7 +224,6 @@ exports.EditPromotionSchema = Joi.object({
 
 exports.PaymentSchema = Joi.object({
   user: Joi.string().required(),
-  status: Joi.string(),
   amount: Joi.number().min(0).required(),
   category: Joi.string().required().valid("app", "membership"),
   expiryDate: Joi.date().required(),
