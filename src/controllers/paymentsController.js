@@ -354,18 +354,43 @@ exports.updatePaymentStatus = async (req, res) => {
 exports.getUserPayments = async (req, res) => {
   const { userId } = req.params;
 
-  const filter = { user: userId };
+  try {
+    const filter = { user: userId };
 
-  const totalCount = await Payment.countDocuments(filter);
-  const payments = await Payment.find(filter);
+    // Fetch the latest payment for 'app' category
+    const appPayment = await Payment.findOne({ ...filter, category: "app" })
+      .sort({ createdAt: -1 })
+      .lean();
 
-  return responseHandler(
-    res,
-    200,
-    "Successfully retrieved payments",
-    payments,
-    totalCount
-  );
+    // Fetch the latest payment for 'membership' category
+    const membershipPayment = await Payment.findOne({
+      ...filter,
+      category: "membership",
+    })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // Array to hold the final results
+    const payments = [];
+
+    if (appPayment) {
+      payments.push(appPayment);
+    }
+
+    if (membershipPayment) {
+      payments.push(membershipPayment);
+    }
+
+    return responseHandler(
+      res,
+      200,
+      "Successfully retrieved payments",
+      payments,
+      payments.length
+    );
+  } catch (error) {
+    return responseHandler(res, 500, "Error retrieving payments", error);
+  }
 };
 
 /****************************************************************************************************/
