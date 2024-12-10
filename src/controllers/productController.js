@@ -295,7 +295,8 @@ exports.getAllProductsUser = async (req, res) => {
         $match: {
           $or: [
             { name: { $regex: search, $options: "i" } }, // Product name
-            { tags: { $regex: search, $options: "i" } },
+            { category: { $regex: search, $options: "i" } },
+            { category: { $regex: search, $options: "i" } },
             { description: { $regex: search, $options: "i" } }, // Product description
             { "seller_id.name.first_name": { $regex: search, $options: "i" } }, // Seller first name
             { "seller_id.name.middle_name": { $regex: search, $options: "i" } }, // Seller middle name
@@ -340,7 +341,8 @@ exports.getAllProductsUser = async (req, res) => {
           description: 1,
           moq: 1,
           status: 1,
-          tags: 1,
+          category: 1,
+          subcategory: 1,
           createdAt: 1,
           updatedAt: 1,
           full_name: 1,
@@ -367,6 +369,8 @@ exports.getAllProductsUser = async (req, res) => {
           $or: [
             { name: { $regex: search, $options: "i" } },
             { description: { $regex: search, $options: "i" } },
+            { category: { $regex: search, $options: "i" } },
+            { subcategory: { $regex: search, $options: "i" } },
             { "seller_id.name.first_name": { $regex: search, $options: "i" } },
             { "seller_id.name.middle_name": { $regex: search, $options: "i" } },
             { "seller_id.name.last_name": { $regex: search, $options: "i" } },

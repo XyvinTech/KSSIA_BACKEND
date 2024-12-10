@@ -33,7 +33,8 @@ const productsSchema = Joi.object({
   units: Joi.string(),
   moq: Joi.number().min(0),
   status: Joi.string(),
-  tags: Joi.array().items(),
+  category: Joi.string(),
+  subcategory: Joi.array().items(),
 });
 
 exports.CreateUserSchema = Joi.object({
