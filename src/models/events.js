@@ -85,7 +85,7 @@ eventSchema.methods.markrsvp = function (userId) {
         this.rsvp.push(userId);
         return this.save();
     }
-    return Promise.resolve(this); // Return the existing document if no change was made.
+    return Promise.resolve(this); 
 };
 
 eventSchema.methods.unmarkrsvp = function (userId) {
