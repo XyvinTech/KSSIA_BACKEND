@@ -34,7 +34,7 @@ exports.createPayment = async (req, res) => {
     } else if (req.body.category === "membership") {
       await User.findOneAndUpdate(
         { _id: req.body.user },
-        { status: "inactive" },
+        { status: "active" },
         { new: true }
       );
     }
