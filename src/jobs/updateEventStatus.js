@@ -14,8 +14,7 @@ cron.schedule("* * * * *", async () => {
     const updatedLiveEvents = await Event.updateMany(
       {
         status: { $in: ["upcoming", "postponded"] },
-        startDate: { $lte: now.toDate() },
-        startTime: { $lte: currentDateTime },
+        startTime: { $lte: now.toDate() },
       },
       { status: "live" }
     );
@@ -23,9 +22,7 @@ cron.schedule("* * * * *", async () => {
     // Retrieve only events that were updated to "live" in this operation
     const liveEvents = await Event.find({
       status: "live",
-      updatedAt: { $gte: now.subtract(1, 'minute').toDate() }, // Fetch only recently updated events
-      startDate: { $lte: now.toDate() },
-      startTime: { $lte: currentDateTime },
+      startTime: { $lte: now.toDate() },
     });
 
     liveEvents.forEach(async (event) => {
@@ -58,14 +55,15 @@ cron.schedule("* * * * *", async () => {
       await getMessaging().send(message);
     });
 
-    console.log(`Updated ${updatedLiveEvents.modifiedCount} notified: ${liveEvents.length} events to live`);
+    console.log(
+      `Updated ${updatedLiveEvents.modifiedCount} notified: ${liveEvents.length} events to live`
+    );
 
     // Update events from "live" to "completed"
     const updatedCompletedEvents = await Event.updateMany(
       {
         status: "live",
-        endDate: { $lte: now.toDate() },
-        endTime: { $lte: currentDateTime },
+        endTime: { $lte: now.toDate() },
       },
       { status: "completed" }
     );
@@ -73,9 +71,7 @@ cron.schedule("* * * * *", async () => {
     // Retrieve only events that were updated to "completed" in this operation
     const completedEvents = await Event.find({
       status: "completed",
-      updatedAt: { $gte: now.subtract(1, 'minute').toDate() }, // Fetch only recently updated events
-      endDate: { $lte: now.toDate() },
-      endTime: { $lte: currentDateTime },
+      endTime: { $lte: now.toDate() },
     });
 
     completedEvents.forEach(async (event) => {
@@ -108,7 +104,9 @@ cron.schedule("* * * * *", async () => {
       await getMessaging().send(message);
     });
 
-    console.log(`Updated: ${updatedCompletedEvents.modifiedCount} notified: ${completedEvents.length} events to completed`);
+    console.log(
+      `Updated: ${updatedCompletedEvents.modifiedCount} notified: ${completedEvents.length} events to completed`
+    );
   } catch (err) {
     console.error("Error updating events:", err);
   }
