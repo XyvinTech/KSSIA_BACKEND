@@ -68,7 +68,7 @@ cron.schedule("* * * * *", async () => {
       { status: "completed" }
     );
 
-    // Retrieve only events that were updated to "completed" in this operation
+
     const completedEvents = await Event.find({
       status: "completed",
       endTime: { $lte: now.toDate() },
