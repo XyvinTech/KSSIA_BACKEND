@@ -512,7 +512,26 @@ exports.suspendUser = async (req, res) => {
 
 exports.downloadUsers = async (req, res) => {
   try {
-    const users = await User.find();
+    const { designation, company_name, subscription, status } = req.query;
+    const filter = {};
+
+    if (designation) {
+      filter.designation = designation;
+    }
+
+    if (company_name) {
+      filter.company_name = company_name;
+    }
+
+    if (subscription) {
+      filter.subscription = subscription;
+    }
+
+    if (status) {
+      filter.status = status;
+    }
+
+    const users = await User.find(filter);
     const csvData = users.map((user) => {
       return {
         Name: `${user.name}`.trim(),
