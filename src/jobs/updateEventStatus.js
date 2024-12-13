@@ -20,8 +20,8 @@ cron.schedule("* * * * *", async () => {
       const topic = `event_${event._id}`;
       const message = {
         notification: {
-          title: `Event ${event.eventName} is now live!`,
-          body: `The event ${event.eventName} has started. Join now!`,
+          title: `Event ${event.name} is now live!`,
+          body: `The event ${event.name} has started. Join now!`,
         },
         topic: topic,
         android: {
@@ -43,10 +43,10 @@ cron.schedule("* * * * *", async () => {
 
       try {
         await getMessaging().send(message);
-        console.log(`Notification sent for event ${event.eventName}`);
+        console.log(`Notification sent for event ${event.name}`);
       } catch (err) {
         console.error(
-          `Failed to send notification for event ${event.eventName}:`,
+          `Failed to send notification for event ${event.name}:`,
           err
         );
       }
@@ -67,18 +67,33 @@ cron.schedule("* * * * *", async () => {
       const topic = `event_${event._id}`;
       const message = {
         notification: {
-          title: `Event ${event.eventName} is now completed!`,
-          body: `The event ${event.eventName} has ended. Thank you for participating!`,
+          title: `Event ${event.name} is now completed!`,
+          body: `The event ${event.name} has ended. Thank you for participating!`,
         },
         topic: topic,
+        android: {
+          notification: {
+            imageUrl: event.image,
+          },
+        },
+        apns: {
+          payload: {
+            aps: {
+              "mutable-content": 1,
+            },
+          },
+          fcm_options: {
+            imageUrl: event.image,
+          },
+        },
       };
 
       try {
         await getMessaging().send(message);
-        console.log(`Notification sent for completed event ${event.eventName}`);
+        console.log(`Notification sent for completed event ${event.name}`);
       } catch (err) {
         console.error(
-          `Failed to send notification for event ${event.eventName}:`,
+          `Failed to send notification for event ${event.name}:`,
           err
         );
       }
