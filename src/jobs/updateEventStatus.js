@@ -24,21 +24,6 @@ cron.schedule("* * * * *", async () => {
           body: `The event ${event.name} has started. Join now!`,
         },
         topic: topic,
-        android: {
-          notification: {
-            imageUrl: event.image,
-          },
-        },
-        apns: {
-          payload: {
-            aps: {
-              "mutable-content": 1,
-            },
-          },
-          fcm_options: {
-            imageUrl: event.image,
-          },
-        },
       };
 
       try {
@@ -71,21 +56,6 @@ cron.schedule("* * * * *", async () => {
           body: `The event ${event.name} has ended. Thank you for participating!`,
         },
         topic: topic,
-        android: {
-          notification: {
-            imageUrl: event.image,
-          },
-        },
-        apns: {
-          payload: {
-            aps: {
-              "mutable-content": 1,
-            },
-          },
-          fcm_options: {
-            imageUrl: event.image,
-          },
-        },
       };
 
       try {
