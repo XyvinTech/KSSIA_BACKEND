@@ -18,12 +18,12 @@ cron.schedule("* * * * *", async () => {
       event.status = "live";
       await event.save();
       const topic = `event_${event._id}`;
+
       const message = {
         notification: {
           title: `Event ${event.name} is now live!`,
           body: `The event ${event.name} has started. Join now!`,
         },
-        topic: topic,
         android: {
           notification: {
             imageUrl: event.image,
@@ -39,6 +39,7 @@ cron.schedule("* * * * *", async () => {
             image: event.image,
           },
         },
+        topic: topic,
       };
 
       try {
@@ -70,7 +71,6 @@ cron.schedule("* * * * *", async () => {
           title: `Event ${event.name} is now completed!`,
           body: `The event ${event.name} has ended. Thank you for participating!`,
         },
-        topic: topic,
         android: {
           notification: {
             imageUrl: event.image,
@@ -86,6 +86,7 @@ cron.schedule("* * * * *", async () => {
             image: event.image,
           },
         },
+        topic: topic,
       };
 
       try {
