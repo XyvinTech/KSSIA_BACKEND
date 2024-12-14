@@ -391,3 +391,35 @@ exports.getEventHistory = async (req, res) => {
     totalCount
   );
 };
+
+exports.downloadRsvps = async (req, res) => {
+  const { id } = req.params;
+
+  const event = await Event.findById(id).populate("rsvp");
+  if (!event) {
+    return responseHandler(res, 404, "Event not found.");
+  }
+
+  const csvData = event?.rsvp?.map((user) => {
+    return {
+      Name: `${user.name}`.trim(),
+      MembershipID: user.membership_id,
+      Email: user.email,
+      Mobile: user.phone_numbers?.personal || "N/A",
+      Company: user.company_name || "N/A",
+      Designation: user.designation || "N/A",
+    };
+  });
+  const headers = [
+    { header: "Name", key: "Name" },
+    { header: "Membership ID", key: "MembershipID" },
+    { header: "Email", key: "Email" },
+    { header: "Mobile", key: "Mobile" },
+    { header: "Company", key: "Company" },
+    { header: "Designation", key: "Designation" },
+  ];
+  return responseHandler(res, 200, "Event RSVP downloaded successfully", {
+    headers: headers,
+    body: csvData,
+  });
+};

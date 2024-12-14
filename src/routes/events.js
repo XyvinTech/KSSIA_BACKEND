@@ -46,4 +46,6 @@ eventRoute
   .route("/get/history")
   .get(asyncHandler(eventController.getEventHistory));
 
+eventRoute.get("/download-rsvps/:id", eventController.downloadRsvps);
+
 module.exports = eventRoute;
