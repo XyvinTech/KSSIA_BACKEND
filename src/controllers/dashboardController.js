@@ -429,7 +429,7 @@ exports.getAllStatistics = async (req, res) => {
     );
 
     const installedUserCount = await User.countDocuments({
-      fcm: { $ne: null },
+      fcm: { $ne: null, $ne: "" },
     });
 
     // Create the response data
