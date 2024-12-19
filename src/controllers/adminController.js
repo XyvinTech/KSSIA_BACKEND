@@ -370,9 +370,9 @@ exports.getAllUsers = async (req, res) => {
           {
             "phone_numbers.personal": { $regex: escapedSearch, $options: "i" },
           },
-          { designation: { $regex: escapedSearch } },
-          { company_name: { $regex: escapedSearch } },
-          { membership_id: { $regex: escapedSearch } },
+          { designation: { $regex: escapedSearch }, $options: "i" },
+          { company_name: { $regex: escapedSearch , $options: "i"} },
+          { membership_id: { $regex: escapedSearch }, $options: "i" },
         ],
       };
     }
