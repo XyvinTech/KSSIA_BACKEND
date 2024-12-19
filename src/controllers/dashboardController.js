@@ -428,6 +428,10 @@ exports.getAllStatistics = async (req, res) => {
       calculatePercentage(totalCategoryAppRevenue, prevTotalCategoryAppRevenue)
     );
 
+    const installedUserCount = await User.countDocuments({
+      fcm: { $ne: null },
+    });
+
     // Create the response data
     const responseData = {
       userCount,
@@ -448,6 +452,7 @@ exports.getAllStatistics = async (req, res) => {
       requirementCount,
       appRevenue,
       membershipRevenue,
+      installedUserCount,
     };
 
     // Return the results
