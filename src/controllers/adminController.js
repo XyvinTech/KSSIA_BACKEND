@@ -10,6 +10,7 @@ const path = require("path");
 const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
 const { CreateUserSchema, EditUserSchema } = require("../validation");
+const capitalizeData = require("../utils/capitalizeData");
 
 /****************************************************************************************************/
 /*                                 Function to create a new user                                    */
@@ -420,13 +421,12 @@ exports.getAllUsers = async (req, res) => {
         .sort({ createdAt: -1, _id: 1 })
         .lean();
 
-      // Map the data to include the required fields (full name and mobile)
       const mappedData = users.map((user) => {
-        return {
-          ...user, // Spread the original user data
-          full_name: `${user.name}`.trim(),
-          mobile: user.phone_numbers?.personal || "N/A", // Handle phone number or return 'N/A'
-        };
+        return capitalizeData({
+          ...user,
+          full_name: user.name?.trim() || "",
+          mobile: user.phone_numbers?.personal || "N/A",
+        });
       });
 
       // Return the paginated and mapped data
