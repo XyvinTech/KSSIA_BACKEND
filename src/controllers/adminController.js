@@ -349,9 +349,13 @@ exports.getAllUsers = async (req, res) => {
       filter.designation = designation;
     }
 
-    if (installed) {
+    if (installed == true) {
       filter.fcm = {
         $nin: [null, ""],
+      };
+    } else if (installed == false) {
+      filter.fcm = {
+        $in: [null, ""],
       };
     }
 
