@@ -326,6 +326,7 @@ exports.getAllUsers = async (req, res) => {
       companyName = "",
       status = "",
       subscription = "",
+      installed,
     } = req.query;
 
     let filter = {};
@@ -346,6 +347,12 @@ exports.getAllUsers = async (req, res) => {
 
     if (designation && designation !== "") {
       filter.designation = designation;
+    }
+
+    if (installed && installed !== "") {
+      filter.fcm = {
+        $nin: [null, ""],
+      };
     }
 
     if (companyName) {
@@ -371,7 +378,7 @@ exports.getAllUsers = async (req, res) => {
             "phone_numbers.personal": { $regex: escapedSearch, $options: "i" },
           },
           { designation: { $regex: escapedSearch }, $options: "i" },
-          { company_name: { $regex: escapedSearch , $options: "i"} },
+          { company_name: { $regex: escapedSearch, $options: "i" } },
           { membership_id: { $regex: escapedSearch }, $options: "i" },
         ],
       };
