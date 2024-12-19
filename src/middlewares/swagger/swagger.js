@@ -58,10 +58,7 @@ const options = {
     ],
     servers: [
       {
-        url: `http://65.0.49.224:${PORT}/api/${API_VERSION}`,
-      },
-      {
-        url: `http://43.205.89.79/api/${API_VERSION}`,
+        url: `https://api.kssiathrissur.com/api/${API_VERSION}`,
       },
       {
         url: `http://localhost:${PORT}/api/${API_VERSION}`,

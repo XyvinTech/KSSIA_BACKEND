@@ -330,22 +330,6 @@ exports.getAllProductsUser = async (req, res) => {
           ],
         },
       },
-
-      // Stage 5: Add a full name field for the seller
-      {
-        $addFields: {
-          full_name: {
-            $concat: [
-              { $ifNull: ["$seller_id.name.first_name", ""] },
-              " ",
-              { $ifNull: ["$seller_id.name.middle_name", ""] },
-              " ",
-              { $ifNull: ["$seller_id.name.last_name", ""] },
-            ],
-          },
-        },
-      },
-      // Stage 6: Sort by creation date (newest first)
       {
         $sort: { createdAt: -1 },
       },
@@ -372,9 +356,8 @@ exports.getAllProductsUser = async (req, res) => {
           subcategory: 1,
           createdAt: 1,
           updatedAt: 1,
-          full_name: 1,
-          "seller_id.membership_id": 1,
-          "seller_id._id": 1,
+          seller_id: "$seller_id._id",
+          full_name: "$seller_id.name",
         },
       },
     ];
