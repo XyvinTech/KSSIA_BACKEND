@@ -15,7 +15,6 @@ const {
   EditUserSchema,
 } = require("../validation");
 const { generateToken } = require("../utils/generateToken");
-const capitalizeData = require("../utils/capitalizeData");
 
 /****************************************************************************************************/
 /*                               Function to generate a 6-digit OTP                                 */
@@ -154,10 +153,10 @@ exports.getUserById = async (req, res) => {
   }
 
   // Prepare response with user data and products
-  const userData = capitalizeData({
+  const userData = {
     ...user._doc,
     products: products,
-  });
+  };
 
   // console.log(`User retrieved successfully`);                                      // Debug line
   return responseHandler(res, 200, "User retrieved successfully", userData);
