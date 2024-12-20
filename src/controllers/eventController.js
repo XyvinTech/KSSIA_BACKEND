@@ -117,7 +117,7 @@ exports.getAllEvents = async (req, res) => {
       }
     : {};
 
-  if (req.roleId) {
+  if (!req.roleId) {
     filter.status = { $ne: "completed" };
   }
 
