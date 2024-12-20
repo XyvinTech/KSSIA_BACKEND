@@ -117,6 +117,10 @@ exports.getAllEvents = async (req, res) => {
       }
     : {};
 
+  if (req.userId) {
+    filter.status = { $ne: "completed", $ne: "cancelled" };
+  }
+
   const totalCount = await Event.countDocuments(filter);
   const events = await Event.find(filter)
     .skip(skipCount)
