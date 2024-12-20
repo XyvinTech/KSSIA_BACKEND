@@ -134,11 +134,11 @@ exports.editPromotion = async (req, res) => {
       { new: true }
     );
     return responseHandler(
-        res,
-        200,
-        "Promotion updated successfully!",
-        updatedPromotion
-      );
+      res,
+      200,
+      "Promotion updated successfully!",
+      updatedPromotion
+    );
   } catch (err) {
     return responseHandler(
       res,
@@ -156,8 +156,12 @@ exports.getAllPromotions = async (req, res) => {
   const { pageNo = 1, limit = 10 } = req.query;
   const skipCount = limit * (pageNo - 1);
 
-  const totalCount = await Promotion.countDocuments();
-  const promotions = await Promotion.find()
+  const filter = {
+    status: true,
+  };
+
+  const totalCount = await Promotion.countDocuments(filter);
+  const promotions = await Promotion.find(filter)
     .skip(skipCount)
     .limit(limit)
     .sort({ createdAt: -1 })
