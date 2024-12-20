@@ -117,8 +117,8 @@ exports.getAllEvents = async (req, res) => {
       }
     : {};
 
-  if (req.userId) {
-    filter.status = { $ne: "completed", $ne: "cancelled" };
+  if (req.roleId) {
+    filter.status = { $ne: "completed" };
   }
 
   const totalCount = await Event.countDocuments(filter);
