@@ -19,7 +19,7 @@ cron.schedule("0 0 * * *", async () => {
     console.log(`Activated ${active.length} promotions`);
 
     const endActive = await Promotion.find({
-      endDate: { $lte: now.toDate() },
+      endDate: { $gte: now.toDate() },
       status: false,
     });
 
