@@ -3,7 +3,7 @@ const moment = require("moment-timezone");
 const Promotion = require("../models/promotions");
 require("dotenv").config();
 
-cron.schedule("* * * * *", async () => {
+cron.schedule("0 0 * * *", async () => {
   const now = moment().tz("Asia/Kolkata");
 
   try {
