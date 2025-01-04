@@ -18,6 +18,17 @@ cron.schedule("0 0 * * *", async () => {
     }
     console.log(`Activated ${active.length} promotions`);
 
+    const endActive = await Promotion.find({
+      endDate: { $lte: now.toDate() },
+      status: false,
+    });
+
+    for (const act of endActive) {
+      act.status = true;
+      await act.save();
+    }
+    console.log(`Activated ${endActive.length} promotions`);
+
     const expiring = await Promotion.find({
       endDate: { $lte: now.toDate() },
       status: true,
