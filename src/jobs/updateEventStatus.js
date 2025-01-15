@@ -43,7 +43,7 @@ cron.schedule("* * * * *", async () => {
     //* Update events from "live" to "completed" and send notification
     const doneEvents = await Event.find({
       status: "live",
-      endTime: { $lte: now.toDate() },
+      endDate: { $lte: now.toDate() },
     });
 
     for (const event of doneEvents) {
