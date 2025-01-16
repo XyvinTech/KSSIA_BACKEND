@@ -520,7 +520,8 @@ exports.suspendUser = async (req, res) => {
 
 exports.downloadUsers = async (req, res) => {
   try {
-    const { designation, company_name, subscription, status } = req.query;
+    const { designation, company_name, subscription, status, installed } =
+      req.query;
     const filter = {};
 
     if (designation) {
@@ -537,6 +538,12 @@ exports.downloadUsers = async (req, res) => {
 
     if (status) {
       filter.status = status;
+    }
+
+    if (installed) {
+      filter.fcm = {
+        $nin: [null, ""],
+      };
     }
 
     const users = await User.find(filter);
