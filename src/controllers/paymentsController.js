@@ -611,3 +611,16 @@ exports.updateParentSubscription = async (req, res) => {
     return responseHandler(res, 500, "Internal Server Error", error.message);
   }
 };
+
+exports.getParentSubscription = async (req, res) => {
+  try {
+    const payment = await ParentSub.find();
+    if (!payment) {
+      return responseHandler(res, 500, "Error saving payment");
+    } else {
+      return responseHandler(res, 200, "Payment saved successfully", payment);
+    }
+  } catch (error) {
+    return responseHandler(res, 500, "Internal Server Error", error.message);
+  }
+};
