@@ -189,7 +189,7 @@ exports.inAppNotificationSchema = Joi.object({
 });
 
 exports.NewsSchema = Joi.object({
-  category: Joi.string().required(),
+  category: Joi.string(),
   title: Joi.string().required(),
   content: Joi.string().optional(),
   image: Joi.string(),
