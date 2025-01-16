@@ -194,6 +194,7 @@ exports.NewsSchema = Joi.object({
   content: Joi.string().optional(),
   image: Joi.string(),
   published: Joi.boolean().default(false), // Add published field with a default value
+  pdf: Joi.string(),
 });
 
 exports.EditPromotionSchema = Joi.object({
