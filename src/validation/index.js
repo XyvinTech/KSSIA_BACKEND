@@ -189,9 +189,18 @@ exports.inAppNotificationSchema = Joi.object({
 });
 
 exports.NewsSchema = Joi.object({
-  category: Joi.string(),
+  category: Joi.string().required(),
   title: Joi.string().required(),
   content: Joi.string().optional(),
+  image: Joi.string(),
+  published: Joi.boolean().default(false), // Add published field with a default value
+  pdf: Joi.string(),
+});
+
+exports.EditNewsSchema = Joi.object({
+  category: Joi.string(),
+  title: Joi.string(),
+  content: Joi.string(),
   image: Joi.string(),
   published: Joi.boolean().default(false), // Add published field with a default value
   pdf: Joi.string(),

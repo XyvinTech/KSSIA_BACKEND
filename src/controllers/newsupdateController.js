@@ -2,7 +2,7 @@ require("dotenv").config();
 const path = require("path");
 const responseHandler = require("../helpers/responseHandler");
 const News = require("../models/news");
-const { NewsSchema } = require("../validation");
+const { NewsSchema, EditNewsSchema } = require("../validation");
 const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
 
@@ -56,7 +56,7 @@ exports.editNews = async (req, res) => {
   }
 
   // Validate the input data
-  const { error } = NewsSchema.validate(data, { abortEarly: true });
+  const { error } = EditNewsSchema.validate(data, { abortEarly: true });
   if (error) {
     return responseHandler(res, 400, `Invalid input: ${error.message}`);
   }
