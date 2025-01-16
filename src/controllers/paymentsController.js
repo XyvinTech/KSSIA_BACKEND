@@ -4,9 +4,15 @@ const responseHandler = require("../helpers/responseHandler");
 const deleteFile = require("../helpers/deleteFiles");
 const Payment = require("../models/payment");
 const User = require("../models/user");
-const { PaymentSchema, UserPaymentSchema } = require("../validation");
+const {
+  PaymentSchema,
+  UserPaymentSchema,
+  createParentSubSchema,
+  editParentSubSchema,
+} = require("../validation");
 const handleFileUpload = require("../utils/fileHandler");
 const sendInAppNotification = require("../utils/sendInAppNotification");
+const ParentSub = require("../models/parentSub");
 
 /****************************************************************************************************/
 /*                                  Function to create payments                                     */
@@ -16,9 +22,6 @@ exports.createPayment = async (req, res) => {
   if (error) {
     return responseHandler(res, 400, `Invalid input: ${error.message}`);
   }
-
-  const lastRenewDate = new Date();
-  req.body.lastRenewDate = lastRenewDate;
 
   const newPayment = await Payment.create(req.body);
 
@@ -62,13 +65,7 @@ exports.updatePayment = async (req, res) => {
     }
     const { id } = req.params;
 
-    const oldPayment = await Payment.findByIdAndUpdate(
-      id,
-      { status: "expired" },
-      { new: true }
-    );
-
-    req.body.lastRenewDate = oldPayment.createdAt;
+    await Payment.findByIdAndUpdate(id, { status: "expired" }, { new: true });
 
     const payment = await Payment.create(req.body);
 
@@ -84,7 +81,7 @@ exports.updatePayment = async (req, res) => {
       } else if (req.body.category === "membership") {
         await User.findOneAndUpdate(
           { _id: req.body.user },
-          { status: "inactive" },
+          { status: "active" },
           { new: true }
         );
       }
@@ -299,12 +296,7 @@ exports.deletePayment = async (req, res) => {
 /****************************************************************************************************/
 exports.updatePaymentStatus = async (req, res) => {
   const { paymentID } = req.params;
-  const { status, reason } = req.body;
-
-  const validStatuses = ["pending", "accepted", "resubmit", "rejected"];
-  if (!validStatuses.includes(status)) {
-    return responseHandler(res, 400, "Invalid status value");
-  }
+  const { status } = req.body;
 
   let payment = await Payment.findById(paymentID);
   if (!payment) {
@@ -312,62 +304,24 @@ exports.updatePaymentStatus = async (req, res) => {
   }
 
   payment.status = status;
-  payment.reason = reason;
 
   try {
     await payment.save();
 
-    try {
-      let user = await User.findById(payment.member);
+    let user = await User.findById(payment.user);
 
-      if (!user) {
-        return responseHandler(res, 404, "User not found");
-      }
-
-      if (status == "accepted") {
-        payment.reason = "";
-      }
-
-      try {
-        if (payment.status == "accepted" && payment.category == "app") {
-          user.subscription = payment.plan;
-          await user.save();
-        } else if (
-          payment.status == "accepted" &&
-          payment.category == "membership"
-        ) {
-          user.membership_status = payment.plan;
-          await user.save();
-        }
-      } catch (error) {
-        console.log(`error updating the user subscription : ${error}`);
-      }
-
-      try {
-        let userFCM = [];
-        userFCM.push(user.fcm);
-
-        const subject = `${payment.category} subscription status update`;
-        let content =
-          `Your payment for ${payment.category} has been ${payment.status}`.trim();
-
-        if (payment.reason != "" && payment.reason != undefined) {
-          content =
-            `Your payment for ${payment.category} has been ${payment.status} beacuse ${payment.reason}`.trim();
-        }
-
-        await sendInAppNotification(
-          userFCM,
-          subject,
-          content,
-          (media = null),
-          "approvals"
-        );
-      } catch (error) {
-        console.log(`error creating notification : ${error}`);
-      }
-    } catch (error) {
-      console.log(`Error featching user: ${error.message}`);
+    if (!user) {
+      return responseHandler(res, 404, "User not found");
+    }
+    if (payment.status == "cancelled" && payment.category == "app") {
+      user.subscription = "free";
+      await user.save();
+    } else if (
+      payment.status == "cancelled" &&
+      payment.category == "membership"
+    ) {
+      user.status = "inactive";
+      await user.save();
     }
 
     return responseHandler(
@@ -610,6 +564,47 @@ exports.getUserSubscriptionActiveApp = async (req, res) => {
     });
 
     return responseHandler(res, 200, "Subscriptions found", structuredResponse);
+  } catch (error) {
+    return responseHandler(res, 500, "Internal Server Error", error.message);
+  }
+};
+
+exports.createParentSubscription = async (req, res) => {
+  try {
+    const { error } = createParentSubSchema.validate(req.body, {
+      abortEarly: true,
+    });
+    if (error) {
+      return responseHandler(res, 400, `Invalid input: ${error.message}`);
+    }
+    const payment = await ParentSub.create(req.body);
+    if (!payment) {
+      return responseHandler(res, 500, "Error saving payment");
+    } else {
+      return responseHandler(res, 200, "Payment saved successfully", payment);
+    }
+  } catch (error) {
+    return responseHandler(res, 500, "Internal Server Error", error.message);
+  }
+};
+
+exports.updateParentSubscription = async (req, res) => {
+  try {
+    const { error } = editParentSubSchema.validate(req.body, {
+      abortEarly: true,
+    });
+    if (error) {
+      return responseHandler(res, 400, `Invalid input: ${error.message}`);
+    }
+    const { id } = req.params;
+    const payment = await ParentSub.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
+    if (!payment) {
+      return responseHandler(res, 500, "Error saving payment");
+    } else {
+      return responseHandler(res, 200, "Payment saved successfully", payment);
+    }
   } catch (error) {
     return responseHandler(res, 500, "Internal Server Error", error.message);
   }

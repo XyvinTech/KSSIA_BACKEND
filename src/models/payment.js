@@ -13,8 +13,8 @@ const paymentSchema = new mongoose.Schema(
       type: String,
       enum: ["app", "membership"],
     },
-    lastRenewDate: { type: Date },
-    expiryDate: { type: Date },
+    parentSub: { type: mongoose.Schema.Types.ObjectId, ref: "ParentSub" },
+    receipt: { type: String },
   },
   { timestamps: true }
 );

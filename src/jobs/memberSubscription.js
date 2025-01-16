@@ -10,41 +10,48 @@ cron.schedule("0 0 * * *", async () => {
 
   try {
     const tenDaysFromNow = now.clone().add(10, "days").toDate();
+
     const expiring = await Payment.find({
       category: "membership",
       status: { $in: ["active", "expiring"] },
-      expiryDate: { $lte: tenDaysFromNow },
-    }).populate("user");
+    })
+      .populate("user")
+      .populate("parentSub");
 
     for (const exp of expiring) {
-      exp.status = "expiring";
-      await exp.save();
+      if (exp.parentSub && exp.parentSub.expiryDate <= tenDaysFromNow) {
+        exp.status = "expiring";
+        await exp.save();
 
-      await sendInAppNotification(
-        [exp.user.fcmToken],
-        "Subscription Expiring",
-        `Your subscription to our KSSIA membership is expiring soon. Please renew your membership to continue using our app.`
-      );
+        await sendInAppNotification(
+          [exp.user.fcmToken],
+          "Subscription Expiring",
+          "Your subscription to our KSSIA membership is expiring soon. Please renew your membership to continue using our app."
+        );
+      }
     }
 
     const expiredSub = await Payment.find({
       category: "membership",
       status: "expiring",
-      endTime: { $lte: now.toDate() },
-    });
+    })
+      .populate("user")
+      .populate("parentSub");
 
     for (const exp of expiredSub) {
-      exp.status = "expired";
-      await exp.save();
-      await User.findByIdAndUpdate(exp.user._id, { status: "inactive" });
+      if (exp.parentSub && exp.parentSub.expiryDate <= now.toDate()) {
+        exp.status = "expired";
+        await exp.save();
+        await User.findByIdAndUpdate(exp.user._id, { status: "inactive" });
 
-      await sendInAppNotification(
-        [exp.user.fcmToken],
-        "Subscription Expired",
-        `Your subscription to our KSSIA membership has expired. Please renew your membership to continue using our app.`
-      );
+        await sendInAppNotification(
+          [exp.user.fcmToken],
+          "Subscription Expired",
+          "Your subscription to our KSSIA membership has expired. Please renew your membership to continue using our app."
+        );
+      }
     }
   } catch (err) {
-    console.error("Error updating subscriptions:", err);
+    console.error("Error updating memberships:", err);
   }
 });

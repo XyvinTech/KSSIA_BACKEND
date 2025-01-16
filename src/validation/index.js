@@ -228,7 +228,8 @@ exports.PaymentSchema = Joi.object({
   user: Joi.string().required(),
   amount: Joi.number().min(0).required(),
   category: Joi.string().required().valid("app", "membership"),
-  expiryDate: Joi.date().required(),
+  parentSub: Joi.string().required(),
+  receipt: Joi.string(),
 });
 
 exports.UserPaymentSchema = Joi.object({
@@ -273,4 +274,14 @@ exports.editRoleSchema = Joi.object({
   description: Joi.string(),
   permissions: Joi.array(),
   status: Joi.boolean(),
+});
+
+exports.createParentSubSchema = Joi.object({
+  academicYear: Joi.string().required(),
+  expiryDate: Joi.date().required(),
+});
+
+exports.editParentSubSchema = Joi.object({
+  academicYear: Joi.string(),
+  expiryDate: Joi.date(),
 });

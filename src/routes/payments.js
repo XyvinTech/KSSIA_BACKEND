@@ -61,4 +61,14 @@ paymentRoute.get(
   asyncHandler(paymentController.getUserSubscriptionActiveApp)
 );
 
+paymentRoute.post(
+  "/parent-subscription",
+  paymentController.createParentSubscription
+);
+
+paymentRoute.put(
+  "/parent-subscription/:id",
+  paymentController.updateParentSubscription
+);
+
 module.exports = paymentRoute;
