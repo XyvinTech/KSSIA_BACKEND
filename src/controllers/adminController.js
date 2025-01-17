@@ -351,7 +351,7 @@ exports.getAllUsers = async (req, res) => {
 
     if (installed) {
       filter.fcm = {
-        $nin: [null, ""],
+        $and: [{ fcm: { $ne: null } }, { fcm: { $ne: "" } }],
       };
     }
 
@@ -542,7 +542,7 @@ exports.downloadUsers = async (req, res) => {
 
     if (installed) {
       filter.fcm = {
-        $nin: [null, ""],
+        $and: [{ fcm: { $ne: null } }, { fcm: { $ne: "" } }],
       };
     }
 
