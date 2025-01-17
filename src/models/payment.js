@@ -5,8 +5,8 @@ const paymentSchema = new mongoose.Schema(
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     status: {
       type: String,
-      default: "active",
-      enum: ["active", "expired", "expiring"],
+      default: "pending",
+      enum: ["active", "expired", "expiring", "pending", "cancelled"],
     },
     amount: { type: Number, min: 0 },
     category: {

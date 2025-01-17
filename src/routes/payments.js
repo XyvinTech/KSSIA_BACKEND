@@ -10,6 +10,11 @@ paymentRoute.use(authVerify);
 
 paymentRoute.post("/", asyncHandler(paymentController.createPayment));
 
+paymentRoute
+  .route("/parent-subscription")
+  .post(paymentController.createParentSubscription)
+  .get(paymentController.getParentSubscription);
+
 paymentRoute.put("/update/:id", asyncHandler(paymentController.updatePayment));
 
 paymentRoute.get(
@@ -60,10 +65,6 @@ paymentRoute.get(
   "/user/:userId/subscriptions/app",
   asyncHandler(paymentController.getUserSubscriptionActiveApp)
 );
-
-paymentRoute
-  .route("/parent-subscription")
-  .post(paymentController.createParentSubscription).get(paymentController.getParentSubscription);
 
 paymentRoute.put(
   "/parent-subscription/:id",

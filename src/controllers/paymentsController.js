@@ -309,11 +309,7 @@ exports.updatePaymentStatus = async (req, res) => {
     return responseHandler(res, 404, "Payment details do not exist");
   }
 
-  payment.status = status;
-
   try {
-    await payment.save();
-
     let user = await User.findById(payment.user);
 
     if (!user) {
@@ -321,17 +317,19 @@ exports.updatePaymentStatus = async (req, res) => {
     }
     if (status == "cancelled" && category == "app") {
       user.subscription = "free";
-      await user.save();
+      payment.status = "cancelled";
     } else if (status == "cancelled" && category == "membership") {
       user.status = "inactive";
-      await user.save();
+      payment.status = "cancelled";
     } else if (status == "accepted" && category == "app") {
       user.subscription = "premium";
-      await user.save();
+      payment.status = "active";
     } else if (status == "accepted" && category == "membership") {
       user.status = "active";
-      await user.save();
+      payment.status = "active";
     }
+    await user.save();
+    await payment.save();
 
     return responseHandler(
       res,
