@@ -619,3 +619,18 @@ exports.getParentSubscription = async (req, res) => {
     return responseHandler(res, 500, "Internal Server Error", error.message);
   }
 };
+
+exports.getSingleParentSubscription = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const payment = await ParentSub.findById(id);
+    if (!payment) {
+      return responseHandler(res, 500, "Error saving payment");
+    } else {
+      return responseHandler(res, 200, "Payment saved successfully", payment);
+    }
+  } catch (error) {
+    return responseHandler(res, 500, "Internal Server Error", error.message);
+  }
+};

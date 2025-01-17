@@ -62,9 +62,9 @@ paymentRoute.get(
   asyncHandler(paymentController.getUserSubscriptionActiveApp)
 );
 
-paymentRoute.put(
-  "/parent-subscription/:id",
-  paymentController.updateParentSubscription
-);
+paymentRoute
+  .route("/parent-subscription/:id")
+  .put(paymentController.updateParentSubscription)
+  .get(paymentController.getSingleParentSubscription);
 
 module.exports = paymentRoute;
