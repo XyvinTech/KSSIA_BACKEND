@@ -349,17 +349,15 @@ exports.getUserPayments = async (req, res) => {
   const { userId } = req.params;
 
   try {
-    const filter = { user: userId };
-
     // Fetch the latest payment for 'app' category
-    const appPayment = await Payment.findOne({ ...filter, category: "app" })
+    const appPayment = await Payment.findOne({ user: userId, category: "app" })
       .sort({ createdAt: -1 })
       .populate("parentSub")
       .lean();
 
     // Fetch the latest payment for 'membership' category
     const membershipPayment = await Payment.findOne({
-      ...filter,
+      user: userId,
       category: "membership",
     })
       .sort({ createdAt: -1 })
