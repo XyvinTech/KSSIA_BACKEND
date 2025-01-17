@@ -296,7 +296,7 @@ exports.deletePayment = async (req, res) => {
 /****************************************************************************************************/
 exports.updatePaymentStatus = async (req, res) => {
   const { paymentID } = req.params;
-  const { status } = req.body;
+  const { status, category } = req.body;
 
   let payment = await Payment.findById(paymentID);
   if (!payment) {
@@ -313,14 +313,17 @@ exports.updatePaymentStatus = async (req, res) => {
     if (!user) {
       return responseHandler(res, 404, "User not found");
     }
-    if (payment.status == "cancelled" && payment.category == "app") {
+    if (status == "cancelled" && category == "app") {
       user.subscription = "free";
       await user.save();
-    } else if (
-      payment.status == "cancelled" &&
-      payment.category == "membership"
-    ) {
+    } else if (status == "cancelled" && category == "membership") {
       user.status = "inactive";
+      await user.save();
+    } else if (status == "accepted" && category == "app") {
+      user.subscription = "premium";
+      await user.save();
+    } else if (status == "accepted" && category == "membership") {
+      user.status = "active";
       await user.save();
     }
 
