@@ -15,6 +15,12 @@ paymentRoute
   .post(paymentController.createParentSubscription)
   .get(paymentController.getParentSubscription);
 
+// Route to update the status of a payment
+paymentRoute.patch(
+  "/:paymentID/status",
+  asyncHandler(paymentController.updatePaymentStatus)
+);
+
 paymentRoute.put("/update/:id", asyncHandler(paymentController.updatePayment));
 
 paymentRoute.get(
@@ -46,12 +52,6 @@ paymentRoute.put(
 paymentRoute.delete(
   "/:paymentID",
   asyncHandler(paymentController.deletePayment)
-);
-
-// Route to update the status of a payment
-paymentRoute.patch(
-  "/:paymentID/status",
-  asyncHandler(paymentController.updatePaymentStatus)
 );
 
 // Route to get the active subscription of a user
