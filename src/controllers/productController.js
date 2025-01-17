@@ -698,3 +698,19 @@ exports.downloadProducts = async (req, res) => {
     return responseHandler(res, 500, `Internal Server Error ${error.message}`);
   }
 };
+
+exports.getAllCategories = async (req, res) => {
+  try {
+    const categories = await Product.aggregate([
+      { $group: { _id: "$category", count: { $sum: 1 } } }, 
+      { $project: { _id: 0, name: "$_id", count: 1 } },
+    ]);
+
+    return responseHandler(res, 200, "Categories retrieved successfully", {
+      categories,
+      count: categories.length,
+    });
+  } catch (error) {
+    return responseHandler(res, 500, `Internal Server Error ${error.message}`);
+  }
+};

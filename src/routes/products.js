@@ -20,6 +20,8 @@ productRoute.get('/', asyncHandler(productController.getAllProductsUser));
 // Route to retrieve all products admin
 productRoute.get('/admin', asyncHandler(productController.getAllProducts));
 
+productRoute.get("/categories", asyncHandler(productController.getAllCategories));
+
 // Route to retrieve a single product by ID
 productRoute.get('/:productId', asyncHandler(productController.getProductsById));
 
