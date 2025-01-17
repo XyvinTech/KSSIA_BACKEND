@@ -351,8 +351,8 @@ exports.getUserPayments = async (req, res) => {
   try {
     // Fetch the latest payment for 'app' category
     const appPayment = await Payment.findOne({ user: userId, category: "app" })
-      .populate("parentsub")
       .sort({ createdAt: -1 })
+      .populate("parentSub")
       .lean();
 
     // Fetch the latest payment for 'membership' category
@@ -360,8 +360,8 @@ exports.getUserPayments = async (req, res) => {
       user: userId,
       category: "membership",
     })
-      .populate("parentsub")
       .sort({ createdAt: -1 })
+      .populate("parentSub")
       .lean();
 
     // Array to hold the final results

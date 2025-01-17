@@ -13,7 +13,7 @@ const paymentSchema = new mongoose.Schema(
       type: String,
       enum: ["app", "membership"],
     },
-    parentSub: { type: mongoose.Schema.Types.ObjectId, ref: "ParentSub" },
+    parentSub: { type: mongoose.Schema.Types.ObjectId, ref: "parentSub" },
     receipt: { type: String },
   },
   { timestamps: true }
