@@ -410,31 +410,21 @@ exports.createUserPayment = async (req, res) => {
   const payment_exist = await Payment.findOne({
     category: data.category,
     member: userId,
-    status: { $in: ["pending", "accepted", "expiring"] },
+    status: { $in: ["accepted", "expiring"] },
   });
 
   if (payment_exist) {
-    return responseHandler(res, 400, "Payment already exist");
+    payment_exist.status == "expired";
+    await payment_exist.save();
   }
 
   if (error) {
     return responseHandler(res, 400, `Invalid input: ${error.message}`);
   }
 
-  let invoice_url = "";
-  const bucketName = process.env.AWS_S3_BUCKET;
-  if (req.file) {
-    try {
-      invoice_url = await handleFileUpload(req.file, bucketName);
-    } catch (err) {
-      return responseHandler(res, 500, err.message);
-    }
-  }
-
   const newPayment = new Payment({
     ...data,
-    invoice_url,
-    member: userId,
+    user: userId,
   });
 
   try {

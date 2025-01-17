@@ -31,11 +31,7 @@ paymentRoute.get(
 paymentRoute.get("/", asyncHandler(paymentController.getAllPayments));
 
 // Route to create a new payment (user)
-paymentRoute.post(
-  "/user",
-  upload.single("file"),
-  asyncHandler(paymentController.createUserPayment)
-);
+paymentRoute.post("/user", asyncHandler(paymentController.createUserPayment));
 
 // Route to get all payments
 
