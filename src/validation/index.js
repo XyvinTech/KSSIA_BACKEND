@@ -230,6 +230,7 @@ exports.PaymentSchema = Joi.object({
   category: Joi.string().required().valid("app", "membership"),
   parentSub: Joi.string().required(),
   receipt: Joi.string(),
+  status: Joi.string()
 });
 
 exports.UserPaymentSchema = Joi.object({
