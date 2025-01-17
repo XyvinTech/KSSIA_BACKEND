@@ -237,30 +237,12 @@ exports.getPaymentById = async (req, res) => {
   const { paymentID } = req.params;
 
   try {
-    const payment = await Payment.findById(paymentID)
-      .populate({ path: "member", select: "name membership_id" })
-      .exec();
+    const payment = await Payment.findById(paymentID);
     if (!payment) {
       return responseHandler(res, 404, "Payment not found");
     }
 
-    // Construct full name from the member's details
-    const full_name = `${payment.member?.name.first_name || ""} ${
-      payment.member?.name.middle_name || ""
-    } ${payment.member?.name.last_name || ""}`.trim();
-
-    // Add full_name to the payment object
-    const responsePayment = {
-      ...payment.toObject(), // Convert payment to a plain object
-      full_name, // Add the constructed full name
-    };
-
-    return responseHandler(
-      res,
-      200,
-      "Successfully retrieved payment",
-      responsePayment
-    );
+    return responseHandler(res, 200, "Successfully retrieved payment", payment);
   } catch (err) {
     return responseHandler(
       res,
