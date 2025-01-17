@@ -183,13 +183,19 @@ exports.updateSubs = async (req, res) => {
 /*                                  Function to get all payments                                     */
 /****************************************************************************************************/
 exports.getAllPayments = async (req, res) => {
-  const { pageNo = 1, limit = 10 } = req.query;
+  const { pageNo = 1, limit = 10, status } = req.query;
   const skipCount = limit * (pageNo - 1);
 
-  try {
-    const totalCount = await Payment.countDocuments();
+  const filter = {};
 
-    const payments = await Payment.find()
+  if (status) {
+    filter.status = status;
+  }
+
+  try {
+    const totalCount = await Payment.countDocuments(filter);
+
+    const payments = await Payment.find(filter)
       .populate({ path: "user", select: "name membership_id" })
       .skip(skipCount)
       .limit(limit)
