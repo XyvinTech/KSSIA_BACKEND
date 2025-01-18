@@ -283,3 +283,11 @@ exports.editRoleSchema = Joi.object({
   permissions: Joi.array(),
   status: Joi.boolean(),
 });
+
+exports.createEnquirySchema = Joi.object({
+  user: Joi.string().required(),
+  name: Joi.string().required(),
+  email: Joi.string().email().required(),
+  phone: Joi.string().required(),
+  message: Joi.string().required(),
+});

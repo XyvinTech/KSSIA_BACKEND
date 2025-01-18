@@ -13,9 +13,11 @@ const {
   CreateUserSchema,
   ReviewSchema,
   EditUserSchema,
+  createEnquirySchema,
 } = require("../validation");
 const { generateToken } = require("../utils/generateToken");
 const capitalizeData = require("../utils/capitalizeData");
+const Enquiry = require("../models/enquiry");
 
 /****************************************************************************************************/
 /*                               Function to generate a 6-digit OTP                                 */
@@ -1011,6 +1013,45 @@ exports.updateSubscription = async (req, res) => {
       200,
       "User subscription updated successfully",
       subscription
+    );
+  } catch (error) {
+    return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
+  }
+};
+
+exports.sendEnquiry = async (req, res) => {
+  try {
+    const { error } = createEnquirySchema.validate(req.body, {
+      abortEarly: true,
+    });
+
+    if (error) {
+      return responseHandler(res, 400, `Invalid input: ${error.message}`);
+    }
+
+    const newEnquiry = await Enquiry.create(req.body);
+    if (newEnquiry) {
+      return responseHandler(
+        res,
+        201,
+        "Enquiry created successfully",
+        newEnquiry
+      );
+    }
+  } catch (error) {
+    return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
+  }
+};
+
+exports.getEnquiry = async (req, res) => {
+  try {
+    const user = req.userId;
+    const enquiries = await Enquiry.find({ user: user });
+    return responseHandler(
+      res,
+      200,
+      "Enquiries fetched successfully",
+      enquiries
     );
   } catch (error) {
     return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
