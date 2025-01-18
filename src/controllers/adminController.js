@@ -351,7 +351,7 @@ exports.getAllUsers = async (req, res) => {
 
     if (installed) {
       filter.fcm = {
-        $and: [{ fcm: { $ne: null } }, { fcm: { $ne: "" } }],
+        $nin: [null, ""],
       };
     }
 
