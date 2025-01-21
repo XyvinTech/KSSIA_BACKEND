@@ -71,37 +71,6 @@ cron.schedule("* * * * *", async () => {
     }
 
     console.log(`Updated ${doneEvents.length} events to completed`);
-
-    const reActiveEvents = await Event.find({
-      status: "completed",
-      endDate: { $gte: now.toDate() },
-    });
-
-    for (const event of reActiveEvents) {
-      event.status = "live";
-      await event.save();
-      const topic = `event_${event._id}`;
-
-      const message = {
-        notification: {
-          title: `Event ${event.name} is now live!`,
-          body: `The event ${event.name} has started. Join now!`,
-        },
-        topic: topic,
-      };
-
-      try {
-        await getMessaging().send(message);
-        console.log(`Notification sent for event ${event.name}`);
-      } catch (err) {
-        console.error(
-          `Failed to send notification for event ${event.name}:`,
-          err
-        );
-      }
-    }
-
-    console.log(`Updated ${progressEvents.length} events to live`);
   } catch (err) {
     console.error("Error updating events:", err);
   }
