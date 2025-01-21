@@ -166,6 +166,7 @@ exports.EditEventsSchema = Joi.object({
   organiser_role: Joi.string(),
   speakers: Joi.array().items(speakerSchema),
   activate: Joi.boolean(),
+  status: Joi.string(),
 });
 
 // notificationSchema validation
