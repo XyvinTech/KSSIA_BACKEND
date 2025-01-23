@@ -4,7 +4,7 @@ const asyncHandler = require("../utils/asyncHandler");
 const authVerify = require("../middlewares/authVerify");
 const dashboardRoute = express.Router();
 
-dashboardRoute.use(authVerify);
+// dashboardRoute.use(authVerify);
 
 dashboardRoute.route('/statistics').get(asyncHandler(dashboardController.getAllStatistics));
 dashboardRoute.route('/statistics/:year/:month').get(asyncHandler(dashboardController.getAllStatistics));

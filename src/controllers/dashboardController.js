@@ -247,13 +247,13 @@ exports.getAllStatistics = async (req, res) => {
   try {
     let year;
     let month;
+    const currentDate = new Date();
 
     if (req.params.year && req.params.month) {
       year = req.params.year;
       month = currentDate.getMonth() + 1;
     } else {
       // Use the current date for the year and month
-      const currentDate = new Date();
       month = currentDate.getMonth() + 1; // Get current month (1-based)
       year = currentDate.getFullYear(); // Get current year
     }
@@ -290,8 +290,8 @@ exports.getAllStatistics = async (req, res) => {
       Payment.aggregate([
         {
           $match: {
-            date: { $gte: startDate, $lt: endDate },
-            status: { $in: ["accepted", "expiring", "expired"] },
+            createdAt: { $gte: startDate, $lt: endDate },
+            status: { $in: ["accepted", "expiring", "expired", "active"] },
           },
         },
         { $group: { _id: null, totalRevenue: { $sum: "$amount" } } },
@@ -301,8 +301,8 @@ exports.getAllStatistics = async (req, res) => {
       Payment.aggregate([
         {
           $match: {
-            date: { $gte: startDate, $lt: endDate },
-            status: { $in: ["accepted", "expiring", "expired"] },
+            createdAt: { $gte: startDate, $lt: endDate },
+            status: { $in: ["accepted", "expiring", "expired", "active"] },
             category: "membership",
           },
         },
@@ -313,8 +313,8 @@ exports.getAllStatistics = async (req, res) => {
       Payment.aggregate([
         {
           $match: {
-            date: { $gte: startDate, $lt: endDate },
-            status: { $in: ["accepted", "expiring", "expired"] },
+            createdAt: { $gte: startDate, $lt: endDate },
+            status: { $in: ["accepted", "expiring", "expired", "active"] },
             category: "app",
           },
         },
@@ -436,7 +436,7 @@ exports.getAllStatistics = async (req, res) => {
       activeUserCount,
       activePremiumUserCount,
       suspendedUserCount,
-      totalRevenue: total,
+      totalRevenue,
       totalCategoryMembershipRevenue,
       totalCategoryAppRevenue,
       totalRevenuePercentage,
