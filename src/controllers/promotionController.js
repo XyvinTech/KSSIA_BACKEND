@@ -123,6 +123,10 @@ exports.editPromotion = async (req, res) => {
     } else if (data.type === "poster") {
       req.body.poster_image_url = req.body.file_url;
     }
+
+    if (data.endDate && new Date(data.endDate) < Date.now()) {
+      req.body.status = true;
+    }
   } catch (err) {
     return responseHandler(res, 500, `Error updating file: ${err.message}`);
   }

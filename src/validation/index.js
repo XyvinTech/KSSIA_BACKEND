@@ -166,6 +166,7 @@ exports.EditEventsSchema = Joi.object({
   organiser_role: Joi.string(),
   speakers: Joi.array().items(speakerSchema),
   activate: Joi.boolean(),
+  status: Joi.string(),
 });
 
 // notificationSchema validation
@@ -192,6 +193,15 @@ exports.NewsSchema = Joi.object({
   category: Joi.string().required(),
   title: Joi.string().required(),
   content: Joi.string().optional(),
+  image: Joi.string(),
+  published: Joi.boolean().default(false), // Add published field with a default value
+  pdf: Joi.string(),
+});
+
+exports.EditNewsSchema = Joi.object({
+  category: Joi.string(),
+  title: Joi.string(),
+  content: Joi.string(),
   image: Joi.string(),
   published: Joi.boolean().default(false), // Add published field with a default value
   pdf: Joi.string(),
@@ -285,4 +295,12 @@ exports.createParentSubSchema = Joi.object({
 exports.editParentSubSchema = Joi.object({
   academicYear: Joi.string(),
   expiryDate: Joi.date(),
+});
+
+exports.createEnquirySchema = Joi.object({
+  user: Joi.string().required(),
+  name: Joi.string().required(),
+  email: Joi.string().email().required(),
+  phone: Joi.string().required(),
+  message: Joi.string().required(),
 });
