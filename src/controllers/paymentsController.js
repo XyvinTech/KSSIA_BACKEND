@@ -213,6 +213,7 @@ exports.getAllPayments = async (req, res) => {
         ...payment,
         full_name: `${payment.user?.name || ""}`,
         expiry_date: payment.parentSub?.expiryDate,
+        year: payment.parentSub?.academicYear,
       };
     });
 
