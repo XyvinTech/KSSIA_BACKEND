@@ -197,6 +197,7 @@ exports.getAllPayments = async (req, res) => {
 
     const payments = await Payment.find(filter)
       .populate({ path: "user", select: "name membership_id" })
+      .populate("parentSub")
       .skip(skipCount)
       .limit(limit)
       .sort({ createdAt: -1 })
@@ -211,6 +212,7 @@ exports.getAllPayments = async (req, res) => {
       return {
         ...payment,
         full_name: `${payment.user?.name || ""}`,
+        expiry_date: payment.parentSub?.expiryDate,
       };
     });
 
