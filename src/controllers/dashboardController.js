@@ -448,8 +448,8 @@ exports.getAllStatistics = async (req, res) => {
       promotionCount,
       productCount,
       requirementCount,
-      appRevenue,
-      membershipRevenue,
+      appRevenue: totalCategoryAppRevenue,
+      membershipRevenue: totalCategoryMembershipRevenue,
       installedUserCount,
     };
 
