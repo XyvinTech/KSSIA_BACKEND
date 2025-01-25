@@ -883,7 +883,7 @@ exports.loginUser = async (req, res) => {
       });
       if (!user) {
         return responseHandler(res, 404, "User not found");
-      } else if (user.uid !== null) {
+      } else if (user.uid && user.uid !== null) {
         user.fcm = fcm;
         user.save();
         const token = generateToken(user._id);
