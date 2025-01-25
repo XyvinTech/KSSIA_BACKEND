@@ -870,8 +870,9 @@ exports.unblockRequirement = async (req, res) => {
 exports.loginUser = async (req, res) => {
   const id = req.body.clientToken;
   const { fcm } = req.body;
-  if (!id) {
-    return responseHandler(res, 400, "Client Token is required");
+
+  if (!id && !fcm) {
+    return responseHandler(res, 400, "Client Token or FCM is required");
   }
   let user;
   admin
