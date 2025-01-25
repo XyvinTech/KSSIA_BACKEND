@@ -212,23 +212,11 @@ exports.EditPromotionSchema = Joi.object({
   banner_image_url: Joi.string(),
   upload_video: Joi.string(),
   file_url: Joi.string(),
-  yt_link: Joi.string().when("type", {
-    is: "video",
-    then: Joi.required(),
-  }),
-  video_title: Joi.string().when("type", {
-    is: "video",
-    then: Joi.required(),
-  }),
+  yt_link: Joi.string(),
+  video_title: Joi.string(),
   poster_image_url: Joi.string(),
-  notice_title: Joi.string().when("type", {
-    is: "notice",
-    then: Joi.required(),
-  }),
-  notice_description: Joi.string().when("type", {
-    is: "notice",
-    then: Joi.required(),
-  }),
+  notice_title: Joi.string(),
+  notice_description: Joi.string(),
   status: Joi.boolean().default(false),
   startDate: Joi.date(),
   endDate: Joi.date(),
