@@ -200,51 +200,51 @@ exports.editProfile = async (req, res) => {
 
   // Handle deletion of old files if new URLs are provided
 
-  if (
-    !data.profile_picture ||
-    (data.profile_picture !== currentUser.profile_picture &&
-      currentUser.profile_picture !== undefined &&
-      currentUser.profile_picture != "")
-  ) {
-    if (currentUser.profile_picture) {
-      const oldFileKey = path.basename(currentUser.profile_picture);
-      await deleteFile(bucketName, oldFileKey);
-    }
-  }
+  // if (
+  //   !data.profile_picture ||
+  //   (data.profile_picture !== currentUser.profile_picture &&
+  //     currentUser.profile_picture !== undefined &&
+  //     currentUser.profile_picture != "")
+  // ) {
+  //   if (currentUser.profile_picture) {
+  //     const oldFileKey = path.basename(currentUser.profile_picture);
+  //     await deleteFile(bucketName, oldFileKey);
+  //   }
+  // }
 
-  if (
-    !data.company_logo ||
-    (data.company_logo !== currentUser.company_logo &&
-      currentUser.company_logo !== undefined &&
-      currentUser.company_logo != "")
-  ) {
-    if (currentUser.company_logo) {
-      const oldFileKey = path.basename(currentUser.company_logo);
-      await deleteFile(bucketName, oldFileKey);
-    }
-  }
+  // if (
+  //   !data.company_logo ||
+  //   (data.company_logo !== currentUser.company_logo &&
+  //     currentUser.company_logo !== undefined &&
+  //     currentUser.company_logo != "")
+  // ) {
+  //   if (currentUser.company_logo) {
+  //     const oldFileKey = path.basename(currentUser.company_logo);
+  //     await deleteFile(bucketName, oldFileKey);
+  //   }
+  // }
 
-  const fieldsToCheck = ["awards", "certificates", "brochure"];
-  for (const field of fieldsToCheck) {
-    if (data[field]) {
-      for (const item of currentUser[field]) {
-        const isStillPresent = data[field].some(
-          (newItem) => newItem.url === item.url
-        );
-        if (
-          !isStillPresent &&
-          item.url &&
-          item.url != "" &&
-          item.url !== undefined
-        ) {
-          if (item.url) {
-            let oldFileKey = path.basename(item.url);
-            await deleteFile(bucketName, oldFileKey);
-          }
-        }
-      }
-    }
-  }
+  // const fieldsToCheck = ["awards", "certificates", "brochure"];
+  // for (const field of fieldsToCheck) {
+  //   if (data[field]) {
+  //     for (const item of currentUser[field]) {
+  //       const isStillPresent = data[field].some(
+  //         (newItem) => newItem.url === item.url
+  //       );
+  //       if (
+  //         !isStillPresent &&
+  //         item.url &&
+  //         item.url != "" &&
+  //         item.url !== undefined
+  //       ) {
+  //         if (item.url) {
+  //           let oldFileKey = path.basename(item.url);
+  //           await deleteFile(bucketName, oldFileKey);
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 
   // Update the user's profile with the validated data
   const updatedUser = await User.findByIdAndUpdate(userId, data, {
@@ -288,10 +288,10 @@ exports.editProfile = async (req, res) => {
 
     // Remove products that were not in the update request, and delete associated images
     for (let remainingProduct of currentProductsMap.values()) {
-      if (remainingProduct.image) {
-        let oldImageKey = path.basename(remainingProduct.image);
-        await deleteFile(bucketName, oldImageKey);
-      }
+      // if (remainingProduct.image) {
+      //   let oldImageKey = path.basename(remainingProduct.image);
+      //   await deleteFile(bucketName, oldImageKey);
+      // }
       await Product.findByIdAndDelete(remainingProduct._id);
     }
   }
