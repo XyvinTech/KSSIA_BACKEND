@@ -290,22 +290,22 @@ exports.deletePromotion = async (req, res) => {
 
   if (!promotion) return responseHandler(res, 404, "Promotion not found");
 
-  try {
-    // Delete the associated file if it exists
-    const bucketName = process.env.AWS_S3_BUCKET;
-    if (promotion.type === "banner" && promotion.banner_image_url) {
-      let oldImageKey = path.basename(promotion.banner_image_url);
-      await deleteFile(bucketName, oldImageKey);
-    } else if (promotion.type === "video" && promotion.upload_video) {
-      let oldImageKey = path.basename(promotion.upload_video);
-      await deleteFile(bucketName, oldImageKey);
-    } else if (promotion.type === "poster" && promotion.poster_image_url) {
-      let oldImageKey = path.basename(promotion.poster_image_url);
-      await deleteFile(bucketName, oldImageKey);
-    }
-  } catch (err) {
-    return responseHandler(res, 500, `Error deleting file: ${err.message}`);
-  }
+  // try {
+  //   // Delete the associated file if it exists
+  //   const bucketName = process.env.AWS_S3_BUCKET;
+  //   if (promotion.type === "banner" && promotion.banner_image_url) {
+  //     let oldImageKey = path.basename(promotion.banner_image_url);
+  //     await deleteFile(bucketName, oldImageKey);
+  //   } else if (promotion.type === "video" && promotion.upload_video) {
+  //     let oldImageKey = path.basename(promotion.upload_video);
+  //     await deleteFile(bucketName, oldImageKey);
+  //   } else if (promotion.type === "poster" && promotion.poster_image_url) {
+  //     let oldImageKey = path.basename(promotion.poster_image_url);
+  //     await deleteFile(bucketName, oldImageKey);
+  //   }
+  // } catch (err) {
+  //   return responseHandler(res, 500, `Error deleting file: ${err.message}`);
+  // }
 
   try {
     await Promotion.findByIdAndDelete(promotionId);
