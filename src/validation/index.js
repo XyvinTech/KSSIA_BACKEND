@@ -215,6 +215,7 @@ exports.EditPromotionSchema = Joi.object({
   yt_link: Joi.string(),
   video_title: Joi.string(),
   poster_image_url: Joi.string(),
+  poster_title: Joi.string(),
   notice_title: Joi.string(),
   notice_description: Joi.string(),
   status: Joi.boolean().default(false),

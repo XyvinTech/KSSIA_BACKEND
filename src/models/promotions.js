@@ -54,6 +54,7 @@ const promotionSchema = new mongoose.Schema(
     status: { type: Boolean, default: false },
     startDate: { type: Date },
     endDate: { type: Date },
+    poster_title: { type: String },
   },
   {
     timestamps: true,
