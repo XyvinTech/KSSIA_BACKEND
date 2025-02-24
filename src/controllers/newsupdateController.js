@@ -154,11 +154,11 @@ exports.deleteNews = async (req, res) => {
     }
 
     // Delete the image from S3 if it exists
-    if (news.image) {
-      const bucketName = process.env.AWS_S3_BUCKET;
-      const imageKey = path.basename(news.image);
-      await deleteFile(bucketName, imageKey);
-    }
+    // if (news.image) {
+    //   const bucketName = process.env.AWS_S3_BUCKET;
+    //   const imageKey = path.basename(news.image);
+    //   await deleteFile(bucketName, imageKey);
+    // }
 
     return responseHandler(res, 200, "News article deleted successfully.");
   } catch (err) {

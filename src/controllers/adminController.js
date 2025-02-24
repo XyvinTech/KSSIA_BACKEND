@@ -231,7 +231,7 @@ exports.deleteUser = async (req, res) => {
       return responseHandler(res, 404, "User not found");
     }
 
-    await deleteUserFiles(user);
+    // await deleteUserFiles(user);
   } else {
     // If neither userId nor membership_id is provided, return a 400 status code with the error
     // console.log('Invalid request');                                              // Debug line
@@ -239,15 +239,15 @@ exports.deleteUser = async (req, res) => {
   }
 
   // Delete product images
-  const products = await Product.find({
-    seller_id: userId,
-  });
-  for (const product of products) {
-    if (product.image_url) {
-      let oldFileKey = path.basename(product.image_url);
-      await deleteFile(bucketName, oldFileKey);
-    }
-  }
+  // const products = await Product.find({
+  //   seller_id: userId,
+  // });
+  // for (const product of products) {
+  //   if (product.image_url) {
+  //     let oldFileKey = path.basename(product.image_url);
+  //     await deleteFile(bucketName, oldFileKey);
+  //   }
+  // }
 
   // Delete products
   await Product.deleteMany({
@@ -255,13 +255,13 @@ exports.deleteUser = async (req, res) => {
   });
 
   // Delete requirements images
-  const requirements = await Requirements.find({ author: userId });
-  for (const requirement of requirements) {
-    if (requirement.image) {
-      let oldFileKey = path.basename(requirement.image);
-      await deleteFile(bucketName, oldFileKey);
-    }
-  }
+  // const requirements = await Requirements.find({ author: userId });
+  // for (const requirement of requirements) {
+  //   if (requirement.image) {
+  //     let oldFileKey = path.basename(requirement.image);
+  //     await deleteFile(bucketName, oldFileKey);
+  //   }
+  // }
 
   // Delete requirements
   await Requirements.deleteMany({

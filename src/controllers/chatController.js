@@ -304,13 +304,13 @@ exports.deleteMessage = async (req, res) => {
     io.to(message.to).emit("messageDeleted", messageId);
 
     // If the message has attachments, delete them from S3
-    const bucketName = process.env.AWS_S3_BUCKET;
-    if (message.attachments && message.attachments.length > 0) {
-      for (const attachment of message.attachments) {
-        let oldFileKey = path.basename(attachment.url);
-        await deleteFile(bucketName, oldFileKey);
-      }
-    }
+    // const bucketName = process.env.AWS_S3_BUCKET;
+    // if (message.attachments && message.attachments.length > 0) {
+    //   for (const attachment of message.attachments) {
+    //     let oldFileKey = path.basename(attachment.url);
+    //     await deleteFile(bucketName, oldFileKey);
+    //   }
+    // }
 
     // Update chat thread if the deleted message was the last message
     const chatThread = await ChatThread.findOne({

@@ -212,16 +212,16 @@ exports.deleteRequirement = async (req, res) => {
     return responseHandler(res, 404, "Requirement details do not exist");
   }
 
-  const bucketName = process.env.AWS_S3_BUCKET;
+  // const bucketName = process.env.AWS_S3_BUCKET;
 
-  if (requirement.image) {
-    try {
-      const oldImageKey = path.basename(requirement.image);
-      await deleteFile(bucketName, oldImageKey);
-    } catch (err) {
-      return responseHandler(res, 500, `Error deleting file: ${err.message}`);
-    }
-  }
+  // if (requirement.image) {
+  //   try {
+  //     const oldImageKey = path.basename(requirement.image);
+  //     await deleteFile(bucketName, oldImageKey);
+  //   } catch (err) {
+  //     return responseHandler(res, 500, `Error deleting file: ${err.message}`);
+  //   }
+  // }
 
   await Requirements.findByIdAndDelete(requirementID);
 

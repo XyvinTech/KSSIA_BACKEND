@@ -566,15 +566,15 @@ exports.deleteProduct = async (req, res) => {
     );
   }
 
-  if (product.image) {
-    const bucketName = process.env.AWS_S3_BUCKET;
-    try {
-      let oldImageKey = path.basename(product.image);
-      await deleteFile(bucketName, oldImageKey);
-    } catch (err) {
-      return responseHandler(res, 500, `Error deleting file: ${err.message}`);
-    }
-  }
+  // if (product.image) {
+  //   const bucketName = process.env.AWS_S3_BUCKET;
+  //   try {
+  //     let oldImageKey = path.basename(product.image);
+  //     await deleteFile(bucketName, oldImageKey);
+  //   } catch (err) {
+  //     return responseHandler(res, 500, `Error deleting file: ${err.message}`);
+  //   }
+  // }
 
   return responseHandler(res, 200, "Product deleted successfully!");
 };

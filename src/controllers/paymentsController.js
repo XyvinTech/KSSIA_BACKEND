@@ -266,16 +266,16 @@ exports.deletePayment = async (req, res) => {
     return responseHandler(res, 404, "Payment details do not exist");
   }
 
-  const bucketName = process.env.AWS_S3_BUCKET;
+  // const bucketName = process.env.AWS_S3_BUCKET;
 
-  if (payment.invoice_url) {
-    try {
-      const oldImageKey = path.basename(payment.invoice_url);
-      await deleteFile(bucketName, oldImageKey);
-    } catch (err) {
-      return responseHandler(res, 500, `Error deleting file: ${err.message}`);
-    }
-  }
+  // if (payment.invoice_url) {
+  //   try {
+  //     const oldImageKey = path.basename(payment.invoice_url);
+  //     await deleteFile(bucketName, oldImageKey);
+  //   } catch (err) {
+  //     return responseHandler(res, 500, `Error deleting file: ${err.message}`);
+  //   }
+  // }
 
   await Payment.findByIdAndDelete(paymentID);
 
