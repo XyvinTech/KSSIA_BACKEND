@@ -702,8 +702,44 @@ exports.downloadProducts = async (req, res) => {
 exports.getAllCategories = async (req, res) => {
   try {
     const categories = await Product.aggregate([
-      { $group: { _id: "$category", count: { $sum: 1 } } },
-      { $project: { _id: 0, name: "$_id", count: 1 } },
+      {
+        $unwind: {
+          path: "$subcategory",
+          preserveNullAndEmptyArrays: true, 
+        },
+      },
+      {
+        $group: {
+          _id: { category: "$category", subcategory: "$subcategory" },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $group: {
+          _id: "$_id.category",
+          subcategories: {
+            $push: {
+              name: "$_id.subcategory",
+              count: "$count",
+            },
+          },
+          count: { $sum: "$count" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          name: "$_id",
+          count: 1,
+          subcategories: {
+            $filter: {
+              input: "$subcategories",
+              as: "sub",
+              cond: { $ne: ["$$sub.name", null] },
+            },
+          },
+        },
+      },
     ]);
 
     return responseHandler(
@@ -716,3 +752,4 @@ exports.getAllCategories = async (req, res) => {
     return responseHandler(res, 500, `Internal Server Error ${error.message}`);
   }
 };
+
