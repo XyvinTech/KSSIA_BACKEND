@@ -170,30 +170,30 @@ exports.deleteEvent = async (req, res) => {
 
   if (!event) return responseHandler(res, 404, "Event not found");
 
-  try {
-    // Delete associated files if they exist
-    const bucketName = process.env.AWS_S3_BUCKET;
-    if (event.image) {
-      let oldImageKey = path.basename(event.image);
-      await deleteFile(bucketName, oldImageKey);
-    }
-    if (event.guest_image) {
-      let oldImageKey = path.basename(event.guest_image);
-      await deleteFile(bucketName, oldImageKey);
-    }
-    if (event.speakers && Array.isArray(event.speakers)) {
-      await Promise.all(
-        event.speakers.map(async (speaker) => {
-          if (speaker.speaker_image) {
-            let oldImageKey = path.basename(speaker.speaker_image);
-            await deleteFile(bucketName, oldImageKey);
-          }
-        })
-      );
-    }
-  } catch (err) {
-    return responseHandler(res, 500, `Error deleting file: ${err.message}`);
-  }
+  // try {
+  //   // Delete associated files if they exist
+  //   const bucketName = process.env.AWS_S3_BUCKET;
+  //   if (event.image) {
+  //     let oldImageKey = path.basename(event.image);
+  //     await deleteFile(bucketName, oldImageKey);
+  //   }
+  //   if (event.guest_image) {
+  //     let oldImageKey = path.basename(event.guest_image);
+  //     await deleteFile(bucketName, oldImageKey);
+  //   }
+  //   if (event.speakers && Array.isArray(event.speakers)) {
+  //     await Promise.all(
+  //       event.speakers.map(async (speaker) => {
+  //         if (speaker.speaker_image) {
+  //           let oldImageKey = path.basename(speaker.speaker_image);
+  //           await deleteFile(bucketName, oldImageKey);
+  //         }
+  //       })
+  //     );
+  //   }
+  // } catch (err) {
+  //   return responseHandler(res, 500, `Error deleting file: ${err.message}`);
+  // }
 
   try {
     await Event.findByIdAndDelete(eventId);
