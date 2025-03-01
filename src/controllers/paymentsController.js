@@ -164,7 +164,7 @@ exports.updateSubs = async (req, res) => {
           subject,
           content,
           (media = null),
-          "approvals"
+          "my_subscription"
         );
       } catch (error) {
         console.log(`error creating notification : ${error}`);
