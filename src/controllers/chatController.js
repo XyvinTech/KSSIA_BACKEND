@@ -140,7 +140,7 @@ exports.sendMessage = async (req, res) => {
         newMessage.content,
         imageUrl, // Only pass if valid
         uniqueTag,
-        user._id
+        user._id.toString()
       );
     } catch (error) {
       console.log(`error creating notification : ${error}`);

@@ -88,7 +88,7 @@ cron.schedule("* * * * *", async () => {
         },
         data: {
           screen: "event",
-          id: event._id,
+          id: event._id.toString(),
         },
       };
 
