@@ -4,7 +4,7 @@ const responseHandler = require("../helpers/responseHandler");
 const Message = require("../models/messages");
 const ChatThread = require("../models/chats");
 const User = require("../models/user.js");
-const Product = require("../models/products.js")
+const Product = require("../models/products.js");
 const Requirements = require("../models/requirements.js");
 const sendInAppNotification = require("../utils/sendInAppNotification");
 const handleFileUpload = require("../utils/fileHandler");
@@ -19,15 +19,11 @@ const {
 /*                                   Function to send a message                                     */
 /****************************************************************************************************/
 exports.sendMessage = async (req, res) => {
-  const {
-    content,
-    requirement,
-    product
-  } = req.body;
+  const { content, requirement, product } = req.body;
   const to = req.params.id;
   const from = req.userId;
 
-  console.log("🚀 ~ exports.sendMessage= ~ from:", from)
+  console.log("🚀 ~ exports.sendMessage= ~ from:", from);
 
   let attachments = [];
   const bucketName = process.env.AWS_S3_BUCKET;
@@ -38,7 +34,7 @@ exports.sendMessage = async (req, res) => {
         const url = await handleFileUpload(file, bucketName);
         attachments.push({
           fileType: file.mimetype,
-          url
+          url,
         });
       }
     } catch (err) {
@@ -49,7 +45,7 @@ exports.sendMessage = async (req, res) => {
   try {
     let chatThread = await ChatThread.findOne({
       participants: {
-        $all: [from, to]
+        $all: [from, to],
       },
     });
 
@@ -61,8 +57,9 @@ exports.sendMessage = async (req, res) => {
       status: "sent",
     });
 
-    let product_sent = '';
-    let requirement_sent = '';
+    let product_sent = "";
+    let requirement_sent = "";
+    let user;
 
     if (product) {
       newMessage.product = product;
@@ -79,7 +76,7 @@ exports.sendMessage = async (req, res) => {
         participants: [from, to],
         lastMessage: newMessage._id,
         unreadCount: {
-          [to]: 1
+          [to]: 1,
         },
       });
     } else {
@@ -99,38 +96,38 @@ exports.sendMessage = async (req, res) => {
     }
 
     let NotificationSubject = "New Message";
-    
-    let validAttachments = attachments.filter(att => att && att.startsWith('http'));
+
+    let validAttachments = attachments.filter(
+      (att) => att && att.startsWith("http")
+    );
     let imageUrl = validAttachments.length > 0 ? validAttachments[0].url : null;
 
-
     try {
-      const user = await User.findById(from);
+       user = await User.findById(from);
       if (!user) {
         return responseHandler(res, 404, "User not found");
       }
       let full_name = `${user.name}`.trim();
       NotificationSubject = `${full_name} sent you a message`;
 
-      if (product_sent != '') {
+      if (product_sent != "") {
         NotificationSubject = `${full_name} sent you a message about product ${product_sent.name}`;
         imageUrl = product_sent.image;
       }
 
-      if (requirement_sent != '') {
+      if (requirement_sent != "") {
         NotificationSubject = `${full_name} sent you a message about requirement ${requirement_sent.content}`;
         imageUrl = requirement_sent.image;
       }
-
     } catch (error) {
       console.log(error);
     }
 
     try {
-      const user = await User.findById(to);
+      const to_user = await User.findById(to);
       let userFCM = [];
-      userFCM.push(user.fcm);
-      const uniqueTag = `chat-${chatThread._id}`; // Group by chat thread
+      userFCM.push(to_user.fcm);
+      const uniqueTag = `chat`;
 
       console.log(userFCM);
       console.log(NotificationSubject);
@@ -143,8 +140,8 @@ exports.sendMessage = async (req, res) => {
         newMessage.content,
         imageUrl, // Only pass if valid
         uniqueTag,
+        user._id
       );
-
     } catch (error) {
       console.log(`error creating notification : ${error}`);
     }
@@ -160,50 +157,54 @@ exports.sendMessage = async (req, res) => {
 /*                                   Function to get messages between users                         */
 /****************************************************************************************************/
 exports.getMessagesBetweenUsers = async (req, res) => {
-  const {
-    userId1,
-    userId2
-  } = req.params;
+  const { userId1, userId2 } = req.params;
 
   try {
     const messages = await Message.find({
-        $or: [{
-            from: userId1,
-            to: userId2
-          },
-          {
-            from: userId2,
-            to: userId1
-          },
-        ],
-      })
+      $or: [
+        {
+          from: userId1,
+          to: userId2,
+        },
+        {
+          from: userId2,
+          to: userId1,
+        },
+      ],
+    })
       .sort({
-        timestamp: 1
+        timestamp: 1,
       })
       .populate("product", "name price offer_price image") // Populating product
       .populate("requirement", "content image"); // Populating requirement
 
     // Mark messages as seen
-    await Message.updateMany({
-      from: userId2,
-      to: userId1,
-      status: {
-        $ne: "seen"
+    await Message.updateMany(
+      {
+        from: userId2,
+        to: userId1,
+        status: {
+          $ne: "seen",
+        },
+      },
+      {
+        status: "seen",
       }
-    }, {
-      status: "seen"
-    });
+    );
 
     // Reset unread count in chat thread
-    await ChatThread.updateOne({
-      participants: {
-        $all: [userId1, userId2]
+    await ChatThread.updateOne(
+      {
+        participants: {
+          $all: [userId1, userId2],
+        },
+      },
+      {
+        $set: {
+          [`unreadCount.${userId1}`]: 0,
+        },
       }
-    }, {
-      $set: {
-        [`unreadCount.${userId1}`]: 0
-      }
-    });
+    );
 
     return responseHandler(
       res,
@@ -223,13 +224,13 @@ exports.getMessagesBetweenUsers = async (req, res) => {
 exports.getChatThreads = async (req, res) => {
   try {
     const chatThreads = await ChatThread.find({
-        participants: req.userId
-      })
+      participants: req.userId,
+    })
       .populate("participants", "name profile_picture")
       .populate("lastMessage")
       .sort({
         lastMessage: -1,
-        _id: 1
+        _id: 1,
       })
       .exec();
 
@@ -249,31 +250,34 @@ exports.getChatThreads = async (req, res) => {
 /*                                   Function to mark message seen                                  */
 /****************************************************************************************************/
 exports.markMessagesAsSeen = async (req, res) => {
-  const {
-    userId,
-    otherUserId
-  } = req.params;
+  const { userId, otherUserId } = req.params;
 
   try {
-    await Message.updateMany({
-      from: otherUserId,
-      to: userId,
-      status: {
-        $ne: "seen"
+    await Message.updateMany(
+      {
+        from: otherUserId,
+        to: userId,
+        status: {
+          $ne: "seen",
+        },
       },
-    }, {
-      status: "seen"
-    });
+      {
+        status: "seen",
+      }
+    );
 
-    await ChatThread.updateOne({
-      participants: {
-        $all: [userId, otherUserId]
+    await ChatThread.updateOne(
+      {
+        participants: {
+          $all: [userId, otherUserId],
+        },
+      },
+      {
+        $set: {
+          [`unreadCount.${userId}`]: 0,
+        },
       }
-    }, {
-      $set: {
-        [`unreadCount.${userId}`]: 0
-      }
-    });
+    );
 
     // Emit a socket event to notify the sender that messages have been seen
     io.to(otherUserId.toString()).emit("messagesSeen", userId);
@@ -289,9 +293,7 @@ exports.markMessagesAsSeen = async (req, res) => {
 /*                                   Function to delete message                                     */
 /****************************************************************************************************/
 exports.deleteMessage = async (req, res) => {
-  const {
-    messageId
-  } = req.params;
+  const { messageId } = req.params;
 
   try {
     const message = await Message.findByIdAndDelete(messageId);
@@ -314,22 +316,23 @@ exports.deleteMessage = async (req, res) => {
 
     // Update chat thread if the deleted message was the last message
     const chatThread = await ChatThread.findOne({
-      lastMessage: messageId
+      lastMessage: messageId,
     });
     if (chatThread) {
       // Fetch the previous message in the thread
       const previousMessage = await Message.findOne({
-        $or: [{
+        $or: [
+          {
             from: chatThread.participants[0],
-            to: chatThread.participants[1]
+            to: chatThread.participants[1],
           },
           {
             from: chatThread.participants[1],
-            to: chatThread.participants[0]
+            to: chatThread.participants[0],
           },
         ],
       }).sort({
-        timestamp: -1
+        timestamp: -1,
       });
 
       chatThread.lastMessage = previousMessage ? previousMessage._id : null;
@@ -347,32 +350,39 @@ exports.deleteMessage = async (req, res) => {
 /*                                   Function to delete chats                                       */
 /****************************************************************************************************/
 exports.deleteAllMessagesOfUser = async (req, res) => {
-  const {
-    userId
-  } = req.params;
+  const { userId } = req.params;
 
   try {
     // Add userId to the deletedBy array for all messages where the user is a participant
-    const messages = await Message.updateMany({
-      $or: [{
-        from: userId
-      }, {
-        to: userId
-      }],
-    }, {
-      $addToSet: {
-        deletedBy: userId
+    const messages = await Message.updateMany(
+      {
+        $or: [
+          {
+            from: userId,
+          },
+          {
+            to: userId,
+          },
+        ],
       },
-    });
+      {
+        $addToSet: {
+          deletedBy: userId,
+        },
+      }
+    );
 
     // Remove chat threads only for the current user
-    const chatThreads = await ChatThread.updateMany({
-      participants: userId
-    }, {
-      $pull: {
-        participants: userId
+    const chatThreads = await ChatThread.updateMany(
+      {
+        participants: userId,
       },
-    });
+      {
+        $pull: {
+          participants: userId,
+        },
+      }
+    );
 
     return responseHandler(
       res,
@@ -389,14 +399,12 @@ exports.deleteAllMessagesOfUser = async (req, res) => {
 /*                                   Function to get unread notification                            */
 /****************************************************************************************************/
 exports.getUnreadNotifications = async (req, res) => {
-  const {
-    userId
-  } = req.params;
+  const { userId } = req.params;
 
   try {
     const chatThreads = await ChatThread.find({
-        participants: userId
-      })
+      participants: userId,
+    })
       .populate("participants", "username profilePicture")
       .populate("lastMessage")
       .exec();

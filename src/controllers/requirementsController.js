@@ -278,7 +278,7 @@ exports.updateRequirementStatus = async (req, res) => {
         subject,
         content,
         file_url,
-        "approvals"
+        "my_requirements"
       );
     } catch (error) {
       console.log(`error creating notification : ${error}`);

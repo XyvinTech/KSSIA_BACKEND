@@ -25,6 +25,22 @@ cron.schedule("* * * * *", async () => {
           body: `The event ${event.name} has started. Join now!`,
         },
         topic: topic,
+        android: {
+          notification: {
+            clickAction: "FLUTTER_NOTIFICATION_CLICK", // Important for handling clicks
+          },
+        },
+        apns: {
+          payload: {
+            aps: {
+              "mutable-content": 1,
+            },
+          },
+        },
+        data: {
+          screen: "event",
+          id: event._id,
+        },
       };
 
       try {
@@ -51,12 +67,29 @@ cron.schedule("* * * * *", async () => {
       await event.save();
 
       const topic = `event_${event._id}`;
+
       const message = {
         notification: {
           title: `Event ${event.name} is now completed!`,
           body: `The event ${event.name} has ended. Thank you for participating!`,
         },
         topic: topic,
+        android: {
+          notification: {
+            clickAction: "FLUTTER_NOTIFICATION_CLICK", // Important for handling clicks
+          },
+        },
+        apns: {
+          payload: {
+            aps: {
+              "mutable-content": 1,
+            },
+          },
+        },
+        data: {
+          screen: "event",
+          id: event._id,
+        },
       };
 
       try {

@@ -630,7 +630,7 @@ exports.updateProductStatus = async (req, res) => {
         subject,
         content,
         file_url,
-        "approvals"
+        "my_products"
       );
     } catch (error) {
       console.log(`error creating notification : ${error}`);
