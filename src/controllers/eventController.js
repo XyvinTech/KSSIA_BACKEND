@@ -123,6 +123,10 @@ exports.getAllEvents = async (req, res) => {
 
   const totalCount = await Event.countDocuments(filter);
   const events = await Event.find(filter)
+    .populate({
+      path: "rsvp",
+      select: "name company_name phone_numbers",
+    })
     .skip(skipCount)
     .limit(limit)
     .sort({ startDate: -1 }) // Customize sorting as needed
