@@ -15,8 +15,6 @@ jobs:
         node-version: [20.x]
 
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       ECR_REPOSITORY: stagging
@@ -32,17 +30,15 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
 
       - name: Build and Push Docker image
-        id: build-and-push-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: stagging
-          IMAGE_TAG: latest
-
         run: |
-          docker build -t ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} .
-          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
   deploy:
     name: Deploy to EC2
@@ -53,6 +49,8 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
@@ -62,11 +60,19 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
             # Update system and install Docker if not installed
-            sudo apt-get update
-            sudo apt-get install -y docker.io 
+            sudo yum update -y
+            sudo yum install -y docker
+            sudo systemctl start docker
+            sudo systemctl enable docker
 
-            # Login to Amazon ECR
-            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | sudo docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+            # Ensure AWS CLI is installed
+            if ! command -v aws &> /dev/null; then
+              sudo yum install -y aws-cli
+            fi
+
+            # Login to Amazon ECR with AWS region explicitly defined
+            export AWS_REGION=${{ secrets.AWS_REGION }}
+            aws ecr get-login-password --region $AWS_REGION | sudo docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
 
             # Pull the latest Docker image
             sudo docker pull ${{ steps.login-ecr.outputs.registry }}/stagging:latest
@@ -75,15 +81,15 @@ jobs:
             sudo docker stop KSSIA_BACKEND_STAGING || true
             sudo docker rm KSSIA_BACKEND_STAGING || true
 
-            # Check if the .env.staging file exists
+            # Check if the .env.production file exists
             if [ ! -f /home/ec2-user/kssia/.env/.env.production ]; then
               echo ".env.production file is missing."
               exit 1
             fi
 
-            # Run the new container with the .env.staging file
+            # Run the new container with the .env.production file
             sudo docker run -d \
               -p 3000:3000 \
               --name KSSIA_BACKEND_STAGING \
               --env-file /home/ec2-user/kssia/.env/.env.production \
-              ${{ steps.login-ecr.outputs.registry }}/kssia-staging:latest
+              ${{ steps.login-ecr.outputs.registry }}/stagging:latest
