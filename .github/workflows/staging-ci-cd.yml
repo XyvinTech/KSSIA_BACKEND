@@ -87,9 +87,9 @@ jobs:
             # Pull the latest Docker image
             sudo docker pull ${{ steps.login-ecr.outputs.registry }}/stagging:latest
 
-            # # Stop and remove the existing container if running
-            # sudo docker stop KSSIA_BACKEND_STAGING || true
-            # sudo docker rm KSSIA_BACKEND_STAGING || true
+            # Stop and remove the existing container if running
+            sudo docker stop KSSIA_BACKEND_STAGING || true
+            sudo docker rm KSSIA_BACKEND_STAGING || true
 
             # Check if the .env.production file exists
             if [ ! -f /home/ec2-user/kssia/.env/.env.production ]; then
