@@ -67,7 +67,7 @@ jobs:
           script: |
             # Update system and install Docker if not installed
             sudo yum update -y
-            sudo yum install -y docker
+            sudo yum install -y docker aws-cli
             sudo systemctl start docker
             sudo systemctl enable docker
 
@@ -95,7 +95,7 @@ jobs:
 
             # Run the new container with the .env.production file
             sudo docker run -d \
-              -p 3000:3000 \
+              -p 3003:3003 \
               --name KSSIA_BACKEND_STAGING \
               --env-file /home/ec2-user/kssia/.env/.env.production \
               ${{ steps.login-ecr.outputs.registry }}/stagging:latest
