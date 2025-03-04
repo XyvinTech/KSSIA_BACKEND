@@ -102,6 +102,5 @@ jobs:
               -p 3003:3003 \
               --name KSSIA_BACKEND_STAGING \
               --env-file /home/ec2-user/kssia/.env/.env.production \
-              --user root \
               ${{ steps.login-ecr.outputs.registry }}/stagging:latest
-              sudo docker run -d \
+              
