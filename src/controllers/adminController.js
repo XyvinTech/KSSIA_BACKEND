@@ -349,12 +349,12 @@ exports.getAllUsers = async (req, res) => {
       filter.designation = designation;
     }
 
-    if (installed) {
+    if (installed === false) {
+      filter.fcm = { $exists: false };
+    } else if (installed) {
       filter.fcm = {
         $nin: [null, ""],
       };
-    } else if (installed === false) {
-      filter.fcm = { $exists: false };
     }
 
     if (companyName) {
@@ -542,12 +542,12 @@ exports.downloadUsers = async (req, res) => {
       filter.status = status;
     }
 
-    if (installed) {
+    if (installed === false) {
+      filter.fcm = { $exists: false };
+    } else if (installed) {
       filter.fcm = {
         $nin: [null, ""],
       };
-    } else if (installed === false) {
-      filter.fcm = { $exists: false };
     }
 
     const users = await User.find(filter);
