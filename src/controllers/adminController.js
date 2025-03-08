@@ -354,9 +354,7 @@ exports.getAllUsers = async (req, res) => {
         $nin: [null, ""],
       };
     } else if (installed === false) {
-      filter.fcm = {
-        $in: [null, ""],
-      };
+      filter.fcm = { $exists: false };
     }
 
     if (companyName) {
@@ -549,9 +547,7 @@ exports.downloadUsers = async (req, res) => {
         $nin: [null, ""],
       };
     } else if (installed === false) {
-      filter.fcm = {
-        $in: [null, ""],
-      };
+      filter.fcm = { $exists: false };
     }
 
     const users = await User.find(filter);
