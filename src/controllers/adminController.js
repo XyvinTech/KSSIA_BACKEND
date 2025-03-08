@@ -349,7 +349,7 @@ exports.getAllUsers = async (req, res) => {
       filter.designation = designation;
     }
 
-    if (installed === false) {
+    if (installed === 'false') {
       filter.fcm = { $exists: false };
     } else if (installed) {
       filter.fcm = {
@@ -542,7 +542,7 @@ exports.downloadUsers = async (req, res) => {
       filter.status = status;
     }
 
-    if (installed === false) {
+    if (installed === 'false') {
       filter.fcm = { $exists: false };
     } else if (installed) {
       filter.fcm = {
