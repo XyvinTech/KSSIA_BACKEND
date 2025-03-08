@@ -353,6 +353,10 @@ exports.getAllUsers = async (req, res) => {
       filter.fcm = {
         $nin: [null, ""],
       };
+    }else if(installed === false){
+      filter.fcm = {
+        $in: [null, ""],
+      };
     }
 
     if (companyName) {
