@@ -350,7 +350,7 @@ exports.getAllUsers = async (req, res) => {
     }
 
     if (installed === "false") {
-      filter.fcm = { $in: [null, ""] };
+      filter.$or = [{ uid: null }, { uid: "" }, { fcm: null }, { fcm: "" }];
     } else if (installed) {
       filter.$or = [
         {
@@ -548,7 +548,7 @@ exports.downloadUsers = async (req, res) => {
     }
 
     if (installed === "false") {
-      filter.fcm = { $in: [null, ""] };
+      filter.$or = [{ uid: null }, { uid: "" }, { fcm: null }, { fcm: "" }];
     } else if (installed) {
       filter.$or = [
         {
