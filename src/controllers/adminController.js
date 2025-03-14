@@ -353,21 +353,15 @@ exports.getAllUsers = async (req, res) => {
       filter.fcm = { $in: [null, ""] };
     } else if (installed) {
       filter.fcm = {
-        "$or": [
+        $or: [
           {
-            "$and": [
-              { "uid": { "$ne": null } },
-              { "uid": { "$ne": "" } }
-            ]
+            $and: [{ uid: { $ne: null } }, { uid: { $ne: "" } }],
           },
           {
-            "$and": [
-              { "fcm": { "$ne": null } },
-              { "fcm": { "$ne": "" } }
-            ]
-          }
-        ]
-      }      
+            $and: [{ fcm: { $ne: null } }, { fcm: { $ne: "" } }],
+          },
+        ],
+      };
     }
 
     if (companyName) {
@@ -558,22 +552,14 @@ exports.downloadUsers = async (req, res) => {
     if (installed === "false") {
       filter.fcm = { $in: [null, ""] };
     } else if (installed) {
-      filter.fcm = {
-        "$or": [
-          {
-            "$and": [
-              { "uid": { "$ne": null } },
-              { "uid": { "$ne": "" } }
-            ]
-          },
-          {
-            "$and": [
-              { "fcm": { "$ne": null } },
-              { "fcm": { "$ne": "" } }
-            ]
-          }
-        ]
-      }      
+      filter.$or = [
+        {
+          $and: [{ uid: { $ne: null } }, { uid: { $ne: "" } }],
+        },
+        {
+          $and: [{ fcm: { $ne: null } }, { fcm: { $ne: "" } }],
+        },
+      ];
     }
 
     const users = await User.find(filter);
