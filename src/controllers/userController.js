@@ -887,6 +887,7 @@ exports.loginUser = async (req, res) => {
         return responseHandler(res, 404, "User not found");
       } else if (user.uid && user.uid !== null) {
         user.fcm = fcm;
+        user.uid = decodedToken.uid;
         user.save();
         const token = generateToken(user._id);
         return responseHandler(res, 200, "User logged in successfully", {

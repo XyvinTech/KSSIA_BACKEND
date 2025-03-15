@@ -47,7 +47,7 @@ const sendInAppNotification = async (
       },
       data: {
         screen: tag,
-        id: id,
+        ...(id && { id }),
       },
     };
 

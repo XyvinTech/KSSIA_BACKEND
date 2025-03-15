@@ -349,10 +349,17 @@ exports.getAllUsers = async (req, res) => {
       filter.designation = designation;
     }
 
-    if (installed) {
-      filter.fcm = {
-        $nin: [null, ""],
-      };
+    if (installed === "false") {
+      filter.$or = [{ uid: null }, { uid: "" }, { fcm: null }, { fcm: "" }];
+    } else if (installed) {
+      filter.$or = [
+        {
+          $and: [{ uid: { $ne: null } }, { uid: { $ne: "" } }],
+        },
+        {
+          $and: [{ fcm: { $ne: null } }, { fcm: { $ne: "" } }],
+        },
+      ];
     }
 
     if (companyName) {
@@ -540,10 +547,17 @@ exports.downloadUsers = async (req, res) => {
       filter.status = status;
     }
 
-    if (installed) {
-      filter.fcm = {
-        $nin: [null, ""],
-      };
+    if (installed === "false") {
+      filter.$or = [{ uid: null }, { uid: "" }, { fcm: null }, { fcm: "" }];
+    } else if (installed) {
+      filter.$or = [
+        {
+          $and: [{ uid: { $ne: null } }, { uid: { $ne: "" } }],
+        },
+        {
+          $and: [{ fcm: { $ne: null } }, { fcm: { $ne: "" } }],
+        },
+      ];
     }
 
     const users = await User.find(filter);
