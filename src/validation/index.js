@@ -221,6 +221,7 @@ exports.EditPromotionSchema = Joi.object({
   status: Joi.boolean().default(false),
   startDate: Joi.date(),
   endDate: Joi.date(),
+  notice_link: Joi.string(),
 });
 
 exports.PaymentSchema = Joi.object({
