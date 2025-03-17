@@ -548,13 +548,13 @@ exports.downloadUsers = async (req, res) => {
     }
 
     if (installed === "false") {
-      filter.$or = [
-        { uid: { $exists: false } },
-        { uid: null },
-        { uid: "" },
-        { fcm: { $exists: false } },
-        { fcm: null },
-        { fcm: "" },
+      filter.$and = [
+        {
+          $or: [{ uid: { $exists: false } }, { uid: null }, { uid: "" }],
+        },
+        {
+          $or: [{ fcm: { $exists: false } }, { fcm: null }, { fcm: "" }],
+        },
       ];
     } else if (installed) {
       filter.$or = [
