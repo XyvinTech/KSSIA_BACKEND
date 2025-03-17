@@ -124,6 +124,9 @@ app.get(BASE_PATH, (req, res) => {
   );
 });
 
+console.log("The server is running");
+
+
 app.all("*", (req, res) => {
   return responseHandler(res, 404, "🛡️ No API Found", null);
 });
