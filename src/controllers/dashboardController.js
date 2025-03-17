@@ -430,13 +430,22 @@ exports.getAllStatistics = async (req, res) => {
     const installedUserCount = await User.countDocuments({
       $or: [
         {
-          $and: [{ uid: { $ne: null } }, { uid: { $ne: "" } }],
+          $and: [
+            { uid: { $exists: true } },
+            { uid: { $ne: null } },
+            { uid: { $ne: "" } },
+          ],
         },
         {
-          $and: [{ fcm: { $ne: null } }, { fcm: { $ne: "" } }],
+          $and: [
+            { fcm: { $exists: true } },
+            { fcm: { $ne: null } },
+            { fcm: { $ne: "" } },
+          ],
         },
       ],
     });
+
     // Create the response data
     const responseData = {
       userCount,
