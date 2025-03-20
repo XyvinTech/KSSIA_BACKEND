@@ -59,7 +59,7 @@ exports.createAdmin = async (req, res) => {
 
   const subject = ` Welcome mail`;
   const text = `Welcome  ${data.name}.
-     Your ${email} is designated to ${designation.roleName} and your current password is ${initialPassword}
+     Your ${data.email} is designated to ${designation.roleName} and your current password is ${initialPassword}
      You can change your password through site
      Regards,
      KSSIA Team
