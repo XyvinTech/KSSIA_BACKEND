@@ -7,7 +7,7 @@ const roleSchema = mongoose.Schema(
     description: { type: String },
     status: {
       type: Boolean,
-      default: false,
+      default: true,
     },
   },
   { timestamps: true }
