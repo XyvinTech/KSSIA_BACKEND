@@ -65,6 +65,7 @@ exports.CreateUserSchema = Joi.object({
 exports.EditUserSchema = Joi.object({
   abbreviation: Joi.string(),
   name: Joi.string(),
+  membership_id: Joi.string(),
   blood_group: Joi.string().allow(""),
   email: Joi.string().email().required(),
   profile_picture: Joi.string().uri().allow(""),
@@ -146,6 +147,7 @@ exports.CreateEventsSchema = Joi.object({
   organiser_role: Joi.string().required(),
   speakers: Joi.array().items(speakerSchema),
   activate: Joi.boolean(),
+  status: Joi.string(),
 });
 
 exports.EditEventsSchema = Joi.object({
