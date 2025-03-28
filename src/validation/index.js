@@ -147,6 +147,7 @@ exports.CreateEventsSchema = Joi.object({
   organiser_role: Joi.string().required(),
   speakers: Joi.array().items(speakerSchema),
   activate: Joi.boolean(),
+  status: Joi.string(),
 });
 
 exports.EditEventsSchema = Joi.object({
