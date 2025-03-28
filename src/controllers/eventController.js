@@ -374,15 +374,19 @@ exports.cancelEvent = async (req, res) => {
 /*                                Function to get the events history                               */
 /****************************************************************************************************/
 exports.getEventHistory = async (req, res) => {
-  const { pageNo = 1, limit = 10 } = req.query;
+  const { pageNo = 1, limit = 10, search } = req.query;
   const skipCount = limit * (pageNo - 1);
 
-  const totalCount = await Event.countDocuments({
+  const filter = {
     status: { $in: ["completed", "cancelled"] },
-  });
-  const events = await Event.find({
-    status: { $in: ["completed", "cancelled"] },
-  })
+  };
+
+  if (search) {
+    filter.name = { $regex: search, $options: "i" };
+  }
+
+  const totalCount = await Event.countDocuments(filter);
+  const events = await Event.find(filter)
     .skip(skipCount)
     .limit(limit)
     .sort({ startDate: -1 }) // Customize sorting as needed
