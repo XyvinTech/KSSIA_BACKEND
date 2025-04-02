@@ -115,13 +115,13 @@ exports.getAllRequirements = async (req, res) => {
           from: "users",
           localField: "author",
           foreignField: "_id",
-          as: "authorData",
+          as: "author",
         },
       },
-      { $unwind: "$authorData" },
+      { $unwind: "$author" },
       {
         $match: search
-          ? { "authorData.name": { $regex: search, $options: "i" } }
+          ? { "author.name": { $regex: search, $options: "i" } }
           : {},
       },
       { $sort: { createdAt: -1 } },
@@ -135,7 +135,7 @@ exports.getAllRequirements = async (req, res) => {
           status: 1,
           reason: 1,
           createdAt: 1,
-          "authorData.name": 1,
+          "author.name": 1,
         },
       },
     ];
