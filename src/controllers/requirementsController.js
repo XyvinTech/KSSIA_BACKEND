@@ -107,20 +107,62 @@ exports.getAllRequirements = async (req, res) => {
   const pageNumber = parseInt(pageNo, 10);
   const limitNumber = parseInt(limit, 10);
   const skipCount = limitNumber * (pageNumber - 1);
-  const filter = {};
+
   try {
-    if (search) {
-      filter.$or = [{ "author.name": { $regex: search, $options: "i" } }];
-    }
+    const pipeline = [
+      {
+        $lookup: {
+          from: "users",
+          localField: "author",
+          foreignField: "_id",
+          as: "authorData",
+        },
+      },
+      { $unwind: "$authorData" },
+      {
+        $match: search
+          ? { "authorData.name": { $regex: search, $options: "i" } }
+          : {},
+      },
+      { $sort: { createdAt: -1 } },
+      { $skip: skipCount },
+      { $limit: limitNumber },
+      {
+        $project: {
+          _id: 1,
+          image: 1,
+          content: 1,
+          status: 1,
+          reason: 1,
+          createdAt: 1,
+          "authorData.name": 1,
+        },
+      },
+    ];
 
-    const requirements = await Requirements.find(filter)
-      .populate("author", "name")
-      .skip(skipCount)
-      .limit(limitNumber)
-      .sort({ createdAt: -1 })
-      .lean();
+    const requirements = await Requirements.aggregate(pipeline);
 
-    const totalCount = await Requirements.countDocuments(filter);
+    const totalCountPipeline = [
+      {
+        $lookup: {
+          from: "users",
+          localField: "author",
+          foreignField: "_id",
+          as: "authorData",
+        },
+      },
+      { $unwind: "$authorData" },
+      {
+        $match: search
+          ? { "authorData.name": { $regex: search, $options: "i" } }
+          : {},
+      },
+      { $count: "totalCount" },
+    ];
+
+    const totalCountResult = await Requirements.aggregate(totalCountPipeline);
+    const totalCount =
+      totalCountResult.length > 0 ? totalCountResult[0].totalCount : 0;
 
     return responseHandler(
       res,
