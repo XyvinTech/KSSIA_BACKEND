@@ -386,7 +386,10 @@ exports.getUserRequirements = async (req, res) => {
 
 exports.getRequirements = async (req, res) => {
   const { id } = req.params;
-  const requirements = await Requirements.findById(id);
+  const requirements = await Requirements.findById(id).populate(
+    "author",
+    "name image membership_id"
+  );
   return responseHandler(
     res,
     200,
