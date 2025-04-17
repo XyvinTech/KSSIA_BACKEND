@@ -67,7 +67,7 @@ exports.EditUserSchema = Joi.object({
   name: Joi.string(),
   membership_id: Joi.string(),
   blood_group: Joi.string().allow(""),
-  email: Joi.string().email().required(),
+  email: Joi.string().email(),
   profile_picture: Joi.string().uri().allow(""),
   phone_numbers: phoneSchema.required(),
   designation: Joi.string().allow(""),
