@@ -703,13 +703,16 @@ exports.getAllCategories = async (req, res) => {
       {
         $unwind: {
           path: "$subcategory",
-          preserveNullAndEmptyArrays: true, 
+          preserveNullAndEmptyArrays: true,
         },
       },
       {
         $group: {
-          _id: { category: "$category", subcategory: "$subcategory" },
-          count: { $sum: 1 },
+          _id: {
+            category: "$category",
+            subcategory: "$subcategory",
+          },
+          subCount: { $sum: 1 },
         },
       },
       {
@@ -718,17 +721,36 @@ exports.getAllCategories = async (req, res) => {
           subcategories: {
             $push: {
               name: "$_id.subcategory",
-              count: "$count",
+              count: "$subCount",
             },
           },
-          count: { $sum: "$count" },
         },
+      },
+      {
+        $lookup: {
+          from: "products",
+          let: { categoryName: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$category", "$$categoryName"] },
+              },
+            },
+            {
+              $count: "totalCount",
+            },
+          ],
+          as: "categoryStats",
+        },
+      },
+      {
+        $unwind: "$categoryStats",
       },
       {
         $project: {
           _id: 0,
           name: "$_id",
-          count: 1,
+          count: "$categoryStats.totalCount",
           subcategories: {
             $filter: {
               input: "$subcategories",
@@ -750,4 +772,5 @@ exports.getAllCategories = async (req, res) => {
     return responseHandler(res, 500, `Internal Server Error ${error.message}`);
   }
 };
+
 
