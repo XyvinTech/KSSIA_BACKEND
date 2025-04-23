@@ -334,13 +334,10 @@ exports.getAllUsers = async (req, res) => {
     if (userId && (userId !== "" || userId !== undefined)) {
       filter._id = { $nin: [userId] };
     }
-
-    // Handle name filtering
     if (name && name !== "") {
       filter.name = { $regex: name, $options: "i" };
     }
 
-    // Handle other filters
     if (membershipId && membershipId !== "") {
       filter.membership_id = membershipId;
     }
@@ -386,48 +383,46 @@ exports.getAllUsers = async (req, res) => {
       filter.subscription = subscription;
     }
 
-    // Add search functionality
     if (search && search !== "") {
-      // Escape special characters in the search string for regex
       const escapedSearch = search.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
 
-      // Combine the name filters with other filters
-      filter = {
-        ...filter,
-        $or: [
-          { email: { $regex: escapedSearch } },
-          {
-            "phone_numbers.personal": { $regex: escapedSearch, $options: "i" },
-          },
-          { designation: { $regex: escapedSearch, $options: "i" } },
-          { company_name: { $regex: escapedSearch, $options: "i" } },
-          { membership_id: { $regex: escapedSearch, $options: "i" } },
-          { name: { $regex: escapedSearch, $options: "i" } },
-        ],
-      };
+      const searchConditions = [
+        { email: { $regex: escapedSearch, $options: "i" } },
+        { "phone_numbers.personal": { $regex: escapedSearch, $options: "i" } },
+        { designation: { $regex: escapedSearch, $options: "i" } },
+        { company_name: { $regex: escapedSearch, $options: "i" } },
+        { membership_id: { $regex: escapedSearch, $options: "i" } },
+        { name: { $regex: escapedSearch, $options: "i" } },
+      ];
+
+      if (filter.$or) {
+        filter.$and = filter.$and || [];
+        filter.$and.push({ $or: filter.$or });
+        delete filter.$or;
+      }
+
+      filter.$and = filter.$and || [];
+      filter.$and.push({ $or: searchConditions });
     }
 
     if (status) {
       filter.status = status;
     }
 
-    // Check if the limit is set to 'full' for retrieving all users
     if (limit === "full") {
       const users = await User.find(filter).populate({
         path: "reviews.reviewer",
         select: "name profile_picture",
       });
 
-      // Map the data to include the required fields (full name and mobile)
       const mappedData = users.map((user) => {
         return {
-          ...user._doc, // Spread the original user data
+          ...user._doc,
           full_name: `${user.name}`.trim(),
-          mobile: user.phone_numbers?.personal || "N/A", // Handle phone number or return 'N/A'
+          mobile: user.phone_numbers?.personal || "N/A", 
         };
       });
 
-      // Return the full data
       return responseHandler(
         res,
         200,
@@ -436,11 +431,7 @@ exports.getAllUsers = async (req, res) => {
       );
     } else {
       const skipCount = limit * (pageNo - 1);
-
-      // Get total count of users
       const totalCount = await User.countDocuments(filter);
-
-      // Fetch users with pagination and sorting
       const users = await User.find(filter)
         .populate({
           path: "reviews.reviewer",
@@ -459,7 +450,6 @@ exports.getAllUsers = async (req, res) => {
         });
       });
 
-      // Return the paginated and mapped data
       return responseHandler(
         res,
         200,
