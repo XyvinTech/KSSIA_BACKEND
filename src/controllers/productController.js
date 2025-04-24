@@ -8,6 +8,7 @@ const { productsSchemaval } = require("../validation");
 const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
 const sendInAppNotification = require("../utils/sendInAppNotification");
+const { default: mongoose } = require("mongoose");
 
 /****************************************************************************************************/
 /*                                    Function to add product                                       */
@@ -699,7 +700,14 @@ exports.downloadProducts = async (req, res) => {
 
 exports.getAllCategories = async (req, res) => {
   try {
+    const userId = new mongoose.Types.ObjectId(req.userId); 
+
     const categories = await Product.aggregate([
+      {
+        $match: {
+          seller_id: { $ne: userId }, 
+        },
+      },
       {
         $unwind: {
           path: "$subcategory",
@@ -733,7 +741,12 @@ exports.getAllCategories = async (req, res) => {
           pipeline: [
             {
               $match: {
-                $expr: { $eq: ["$category", "$$categoryName"] },
+                $expr: {
+                  $and: [
+                    { $eq: ["$category", "$$categoryName"] },
+                    { $ne: ["$seller_id", userId] }, 
+                  ],
+                },
               },
             },
             {
@@ -772,5 +785,4 @@ exports.getAllCategories = async (req, res) => {
     return responseHandler(res, 500, `Internal Server Error ${error.message}`);
   }
 };
-
 
