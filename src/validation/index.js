@@ -2,7 +2,7 @@ const Joi = require("joi");
 
 // User arrays Schema validation
 const phoneSchema = Joi.object({
-  personal: Joi.string().required(),
+  personal: Joi.string(),
   landline: Joi.string().allow(""),
   company_phone_number: Joi.string().allow(""),
   whatsapp_number: Joi.string().allow(""),
@@ -69,7 +69,7 @@ exports.EditUserSchema = Joi.object({
   blood_group: Joi.string().allow(""),
   email: Joi.string().email(),
   profile_picture: Joi.string().uri().allow(""),
-  phone_numbers: phoneSchema.required(),
+  phone_numbers: phoneSchema,
   designation: Joi.string().allow(""),
   company_name: Joi.string().allow(""),
   company_email: Joi.string().email().allow(""),
