@@ -324,6 +324,20 @@ exports.updateRequirementStatus = async (req, res) => {
         file_url,
         "my_requirements"
       );
+
+      const otherUsers = await User.find({ _id: { $ne: requirement.author } });
+      const otherFCMs = otherUsers.map((u) => u.fcm).filter(Boolean);
+
+      if (otherFCMs.length > 0) {
+        await sendInAppNotification(
+          otherFCMs,
+          `New requirement added by ${user.name}`,
+          `${requirement.name} has been added by ${user.name}`,
+          requirement.image,
+          "requirements"
+        );
+      }
+
     } catch (error) {
       console.log(`error creating notification : ${error}`);
     }

@@ -597,44 +597,43 @@ exports.updateProductStatus = async (req, res) => {
     return responseHandler(res, 404, "Product not found");
   }
 
-  if (status == "accepted") {
-    product.reason = "";
-  }
-
   product.status = status;
-  product.reason = reason;
+  product.reason = status === "accepted" ? "" : reason;
 
   try {
     await product.save();
 
-    try {
-      const user = await User.findById(product.seller_id);
-      if (!user) {
-        return responseHandler(res, 404, "User not found");
-      }
+    const user = await User.findById(product.seller_id);
+    if (!user) {
+      return responseHandler(res, 404, "User not found");
+    }
 
-      let userFCM = [];
-      userFCM.push(user.fcm);
+    const userFCM = [user.fcm];
+    const subject = `${product.name} status update`;
+    const baseMessage = `Your product ${product.name} has been ${product.status}`;
+    const content = product.reason
+      ? `${baseMessage} because ${product.reason}`
+      : baseMessage;
 
-      const subject = `${product.name} status update`;
-      let content =
-        `Your product ${product.name} has been ${product.status}`.trim();
-      const file_url = product.image;
+    await sendInAppNotification(
+      userFCM,
+      subject,
+      content,
+      product.image,
+      "my_products"
+    );
 
-      if (product.reason != "" && product.reason != undefined) {
-        content =
-          `Your product ${product.name} has been ${product.status} beacuse ${product.reason}`.trim();
-      }
+    const otherUsers = await User.find({ _id: { $ne: product.seller_id } });
+    const otherFCMs = otherUsers.map((u) => u.fcm).filter(Boolean);
 
+    if (otherFCMs.length > 0) {
       await sendInAppNotification(
-        userFCM,
-        subject,
-        content,
-        file_url,
-        "my_products"
+        otherFCMs,
+        `New product added by ${user.name}`,
+        `${product.name} has been added by ${user.name}`,
+        product.image,
+        "products"
       );
-    } catch (error) {
-      console.log(`error creating notification : ${error}`);
     }
 
     return responseHandler(
@@ -644,6 +643,7 @@ exports.updateProductStatus = async (req, res) => {
       product
     );
   } catch (err) {
+    console.error("Error updating product status:", err);
     return responseHandler(res, 500, `Error saving product: ${err.message}`);
   }
 };
