@@ -332,12 +332,13 @@ exports.updateRequirementStatus = async (req, res) => {
         await sendInAppNotification(
           otherFCMs,
           `New requirement added by ${user.name}`,
-          `${requirement.name} has been added by ${user.name}`,
+          `${requirement.content || "Requirement"} has been added by ${
+            user.name
+          }`,
           requirement.image,
           "requirements"
         );
       }
-
     } catch (error) {
       console.log(`error creating notification : ${error}`);
     }
