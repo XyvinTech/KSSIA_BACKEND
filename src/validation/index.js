@@ -92,6 +92,7 @@ exports.EditUserSchema = Joi.object({
   is_active: Joi.boolean().default(true),
   is_deleted: Joi.boolean().default(false),
   selectedTheme: Joi.string(),
+  fcm: Joi.string(),
 });
 
 exports.productsSchemaval = productsSchema;
