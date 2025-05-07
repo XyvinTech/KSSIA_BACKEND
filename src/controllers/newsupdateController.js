@@ -5,6 +5,8 @@ const News = require("../models/news");
 const { NewsSchema, EditNewsSchema } = require("../validation");
 const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
+const User = require("../models/user");
+const sendInAppNotification = require("../utils/sendInAppNotification");
 
 /****************************************************************************************************/
 /*                                    Function to create news                                       */
@@ -33,6 +35,16 @@ exports.createNews = async (req, res) => {
 
   try {
     await newNews.save();
+
+    const users = await User.find();
+    const userFCMs = users.map((u) => u.fcm).filter(Boolean);
+    await sendInAppNotification(
+      userFCMs,
+      `New news article has been added`,
+      `New news article with title ${newNews.title} has been added`,
+      newNews.image,
+      "news"
+    );
     return responseHandler(
       res,
       201,
