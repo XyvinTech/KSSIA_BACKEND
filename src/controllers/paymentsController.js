@@ -315,7 +315,17 @@ exports.updatePaymentStatus = async (req, res) => {
     }
     await user.save();
     await payment.save();
+    const userFCM = [user.fcm];
+    const subject = `Payment status update`;
+    const baseMessage = `Your payment has been ${payment.status}`;
 
+    await sendInAppNotification(
+      userFCM,
+      subject,
+      baseMessage,
+      (media = null),
+      "my_subscription"
+    );
     return responseHandler(
       res,
       200,
