@@ -633,7 +633,7 @@ exports.updateProductStatus = async (req, res) => {
         `${product.name} has been added by ${user.name}`,
         product.image,
         "products",
-        product?._id
+        product?._id.toString()
       );
     }
 
