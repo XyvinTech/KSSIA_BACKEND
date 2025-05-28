@@ -24,7 +24,7 @@ productRoute.get("/categories", asyncHandler(productController.getAllCategories)
 
 // Route to retrieve a single product by ID
 productRoute.get('/:productId', asyncHandler(productController.getProductsById));
-
+productRoute.get('/user/:productId', asyncHandler(productController.getUserProductsById));
 // Route to update a product by ID
 productRoute.put('/:productId', asyncHandler(productController.editProduct));
 

@@ -489,7 +489,99 @@ exports.getProductsById = async (req, res) => {
 
   return responseHandler(res, 200, "Product retrieved successfully!", product);
 };
+exports.getUserProductsById = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const reqUser = req.userId;
 
+    if (!productId) {
+      return responseHandler(res, 400, "Invalid request");
+    }
+
+    // Get current user for block logic
+    const user = await User.findById(reqUser);
+
+    let uniqueBlockedUserIds = [];
+
+    if (user) {
+      const blockedUsersList = user.blocked_users || [];
+      const blockedProductSellers = user.blocked_products || [];
+
+      const blockedUserIds = blockedUsersList.map((item) => item.userId);
+      const blockedProductUserIds = blockedProductSellers.map(
+        (item) => item.userId
+      );
+
+      uniqueBlockedUserIds = [
+        ...new Set([...blockedUserIds, ...blockedProductUserIds]),
+      ];
+    }
+
+    // Build aggregation pipeline for a single product
+    const pipeline = [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(productId),
+          status: "accepted",
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "seller_id",
+          foreignField: "_id",
+          as: "seller_id",
+        },
+      },
+      {
+        $unwind: "$seller_id",
+      },
+      {
+        $match: {
+          "seller_id._id": {
+            $nin: uniqueBlockedUserIds.map(
+              (id) => new mongoose.Types.ObjectId(id)
+            ),
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          image: 1,
+          price: 1,
+          offer_price: 1,
+          description: 1,
+          moq: 1,
+          status: 1,
+          category: 1,
+          subcategory: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          seller_id: "$seller_id._id",
+          full_name: "$seller_id.name",
+        },
+      },
+    ];
+
+    const productResult = await Product.aggregate(pipeline);
+
+    if (!productResult.length) {
+      return responseHandler(res, 404, "Product not found or is blocked");
+    }
+
+    return responseHandler(
+      res,
+      200,
+      "Product retrieved successfully!",
+      productResult[0]
+    );
+  } catch (error) {
+    console.error("Error fetching product by ID:", error);
+    return responseHandler(res, 500, "Internal server error");
+  }
+};
 /****************************************************************************************************/
 /*                          Function to get products by a single seller                             */
 /****************************************************************************************************/
