@@ -446,7 +446,7 @@ exports.getProductsById = async (req, res) => {
 
   const user = await User.findById(reqUser);
 
-  const uniqueBlockedUserIds = [];
+  let uniqueBlockedUserIds = [];
 
   if (user) {
     const blockedUsersList = user.blocked_users || [];
