@@ -183,45 +183,115 @@ exports.updateSubs = async (req, res) => {
 /*                                  Function to get all payments                                     */
 /****************************************************************************************************/
 exports.getAllPayments = async (req, res) => {
-  const { pageNo = 1, limit = 10, status } = req.query;
+  const { pageNo = 1, limit = 10, status, search = "" } = req.query;
   const skipCount = limit * (pageNo - 1);
 
-  const filter = {};
+  const matchStage = {};
 
   if (status) {
-    filter.status = status;
+    matchStage.status = status;
   }
 
   try {
-    const totalCount = await Payment.countDocuments(filter);
+    const pipeline = [
+      {
+        $match: matchStage,
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      {
+        $unwind: "$user",
+      },
+      {
+        $lookup: {
+          from: "parentsubs",
+          localField: "parentSub",
+          foreignField: "_id",
+          as: "parentSub",
+        },
+      },
+      {
+        $unwind: {
+          path: "$parentSub",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $match: {
+          "user.name": { $regex: search, $options: "i" },
+        },
+      },
+      {
+        $sort: { createdAt: -1 },
+      },
+      {
+        $skip: parseInt(skipCount),
+      },
+      {
+        $limit: parseInt(limit),
+      },
+      {
+        $project: {
+          _id: 1,
+          status: 1,
+          amount: 1,
+          category: 1,
+          receipt: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          full_name: "$user.name",
+          "user._id": 1,
+          "user.membership_id": 1,
+          expiry_date: "$parentSub.expiryDate",
+          year: "$parentSub.academicYear",
+        },
+      },
+    ];
 
-    const payments = await Payment.find(filter)
-      .populate({ path: "user", select: "name membership_id" })
-      .populate("parentSub")
-      .skip(skipCount)
-      .limit(limit)
-      .sort({ createdAt: -1 })
-      .lean()
-      .exec();
+    const countPipeline = [
+      {
+        $match: matchStage,
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      {
+        $unwind: "$user",
+      },
+      {
+        $match: {
+          "user.name": { $regex: search, $options: "i" },
+        },
+      },
+      {
+        $count: "totalCount",
+      },
+    ];
+
+    const payments = await Payment.aggregate(pipeline);
+    const totalCountResult = await Payment.aggregate(countPipeline);
+    const totalCount = totalCountResult[0]?.totalCount || 0;
 
     if (payments.length === 0) {
       return responseHandler(res, 404, "No payments found");
     }
 
-    const mappedPayments = payments.map((payment) => {
-      return {
-        ...payment,
-        full_name: `${payment.user?.name || ""}`,
-        expiry_date: payment.parentSub?.expiryDate,
-        year: payment.parentSub?.academicYear,
-      };
-    });
-
     return responseHandler(
       res,
       200,
       "Successfully retrieved all payments",
-      mappedPayments,
+      payments,
       totalCount
     );
   } catch (err) {
@@ -232,6 +302,7 @@ exports.getAllPayments = async (req, res) => {
     );
   }
 };
+
 
 /****************************************************************************************************/
 /*                                  Function to get payment by id                                   */
