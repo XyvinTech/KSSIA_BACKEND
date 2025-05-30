@@ -510,13 +510,12 @@ exports.getNotificationByID = async (req, res) => {
   const { notificationId } = req.params;
 
   if (!notificationId) {
-    // If notificationId is not provided, return a 400 status code with the error message
-    // console.log('Invalid request');                                              // Debug line
     return responseHandler(res, 400, `Invalid request`);
   }
 
   try {
-    const notification = await Notification.findById(notificationId);
+    const notification = await Notification.findById(notificationId).populate("to", "name");
+
     if (!notification) {
       return responseHandler(res, 404, "Notification not found.");
     }
@@ -524,7 +523,7 @@ exports.getNotificationByID = async (req, res) => {
     return responseHandler(
       res,
       200,
-      "Notifiaction fetched successfully!",
+      "Notification fetched successfully!",
       notification
     );
   } catch (err) {
