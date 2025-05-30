@@ -481,7 +481,7 @@ exports.createAndSendEmailNotification = async (req, res) => {
         from: process.env.NODE_MAILER_USER,
         to: email,
         subject,
-        text: content,
+        text: `${content}${link_url ? `\nExternal Link: ${link_url}` : ''}`,
         attachments: attachments,
       };
 
