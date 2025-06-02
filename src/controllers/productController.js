@@ -717,18 +717,18 @@ exports.updateProductStatus = async (req, res) => {
 
     const otherUsers = await User.find({ _id: { $ne: product.seller_id } });
     const otherFCMs = otherUsers.map((u) => u.fcm).filter(Boolean);
-
-    if (otherFCMs.length > 0) {
-      await sendInAppNotification(
-        otherFCMs,
-        `New product added by ${user.name}`,
-        `${product.name} has been added by ${user.name}`,
-        product.image,
-        "products",
-        product?._id.toString()
-      );
+    if (product.status !== "rejected") {
+      if (otherFCMs.length > 0) {
+        await sendInAppNotification(
+          otherFCMs,
+          `New product added by ${user.name}`,
+          `${product.name} has been added by ${user.name}`,
+          product.image,
+          "products",
+          product?._id.toString()
+        );
+      }
     }
-
     return responseHandler(
       res,
       200,

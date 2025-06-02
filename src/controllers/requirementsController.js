@@ -325,23 +325,19 @@ exports.updateRequirementStatus = async (req, res) => {
         "my_requirements"
       );
 
-      if (requirement.status !== "rejected") {
-        const otherUsers = await User.find({
-          _id: { $ne: requirement.author },
-        });
-        const otherFCMs = otherUsers.map((u) => u.fcm).filter(Boolean);
+      const otherUsers = await User.find({ _id: { $ne: requirement.author } });
+      const otherFCMs = otherUsers.map((u) => u.fcm).filter(Boolean);
 
-        if (otherFCMs.length > 0) {
-          await sendInAppNotification(
-            otherFCMs,
-            `New requirement added by ${user.name}`,
-            `${requirement.content || "Requirement"} has been added by ${
-              user.name
-            }`,
-            requirement.image,
-            "requirements"
-          );
-        }
+      if (otherFCMs.length > 0) {
+        await sendInAppNotification(
+          otherFCMs,
+          `New requirement added by ${user.name}`,
+          `${requirement.content || "Requirement"} has been added by ${
+            user.name
+          }`,
+          requirement.image,
+          "requirements"
+        );
       }
     } catch (error) {
       console.log(`error creating notification : ${error}`);
