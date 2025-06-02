@@ -141,9 +141,6 @@ exports.getUnreadInAppNotifications = async (req, res) => {
   try {
     const notifications = await Notification.find({
       to: userId,
-      readBy: {
-        $ne: userId,
-      },
       type: "in-app",
     }).sort({ createdAt: -1 });
     for (const notification of notifications) {
@@ -481,7 +478,7 @@ exports.createAndSendEmailNotification = async (req, res) => {
         from: process.env.NODE_MAILER_USER,
         to: email,
         subject,
-        text: `${content}${link_url ? `\nExternal Link: ${link_url}` : ''}`,
+        text: `${content}${link_url ? `\nExternal Link: ${link_url}` : ""}`,
         attachments: attachments,
       };
 
@@ -514,7 +511,10 @@ exports.getNotificationByID = async (req, res) => {
   }
 
   try {
-    const notification = await Notification.findById(notificationId).populate("to", "name");
+    const notification = await Notification.findById(notificationId).populate(
+      "to",
+      "name"
+    );
 
     if (!notification) {
       return responseHandler(res, 404, "Notification not found.");
