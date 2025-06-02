@@ -30,7 +30,7 @@ const sendInAppNotification = async (
       },
       android: {
         notification: {
-          ...(media && { imageUrl: media }),
+          ...(media && { imageUrl: encodeURI(media) }),
           ...(tag && { tag }),
           clickAction: "FLUTTER_NOTIFICATION_CLICK", // Important for handling clicks
         },
