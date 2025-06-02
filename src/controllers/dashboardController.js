@@ -258,9 +258,8 @@ exports.getAllStatistics = async (req, res) => {
       year = currentDate.getFullYear(); // Get current year
     }
 
-    // Start and end of the month (used for monthly revenue calculations)
-    const startDate = new Date(year, month - 1, 1); // Month is 0-based in JavaScript
-    const endDate = new Date(year, month, 0); // The last day of the month
+    const startDate = new Date(Date.UTC(year, 0, 1));
+    const endDate = new Date(Date.UTC(Number(year) + 1, 0, 1));
     // Calculate the previous month
     const adjustedYear = month === 1 ? year - 1 : year; // Handle January (roll back to December of the previous year)
     const adjustedMonth = month === 1 ? 12 : month - 1; // Roll back to December if January, otherwise subtract 1
@@ -290,7 +289,10 @@ exports.getAllStatistics = async (req, res) => {
       Payment.aggregate([
         {
           $match: {
-            createdAt: { $gte: startDate, $lt: endDate },
+            createdAt: {
+              $gte: startDate,
+              $lt: endDate,
+            },
             status: { $in: ["expiring", "active"] },
           },
         },
@@ -325,7 +327,7 @@ exports.getAllStatistics = async (req, res) => {
       Payment.aggregate([
         {
           $match: {
-            date: { $gte: prevStartDate, $lt: prevEndDate },
+            createdAt: { $gte: prevStartDate, $lt: prevEndDate },
             status: { $in: ["accepted", "expiring", "expired"] },
           },
         },
@@ -336,7 +338,7 @@ exports.getAllStatistics = async (req, res) => {
       Payment.aggregate([
         {
           $match: {
-            date: { $gte: prevStartDate, $lt: prevEndDate },
+            createdAt: { $gte: prevStartDate, $lt: prevEndDate },
             status: { $in: ["accepted", "expiring", "expired"] },
             category: "membership",
           },
@@ -348,7 +350,7 @@ exports.getAllStatistics = async (req, res) => {
       Payment.aggregate([
         {
           $match: {
-            date: { $gte: prevStartDate, $lt: prevEndDate },
+            createdAt: { $gte: prevStartDate, $lt: prevEndDate },
             status: { $in: ["accepted", "expiring", "expired"] },
             category: "app",
           },
