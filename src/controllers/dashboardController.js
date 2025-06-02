@@ -291,7 +291,7 @@ exports.getAllStatistics = async (req, res) => {
         {
           $match: {
             createdAt: { $gte: startDate, $lt: endDate },
-            status: { $in: ["accepted", "expiring", "expired", "active"] },
+            status: { $in: ["expiring", "active"] },
           },
         },
         { $group: { _id: null, totalRevenue: { $sum: "$amount" } } },
@@ -302,7 +302,7 @@ exports.getAllStatistics = async (req, res) => {
         {
           $match: {
             createdAt: { $gte: startDate, $lt: endDate },
-            status: { $in: ["accepted", "expiring", "expired", "active"] },
+            status: { $in: ["expiring", "active"] },
             category: "membership",
           },
         },
@@ -314,7 +314,7 @@ exports.getAllStatistics = async (req, res) => {
         {
           $match: {
             createdAt: { $gte: startDate, $lt: endDate },
-            status: { $in: ["accepted", "expiring", "expired", "active"] },
+            status: { $in: ["expiring", "active"] },
             category: "app",
           },
         },
