@@ -13,6 +13,7 @@ userRoute.route("/qr/:userId").get(asyncHandler(userController.getUserById));
 userRoute.get("/app-version", userController.getVersion);
 
 userRoute.post("/enquiry", asyncHandler(userController.sendEnquiry));
+userRoute.get("/blocked-users", asyncHandler(userController.getBlockedUsers));
 
 userRoute.use(authVerify);
 

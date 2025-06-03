@@ -223,8 +223,15 @@ exports.getMessagesBetweenUsers = async (req, res) => {
 /****************************************************************************************************/
 exports.getChatThreads = async (req, res) => {
   try {
+    const currentUser = await User.findById(req.userId).select("blocked_users");
+
+    const blockedUserIds = currentUser.blocked_users.map(
+      (user) => user.userId
+    );
+
     const chatThreads = await ChatThread.find({
       participants: req.userId,
+      participants: { $nin: blockedUserIds }, // exclude blocked users
     })
       .populate("participants", "name profile_picture")
       .populate("lastMessage")
@@ -245,6 +252,7 @@ exports.getChatThreads = async (req, res) => {
     return responseHandler(res, 500, "Internal Server Error");
   }
 };
+
 
 /****************************************************************************************************/
 /*                                   Function to mark message seen                                  */

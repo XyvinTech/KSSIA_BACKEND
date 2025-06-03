@@ -1060,3 +1060,23 @@ exports.getEnquiry = async (req, res) => {
     return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
   }
 };
+exports.getBlockedUsers = async (req, res) => {
+  try {
+    const userId = req.userId; 
+
+    const user = await User.findById(userId)
+      .populate({
+        path: "blocked_users.userId",
+        select: "name email profile_picture membership_id",
+      })
+      .select("blocked_users");
+
+    if (!user) {
+      return responseHandler(res, 404, "User not found");
+    }
+
+    return responseHandler(res, 200, "Blocked users fetched successfully", user.blocked_users);
+  } catch (error) {
+    return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
+  }
+};
