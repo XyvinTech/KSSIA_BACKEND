@@ -419,7 +419,7 @@ exports.getAllUsers = async (req, res) => {
         return {
           ...user._doc,
           full_name: `${user.name}`.trim(),
-          mobile: user.phone_numbers?.personal || "N/A", 
+          mobile: user.phone_numbers?.personal || "N/A",
         };
       });
 
@@ -462,7 +462,161 @@ exports.getAllUsers = async (req, res) => {
     return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
   }
 };
+exports.getUsersForUser = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const {
+      pageNo = 1,
+      limit = 10,
+      search = "",
+      name = "",
+      membershipId = "",
+      designation = "",
+      companyName = "",
+      status = "",
+      subscription = "",
+      installed,
+    } = req.query;
 
+    let filter = {};
+
+    if (userId && (userId !== "" || userId !== undefined)) {
+      filter._id = { $nin: [userId] };
+    }
+    const currentUser = await User.findById(userId).lean();
+    const blockedUserIds =
+      currentUser?.blocked_users?.map((u) => u.userId) || [];
+
+    if (!filter._id) filter._id = {};
+    filter._id.$nin = [...(filter._id.$nin || []), ...blockedUserIds];
+    if (name && name !== "") {
+      filter.name = { $regex: name, $options: "i" };
+    }
+
+    if (membershipId && membershipId !== "") {
+      filter.membership_id = membershipId;
+    }
+
+    if (designation && designation !== "") {
+      filter.designation = designation;
+    }
+
+    if (installed === "false") {
+      filter.$and = [
+        {
+          $or: [{ uid: { $exists: false } }, { uid: null }, { uid: "" }],
+        },
+        {
+          $or: [{ fcm: { $exists: false } }, { fcm: null }, { fcm: "" }],
+        },
+      ];
+    } else if (installed) {
+      filter.$or = [
+        {
+          $and: [
+            { uid: { $exists: true } },
+            { uid: { $ne: null } },
+            { uid: { $ne: "" } },
+          ],
+        },
+        {
+          $and: [
+            { fcm: { $exists: true } },
+            { fcm: { $ne: null } },
+            { fcm: { $ne: "" } },
+          ],
+        },
+      ];
+    }
+
+    if (companyName) {
+      filter.$or = [];
+      filter.$or.push({ company_name: { $regex: companyName, $options: "i" } });
+    }
+
+    if (subscription) {
+      filter.subscription = subscription;
+    }
+
+    if (search && search !== "") {
+      const escapedSearch = search.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+
+      const searchConditions = [
+        { email: { $regex: escapedSearch, $options: "i" } },
+        { "phone_numbers.personal": { $regex: escapedSearch, $options: "i" } },
+        { designation: { $regex: escapedSearch, $options: "i" } },
+        { company_name: { $regex: escapedSearch, $options: "i" } },
+        { membership_id: { $regex: escapedSearch, $options: "i" } },
+        { name: { $regex: escapedSearch, $options: "i" } },
+      ];
+
+      if (filter.$or) {
+        filter.$and = filter.$and || [];
+        filter.$and.push({ $or: filter.$or });
+        delete filter.$or;
+      }
+
+      filter.$and = filter.$and || [];
+      filter.$and.push({ $or: searchConditions });
+    }
+
+    if (status) {
+      filter.status = status;
+    }
+
+    if (limit === "full") {
+      const users = await User.find(filter).populate({
+        path: "reviews.reviewer",
+        select: "name profile_picture",
+      });
+
+      const mappedData = users.map((user) => {
+        return {
+          ...user._doc,
+          full_name: `${user.name}`.trim(),
+          mobile: user.phone_numbers?.personal || "N/A",
+        };
+      });
+
+      return responseHandler(
+        res,
+        200,
+        "Users retrieved successfully",
+        mappedData
+      );
+    } else {
+      const skipCount = limit * (pageNo - 1);
+      const totalCount = await User.countDocuments(filter);
+      const users = await User.find(filter)
+        .populate({
+          path: "reviews.reviewer",
+          select: "name profile_picture",
+        })
+        .skip(skipCount)
+        .limit(limit)
+        .sort({ name: 1 })
+        .lean();
+
+      const mappedData = users.map((user) => {
+        return capitalizeData({
+          ...user,
+          full_name: user.name?.trim() || "",
+          mobile: user.phone_numbers?.personal || "N/A",
+        });
+      });
+
+      return responseHandler(
+        res,
+        200,
+        "Users retrieved successfully",
+        mappedData,
+        totalCount
+      );
+    }
+  } catch (error) {
+    return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
+  }
+};
 /****************************************************************************************************/
 /*                                   Function to get user by ID                                     */
 /****************************************************************************************************/

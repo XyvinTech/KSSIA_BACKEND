@@ -18,6 +18,7 @@ const {
 const { generateToken } = require("../utils/generateToken");
 const capitalizeData = require("../utils/capitalizeData");
 const Enquiry = require("../models/enquiry");
+const { log } = require("console");
 
 /****************************************************************************************************/
 /*                               Function to generate a 6-digit OTP                                 */
@@ -1062,7 +1063,8 @@ exports.getEnquiry = async (req, res) => {
 };
 exports.getBlockedUsers = async (req, res) => {
   try {
-    const userId = req.userId; 
+    const userId = req.userId;
+console.log(userId);
 
     const user = await User.findById(userId)
       .populate({
@@ -1080,3 +1082,4 @@ exports.getBlockedUsers = async (req, res) => {
     return responseHandler(res, 500, `Internal Server Error: ${error.message}`);
   }
 };
+
