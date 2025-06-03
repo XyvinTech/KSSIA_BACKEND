@@ -160,50 +160,58 @@ exports.getMessagesBetweenUsers = async (req, res) => {
   const { userId1, userId2 } = req.params;
 
   try {
-    // Check if either user has blocked the other
-    const user1 = await User.findById(userId1);
-    const user2 = await User.findById(userId2);
-
-    const isBlockedByUser1 = user1.blocked_users.some(
-      (b) => b.userId.toString() === userId2
-    );
-    const isBlockedByUser2 = user2.blocked_users.some(
-      (b) => b.userId.toString() === userId1
-    );
-
-    if (isBlockedByUser1 || isBlockedByUser2) {
-      return responseHandler(res, 403, "User is blocked. Cannot retrieve messages.");
-    }
-
     const messages = await Message.find({
       $or: [
-        { from: userId1, to: userId2 },
-        { from: userId2, to: userId1 },
+        {
+          from: userId1,
+          to: userId2,
+        },
+        {
+          from: userId2,
+          to: userId1,
+        },
       ],
     })
-      .sort({ timestamp: 1 })
-      .populate("product", "name price offer_price image")
-      .populate("requirement", "content image");
+      .sort({
+        timestamp: 1,
+      })
+      .populate("product", "name price offer_price image") // Populating product
+      .populate("requirement", "content image"); // Populating requirement
 
+    // Mark messages as seen
     await Message.updateMany(
       {
         from: userId2,
         to: userId1,
-        status: { $ne: "seen" },
-      },
-      { status: "seen" }
-    );
-
-    await ChatThread.updateOne(
-      {
-        participants: { $all: [userId1, userId2] },
+        status: {
+          $ne: "seen",
+        },
       },
       {
-        $set: { [`unreadCount.${userId1}`]: 0 },
+        status: "seen",
       }
     );
 
-    return responseHandler(res, 200, "Messages retrieved successfully!", messages);
+    // Reset unread count in chat thread
+    await ChatThread.updateOne(
+      {
+        participants: {
+          $all: [userId1, userId2],
+        },
+      },
+      {
+        $set: {
+          [`unreadCount.${userId1}`]: 0,
+        },
+      }
+    );
+
+    return responseHandler(
+      res,
+      200,
+      "Messages retrieved successfully!",
+      messages
+    );
   } catch (error) {
     console.error("Error retrieving messages:", error);
     return responseHandler(res, 500, "Internal Server Error");
