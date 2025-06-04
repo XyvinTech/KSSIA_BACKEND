@@ -128,8 +128,11 @@ exports.sendMessage = async (req, res) => {
       let userFCM = [];
       userFCM.push(to_user.fcm);
       const uniqueTag = `chat`;
+      const isBlocked = to_user.blocked_users.some(
+        (entry) => entry.userId.toString() === from.toString()
+      );
 
-      if (!to_user.blocked_users.includes(from)) {
+      if (!isBlocked) {
         await sendInAppNotification(
           userFCM,
           NotificationSubject,
