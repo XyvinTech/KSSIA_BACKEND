@@ -230,7 +230,6 @@ exports.getChatThreads = async (req, res) => {
     );
 
     const chatThreads = await ChatThread.find({
-      participants: req.userId,
       participants: { $nin: blockedUserIds }, // exclude blocked users
     })
       .populate("participants", "name profile_picture")
