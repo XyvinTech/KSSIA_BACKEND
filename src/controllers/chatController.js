@@ -129,12 +129,7 @@ exports.sendMessage = async (req, res) => {
       userFCM.push(to_user.fcm);
       const uniqueTag = `chat`;
 
-      console.log(userFCM);
-      console.log(NotificationSubject);
-      console.log(newMessage.content);
-      console.log(imageUrl);
-
-      if (!user.blocked_users.includes(to)) {
+      if (!to_user.blocked_users.includes(from)) {
         await sendInAppNotification(
           userFCM,
           NotificationSubject,
@@ -144,7 +139,6 @@ exports.sendMessage = async (req, res) => {
           user._id.toString()
         );
       }
-      // If the user is blocked, do nothing (no notification sent)
     } catch (error) {
       console.log(`error creating notification : ${error}`);
     }
