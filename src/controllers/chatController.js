@@ -103,7 +103,7 @@ exports.sendMessage = async (req, res) => {
     let imageUrl = validAttachments.length > 0 ? validAttachments[0].url : null;
 
     try {
-       user = await User.findById(from);
+      user = await User.findById(from);
       if (!user) {
         return responseHandler(res, 404, "User not found");
       }
@@ -225,12 +225,13 @@ exports.getChatThreads = async (req, res) => {
   try {
     const currentUser = await User.findById(req.userId).select("blocked_users");
 
-    const blockedUserIds = currentUser.blocked_users.map(
-      (user) => user.userId
-    );
+    const blockedUserIds = currentUser.blocked_users.map((user) => user.userId);
 
     const chatThreads = await ChatThread.find({
-      participants: { $nin: blockedUserIds }, // exclude blocked users
+      $and: [
+        { participants: req.userId },
+        { participants: { $nin: blockedUserIds } },
+      ],
     })
       .populate("participants", "name profile_picture")
       .populate("lastMessage")
@@ -251,7 +252,6 @@ exports.getChatThreads = async (req, res) => {
     return responseHandler(res, 500, "Internal Server Error");
   }
 };
-
 
 /****************************************************************************************************/
 /*                                   Function to mark message seen                                  */
