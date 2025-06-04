@@ -134,14 +134,17 @@ exports.sendMessage = async (req, res) => {
       console.log(newMessage.content);
       console.log(imageUrl);
 
-      await sendInAppNotification(
-        userFCM,
-        NotificationSubject,
-        newMessage.content,
-        imageUrl, // Only pass if valid
-        uniqueTag,
-        user._id.toString()
-      );
+      if (!user.blocked_users.includes(to)) {
+        await sendInAppNotification(
+          userFCM,
+          NotificationSubject,
+          newMessage.content,
+          imageUrl,
+          uniqueTag,
+          user._id.toString()
+        );
+      }
+      // If the user is blocked, do nothing (no notification sent)
     } catch (error) {
       console.log(`error creating notification : ${error}`);
     }
