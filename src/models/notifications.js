@@ -18,6 +18,7 @@ const notificationSchema = new mongoose.Schema(
             ref: "User"
         }],
         pageName: { type: String },
+        itemId: { type: String },
 
     },
     {

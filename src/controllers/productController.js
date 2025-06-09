@@ -746,7 +746,7 @@ exports.updateProductStatus = async (req, res) => {
       file_url: product.image,
       type: "in-app",
       pageName: "products",
-      productId: product._id.toString(),
+      itemId: product._id.toString(),
     });
 
     await newNotificationAll.save();
