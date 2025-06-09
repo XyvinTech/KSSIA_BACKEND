@@ -13,6 +13,8 @@ const {
 const handleFileUpload = require("../utils/fileHandler");
 const sendInAppNotification = require("../utils/sendInAppNotification");
 const ParentSub = require("../models/parentSub");
+const Notification = require("../models/notifications");
+const { type } = require("os");
 
 /****************************************************************************************************/
 /*                                  Function to create payments                                     */
@@ -166,6 +168,15 @@ exports.updateSubs = async (req, res) => {
           (media = null),
           "my_subscription"
         );
+        const newNotification = new Notification({
+          to: user._id,
+          subject: subject,
+          content: content,
+          type: "in-app",
+          pageName: "my_subscription",
+        });
+
+        await newNotification.save();
       } catch (error) {
         console.log(`error creating notification : ${error}`);
       }
@@ -303,7 +314,6 @@ exports.getAllPayments = async (req, res) => {
   }
 };
 
-
 /****************************************************************************************************/
 /*                                  Function to get payment by id                                   */
 /****************************************************************************************************/
@@ -397,6 +407,14 @@ exports.updatePaymentStatus = async (req, res) => {
       (media = null),
       "my_subscription"
     );
+    const newNotification = new Notification({
+      user: payment.user,
+      subject: subject,
+      content: baseMessage,
+      type: "in-app",
+      pageName: "my_subscription",
+    });
+    await newNotification.save();
     return responseHandler(
       res,
       200,

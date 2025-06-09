@@ -7,6 +7,8 @@ const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
 const { RequirementsSchema } = require("../validation");
 const sendInAppNotification = require("../utils/sendInAppNotification");
+const Notification = require("../models/notifications");
+const { to } = require("cli-color/move");
 
 /****************************************************************************************************/
 /*                                Function to create requirements                                   */
@@ -324,7 +326,16 @@ exports.updateRequirementStatus = async (req, res) => {
         file_url,
         "my_requirements"
       );
+      const newNotification = new Notification({
+        to: user._id,
+        type: "in-app",
+        pageName: "my_requirements",
+        subject: subject,
+        content: content,
+        file_url: file_url,
+      });
 
+      await newNotification.save();
       const otherUsers = await User.find({ _id: { $ne: requirement.author } });
       const otherFCMs = otherUsers.map((u) => u.fcm).filter(Boolean);
 
@@ -339,6 +350,17 @@ exports.updateRequirementStatus = async (req, res) => {
           "requirements"
         );
       }
+      const newNotificationAll = new Notification({
+        to: otherUsers,
+        type: "in-app",
+        pageName: "requirements",
+        subject: `New requirement added by ${user.name}`,
+        content: `${requirement.content || "Requirement"} has been added by ${
+          user.name
+        }`,
+        file_url: requirement.image,
+      });
+      await newNotificationAll.save();
     } catch (error) {
       console.log(`error creating notification : ${error}`);
     }

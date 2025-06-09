@@ -7,6 +7,7 @@ const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
 const User = require("../models/user");
 const sendInAppNotification = require("../utils/sendInAppNotification");
+const Notification = require("../models/notifications");
 
 /****************************************************************************************************/
 /*                                    Function to create news                                       */
@@ -45,6 +46,16 @@ exports.createNews = async (req, res) => {
       newNews.image,
       "news"
     );
+    const newNotification = new Notification({
+      to: users,
+      subject: `New news article has been added`,
+      content: `New news article with title ${newNews.title} has been added`,
+      file_url: newNews.image,
+      type: "in-app",
+      pageName: "news",
+    });
+
+    await newNotification.save();
     return responseHandler(
       res,
       201,
