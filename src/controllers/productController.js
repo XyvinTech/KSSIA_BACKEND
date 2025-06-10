@@ -9,6 +9,7 @@ const handleFileUpload = require("../utils/fileHandler");
 const deleteFile = require("../helpers/deleteFiles");
 const sendInAppNotification = require("../utils/sendInAppNotification");
 const mongoose = require("mongoose");
+const Notification = require("../models/notifications");
 
 /****************************************************************************************************/
 /*                                    Function to add product                                       */
@@ -714,7 +715,16 @@ exports.updateProductStatus = async (req, res) => {
       product.image,
       "my_products"
     );
+    const newNotification = new Notification({
+      to: user._id,
+      subject: subject,
+      content: content,
+      file_url: product.image,
+      type: "in-app",
+      pageName: "my_products",
+    });
 
+    await newNotification.save();
     const otherUsers = await User.find({ _id: { $ne: product.seller_id } });
     const otherFCMs = otherUsers.map((u) => u.fcm).filter(Boolean);
     if (product.status !== "rejected") {
@@ -729,6 +739,17 @@ exports.updateProductStatus = async (req, res) => {
         );
       }
     }
+    const newNotificationAll = new Notification({
+      to: otherUsers.map((u) => u._id),
+      subject: `New product added by ${user.name}`,
+      content: `${product.name} has been added by ${user.name}`,
+      file_url: product.image,
+      type: "in-app",
+      pageName: "products",
+      itemId: product._id.toString(),
+    });
+
+    await newNotificationAll.save();
     return responseHandler(
       res,
       200,
