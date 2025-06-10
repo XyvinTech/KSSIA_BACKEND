@@ -8,7 +8,6 @@ const deleteFile = require("../helpers/deleteFiles");
 const { RequirementsSchema } = require("../validation");
 const sendInAppNotification = require("../utils/sendInAppNotification");
 const Notification = require("../models/notifications");
-const { to } = require("cli-color/move");
 
 /****************************************************************************************************/
 /*                                Function to create requirements                                   */

@@ -14,7 +14,6 @@ const handleFileUpload = require("../utils/fileHandler");
 const sendInAppNotification = require("../utils/sendInAppNotification");
 const ParentSub = require("../models/parentSub");
 const Notification = require("../models/notifications");
-const { type } = require("os");
 
 /****************************************************************************************************/
 /*                                  Function to create payments                                     */
