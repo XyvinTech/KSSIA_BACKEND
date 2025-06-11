@@ -146,7 +146,7 @@ exports.getUnreadInAppNotifications = async (req, res) => {
     const response = await Notification.find({
       to: userId,
       type: "in-app",
-    });
+    }).sort({ createdAt: -1 });
     for (const notification of notifications) {
       await notification.markAsRead(userId);
     }
