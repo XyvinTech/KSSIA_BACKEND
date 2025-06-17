@@ -14,6 +14,7 @@ const {
   io,
   chatNamespace,
 } = require("../socket/socket.js"); // Import the socket utility
+const Notification = require("../models/notifications.js");
 
 /****************************************************************************************************/
 /*                                   Function to send a message                                     */
@@ -141,6 +142,16 @@ exports.sendMessage = async (req, res) => {
           uniqueTag,
           user._id.toString()
         );
+        const newNotification = new Notification({
+          to: to_user._id,
+          content: newMessage.content,
+          subject: NotificationSubject,
+          type: "in-app",
+          pageName: "chat",
+          itemId: user._id.toString(),
+        });
+
+        await newNotification.save();
       }
     } catch (error) {
       console.log(`error creating notification : ${error}`);
