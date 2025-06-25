@@ -113,6 +113,12 @@ exports.getallInAppNotifications = async (req, res) => {
     })
     .lean();
 
+  const mappedData = notifications.map((notif) => {
+    if (notif.pageName === "chat") {
+      return { ...notif, subject: "sent a message" };
+    }
+    return notif;
+  });
   if (!notifications) {
     return responseHandler(res, 404, "No notifications found");
   }
@@ -120,7 +126,7 @@ exports.getallInAppNotifications = async (req, res) => {
     res,
     200,
     "Notifications retrieved successfully!",
-    notifications,
+    mappedData,
     totalCount
   );
 };

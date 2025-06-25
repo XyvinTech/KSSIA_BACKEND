@@ -145,7 +145,7 @@ exports.sendMessage = async (req, res) => {
         const newNotification = new Notification({
           to: to_user._id,
           content: newMessage.content,
-          subject: `sent a message`,
+          subject: NotificationSubject,
           type: "in-app",
           pageName: "chat",
           itemId: user._id.toString(),
