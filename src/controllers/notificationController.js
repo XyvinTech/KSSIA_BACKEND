@@ -529,7 +529,9 @@ exports.getNotificationByID = async (req, res) => {
     if (!notification) {
       return responseHandler(res, 404, "Notification not found.");
     }
-
+   if (notification.pageName === "chat") {
+      notification.subject = "sent a message";
+    }
     return responseHandler(
       res,
       200,
