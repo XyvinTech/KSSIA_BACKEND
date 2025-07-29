@@ -333,7 +333,7 @@ exports.getAllProductsUser = async (req, res) => {
         },
       },
       {
-        $sort: { createdAt: -1 },
+        $sort: { name: 1 },
       },
       // Stage 7: Skip to the correct page
       {
