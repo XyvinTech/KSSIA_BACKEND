@@ -77,8 +77,8 @@ jobs:
             sudo docker pull ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
 
             # Stop and remove the existing container if running
-            sudo docker stop ${{ env.CONTAINER_NAME }} || true
-            sudo docker rm ${{ env.CONTAINER_NAME }} || true
+            # sudo docker stop ${{ env.CONTAINER_NAME }} || true
+            # sudo docker rm ${{ env.CONTAINER_NAME }} || true
 
             # Check if the .env.production file exists
             if [ ! -f ${{ env.ENV_FILE_PATH }} ]; then
